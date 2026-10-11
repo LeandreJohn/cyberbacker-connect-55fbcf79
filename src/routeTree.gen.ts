@@ -11,10 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppAttendanceRouteImport } from './routes/_app.attendance'
 import { Route as AppBillingRouteImport } from './routes/_app.billing'
 import { Route as AppContractsRouteImport } from './routes/_app.contracts'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppJobBuilderRouteImport } from './routes/_app.job-builder'
 import { Route as AppKnowledgeBaseRouteImport } from './routes/_app.knowledge-base'
 import { Route as AppMarketplaceRouteImport } from './routes/_app.marketplace'
@@ -43,11 +43,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppAttendanceRoute = AppAttendanceRouteImport.update({
   id: '/attendance',
   path: '/attendance',
@@ -61,6 +56,11 @@ const AppBillingRoute = AppBillingRouteImport.update({
 const AppContractsRoute = AppContractsRouteImport.update({
   id: '/contracts',
   path: '/contracts',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppJobBuilderRoute = AppJobBuilderRouteImport.update({
@@ -155,11 +155,12 @@ const AppInternalTicketsRoute = AppInternalTicketsRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AppIndexRoute
+  '/': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/attendance': typeof AppAttendanceRoute
   '/billing': typeof AppBillingRoute
   '/contracts': typeof AppContractsRoute
+  '/dashboard': typeof AppDashboardRoute
   '/job-builder': typeof AppJobBuilderRoute
   '/knowledge-base': typeof AppKnowledgeBaseRoute
   '/marketplace': typeof AppMarketplaceRoute
@@ -180,10 +181,12 @@ export interface FileRoutesByFullPath {
   '/internal/': typeof AppInternalIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/attendance': typeof AppAttendanceRoute
   '/billing': typeof AppBillingRoute
   '/contracts': typeof AppContractsRoute
+  '/dashboard': typeof AppDashboardRoute
   '/job-builder': typeof AppJobBuilderRoute
   '/knowledge-base': typeof AppKnowledgeBaseRoute
   '/marketplace': typeof AppMarketplaceRoute
@@ -193,7 +196,6 @@ export interface FileRoutesByTo {
   '/rewards': typeof AppRewardsRoute
   '/settings': typeof AppSettingsRoute
   '/support': typeof AppSupportRoute
-  '/': typeof AppIndexRoute
   '/internal/admin': typeof AppInternalAdminRoute
   '/internal/analytics': typeof AppInternalAnalyticsRoute
   '/internal/clients': typeof AppInternalClientsRoute
@@ -211,6 +213,7 @@ export interface FileRoutesById {
   '/_app/attendance': typeof AppAttendanceRoute
   '/_app/billing': typeof AppBillingRoute
   '/_app/contracts': typeof AppContractsRoute
+  '/_app/dashboard': typeof AppDashboardRoute
   '/_app/job-builder': typeof AppJobBuilderRoute
   '/_app/knowledge-base': typeof AppKnowledgeBaseRoute
   '/_app/marketplace': typeof AppMarketplaceRoute
@@ -220,7 +223,6 @@ export interface FileRoutesById {
   '/_app/rewards': typeof AppRewardsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/support': typeof AppSupportRoute
-  '/_app/': typeof AppIndexRoute
   '/_app/internal/admin': typeof AppInternalAdminRoute
   '/_app/internal/analytics': typeof AppInternalAnalyticsRoute
   '/_app/internal/clients': typeof AppInternalClientsRoute
@@ -239,6 +241,7 @@ export interface FileRouteTypes {
     | '/attendance'
     | '/billing'
     | '/contracts'
+    | '/dashboard'
     | '/job-builder'
     | '/knowledge-base'
     | '/marketplace'
@@ -259,10 +262,12 @@ export interface FileRouteTypes {
     | '/internal/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/login'
     | '/attendance'
     | '/billing'
     | '/contracts'
+    | '/dashboard'
     | '/job-builder'
     | '/knowledge-base'
     | '/marketplace'
@@ -272,7 +277,6 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/settings'
     | '/support'
-    | '/'
     | '/internal/admin'
     | '/internal/analytics'
     | '/internal/clients'
@@ -289,6 +293,7 @@ export interface FileRouteTypes {
     | '/_app/attendance'
     | '/_app/billing'
     | '/_app/contracts'
+    | '/_app/dashboard'
     | '/_app/job-builder'
     | '/_app/knowledge-base'
     | '/_app/marketplace'
@@ -298,7 +303,6 @@ export interface FileRouteTypes {
     | '/_app/rewards'
     | '/_app/settings'
     | '/_app/support'
-    | '/_app/'
     | '/_app/internal/admin'
     | '/_app/internal/analytics'
     | '/_app/internal/clients'
@@ -331,13 +335,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/': {
-      id: '/_app/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/attendance': {
       id: '/_app/attendance'
       path: '/attendance'
@@ -357,6 +354,13 @@ declare module '@tanstack/react-router' {
       path: '/contracts'
       fullPath: '/contracts'
       preLoaderRoute: typeof AppContractsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/job-builder': {
@@ -492,6 +496,7 @@ interface AppRouteChildren {
   AppAttendanceRoute: typeof AppAttendanceRoute
   AppBillingRoute: typeof AppBillingRoute
   AppContractsRoute: typeof AppContractsRoute
+  AppDashboardRoute: typeof AppDashboardRoute
   AppJobBuilderRoute: typeof AppJobBuilderRoute
   AppKnowledgeBaseRoute: typeof AppKnowledgeBaseRoute
   AppMarketplaceRoute: typeof AppMarketplaceRoute
@@ -501,7 +506,6 @@ interface AppRouteChildren {
   AppRewardsRoute: typeof AppRewardsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppSupportRoute: typeof AppSupportRoute
-  AppIndexRoute: typeof AppIndexRoute
   AppInternalAdminRoute: typeof AppInternalAdminRoute
   AppInternalAnalyticsRoute: typeof AppInternalAnalyticsRoute
   AppInternalClientsRoute: typeof AppInternalClientsRoute
@@ -517,6 +521,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAttendanceRoute: AppAttendanceRoute,
   AppBillingRoute: AppBillingRoute,
   AppContractsRoute: AppContractsRoute,
+  AppDashboardRoute: AppDashboardRoute,
   AppJobBuilderRoute: AppJobBuilderRoute,
   AppKnowledgeBaseRoute: AppKnowledgeBaseRoute,
   AppMarketplaceRoute: AppMarketplaceRoute,
@@ -526,7 +531,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppRewardsRoute: AppRewardsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppSupportRoute: AppSupportRoute,
-  AppIndexRoute: AppIndexRoute,
   AppInternalAdminRoute: AppInternalAdminRoute,
   AppInternalAnalyticsRoute: AppInternalAnalyticsRoute,
   AppInternalClientsRoute: AppInternalClientsRoute,
