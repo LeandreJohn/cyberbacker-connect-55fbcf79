@@ -23,6 +23,7 @@ import type {
   Reward,
   RetentionPoint,
   SystemUser,
+  TalentProfile,
   Ticket,
   TicketVolumePoint,
 } from "./types";
@@ -66,6 +67,173 @@ const leandreProfile = {
   workSetup: { primaryDevice: "Windows workstation", secondaryDevice: "Laptop", webcam: true, headset: true, primaryIsp: "Fiber connection", backupIsp: "Mobile hotspot", cpu: "Intel Core i7", ram: "16 GB", storage: "512 GB SSD" },
   valuesBreakdown: { Excellence: 94, Reliability: 96, Teamwork: 91, Initiative: 95 },
   disc: { Dominance: 72, Influence: 68, Steadiness: 81, Conscientiousness: 92 },
+};
+
+const standardWorkSetup = {
+  primaryDevice: "Windows workstation",
+  secondaryDevice: "Laptop",
+  webcam: true,
+  headset: true,
+  primaryIsp: "Fiber connection",
+  backupIsp: "Mobile hotspot",
+  cpu: "Intel Core i5 or better",
+  ram: "16 GB",
+  storage: "512 GB SSD",
+};
+
+const candidateProfiles: Record<string, TalentProfile> = {
+  c1: {
+    nationality: "Filipino", languages: ["English", "Spanish", "Filipino"],
+    education: { level: "Bachelor's degree", school: "University of the Philippines", location: "Manila, Philippines", graduation: "2017", degree: "BA Communication" },
+    preferredIndustry: "Real Estate & Professional Services", preferredRoles: ["Senior Executive Assistant", "Chief of Staff Support", "Operations Assistant"], availability: "Immediately available", engagement: "Full-time",
+    experience: [
+      { title: "Senior Executive Assistant", employer: "Northstar Advisory Group", location: "Remote", start: "2022", end: "Present", summary: "Owns executive calendars, international travel, inbox triage, meeting preparation, and follow-through for a distributed leadership team." },
+      { title: "Executive Operations Coordinator", employer: "Metro Realty Partners", location: "Manila, Philippines", start: "2018", end: "2022", summary: "Coordinated transaction deadlines, vendor relationships, client communications, and weekly leadership reporting." },
+    ],
+    coreSkills: [
+      { category: "Executive Support", name: "Calendar Management", proficiency: "Expert" }, { category: "Executive Support", name: "Inbox Management", proficiency: "Expert" },
+      { category: "Operations", name: "Travel Coordination", proficiency: "Expert" }, { category: "Operations", name: "Project Coordination", proficiency: "Proficient" },
+      { category: "Communication", name: "Executive Correspondence", proficiency: "Expert" }, { category: "Communication", name: "Stakeholder Follow-up", proficiency: "Proficient" },
+    ],
+    tools: [{ name: "Google Workspace", proficiency: "Expert" }, { name: "Microsoft 365", proficiency: "Expert" }, { name: "HubSpot", proficiency: "Proficient" }, { name: "Monday.com", proficiency: "Proficient" }, { name: "Slack", proficiency: "Expert" }],
+    portfolio: ["Executive Weekly Brief Template", "International Travel Planning System", "Leadership Meeting Workflow"],
+    certifications: [{ title: "Executive Assistant Certification", organization: "Cyberbacker Academy", completed: "2024" }, { title: "Project Management Foundations", organization: "LinkedIn Learning", completed: "2023" }],
+    workSetup: { ...standardWorkSetup, cpu: "Intel Core i7", primaryDevice: "Dual-monitor Windows workstation" },
+    valuesBreakdown: { Excellence: 97, Reliability: 98, Initiative: 96, Teamwork: 94 }, disc: { Dominance: 69, Influence: 78, Steadiness: 86, Conscientiousness: 94 },
+  },
+  c2: {
+    nationality: "Indian", languages: ["English", "Hindi", "Kannada"],
+    education: { level: "Bachelor's degree", school: "Bangalore University", location: "Bengaluru, India", graduation: "2015", degree: "Bachelor of Commerce" },
+    preferredIndustry: "Healthcare & Professional Services", preferredRoles: ["Full-Charge Bookkeeper", "Senior Accounting Assistant", "Payroll Specialist"], availability: "Available in 1 week", engagement: "Full-time",
+    experience: [
+      { title: "Full-Charge Bookkeeper", employer: "Aster Health Services", location: "Remote", start: "2020", end: "Present", summary: "Manages monthly close, payroll, bank reconciliations, accounts payable and receivable, and management reporting across multiple entities." },
+      { title: "Senior Accounting Associate", employer: "Ledgerwise Consulting", location: "Bengaluru, India", start: "2016", end: "2020", summary: "Maintained ledgers for service businesses, prepared schedules, resolved variances, and supported year-end accountant requests." },
+    ],
+    coreSkills: [
+      { category: "Bookkeeping", name: "Month-end Close", proficiency: "Expert" }, { category: "Bookkeeping", name: "Bank Reconciliation", proficiency: "Expert" },
+      { category: "Accounting Operations", name: "Accounts Payable & Receivable", proficiency: "Expert" }, { category: "Accounting Operations", name: "Payroll Processing", proficiency: "Proficient" },
+      { category: "Reporting", name: "Financial Statements", proficiency: "Expert" }, { category: "Reporting", name: "Variance Analysis", proficiency: "Proficient" },
+    ],
+    tools: [{ name: "QuickBooks Online", proficiency: "Expert" }, { name: "Xero", proficiency: "Expert" }, { name: "Bill.com", proficiency: "Proficient" }, { name: "Gusto", proficiency: "Proficient" }, { name: "Microsoft Excel", proficiency: "Expert" }],
+    portfolio: ["Multi-entity Month-end Checklist", "Cash Flow Forecast Model", "Payroll Reconciliation Workbook"],
+    certifications: [{ title: "QuickBooks Online ProAdvisor", organization: "Intuit", completed: "2024", expires: "2027" }, { title: "Xero Advisor Certification", organization: "Xero", completed: "2025" }],
+    workSetup: { ...standardWorkSetup, primaryDevice: "Dual-monitor Windows workstation", backupIsp: "5G mobile connection" },
+    valuesBreakdown: { Accuracy: 98, Reliability: 96, Ownership: 93, Teamwork: 89 }, disc: { Dominance: 58, Influence: 55, Steadiness: 88, Conscientiousness: 97 },
+  },
+  c3: {
+    nationality: "Filipino", languages: ["English", "French", "Filipino"],
+    education: { level: "Bachelor's degree", school: "University of San Carlos", location: "Cebu, Philippines", graduation: "2019", degree: "BA Advertising Arts" },
+    preferredIndustry: "Retail, Hospitality & Lifestyle", preferredRoles: ["Social Media Strategist", "Content Marketing Manager", "Paid Social Specialist"], availability: "Available in 2 weeks", engagement: "Full-time",
+    experience: [
+      { title: "Social Media Strategist", employer: "Harbor Hospitality Collective", location: "Remote", start: "2022", end: "Present", summary: "Plans multi-brand content calendars, directs creative production, manages paid campaigns, and reports channel performance to stakeholders." },
+      { title: "Content & Community Specialist", employer: "Mango Creative Studio", location: "Cebu, Philippines", start: "2020", end: "2022", summary: "Produced social content, community responses, influencer briefs, and monthly insight reports for retail clients." },
+    ],
+    coreSkills: [
+      { category: "Content", name: "Content Strategy", proficiency: "Expert" }, { category: "Content", name: "Copywriting", proficiency: "Expert" },
+      { category: "Campaigns", name: "Paid Social Campaigns", proficiency: "Proficient" }, { category: "Campaigns", name: "Influencer Coordination", proficiency: "Proficient" },
+      { category: "Analytics", name: "Channel Reporting", proficiency: "Expert" }, { category: "Analytics", name: "Audience Insights", proficiency: "Proficient" },
+    ],
+    tools: [{ name: "Canva Pro", proficiency: "Expert" }, { name: "Meta Business Suite", proficiency: "Expert" }, { name: "Hootsuite", proficiency: "Proficient" }, { name: "Google Analytics 4", proficiency: "Proficient" }, { name: "CapCut", proficiency: "Expert" }],
+    portfolio: ["Hospitality Brand Launch Campaign", "90-day Content Calendar", "Paid Social Performance Report"],
+    certifications: [{ title: "Meta Certified Digital Marketing Associate", organization: "Meta", completed: "2024", expires: "2026" }, { title: "Content Marketing", organization: "HubSpot Academy", completed: "2025" }],
+    workSetup: { ...standardWorkSetup, primaryDevice: "MacBook Pro", secondaryDevice: "Windows laptop", storage: "1 TB SSD" },
+    valuesBreakdown: { Creativity: 96, Initiative: 91, Adaptability: 94, Teamwork: 90 }, disc: { Dominance: 64, Influence: 92, Steadiness: 73, Conscientiousness: 84 },
+  },
+  c4: {
+    nationality: "South African", languages: ["English", "Afrikaans"],
+    education: { level: "Bachelor's degree", school: "University of Cape Town", location: "Cape Town, South Africa", graduation: "2021", degree: "BCom Management Studies" },
+    preferredIndustry: "SaaS & Fintech", preferredRoles: ["Customer Success Specialist", "Onboarding Specialist", "Client Experience Coordinator"], availability: "Immediately available", engagement: "Full-time",
+    experience: [
+      { title: "Customer Success Specialist", employer: "Cloudline Software", location: "Remote", start: "2023", end: "Present", summary: "Leads onboarding, adoption check-ins, QBR preparation, health-score reviews, and renewal coordination for a portfolio of SaaS customers." },
+      { title: "Customer Support Associate", employer: "Finserve Connect", location: "Cape Town, South Africa", start: "2021", end: "2023", summary: "Resolved product and billing concerns across email and chat while maintaining knowledge-base content and customer feedback themes." },
+    ],
+    coreSkills: [
+      { category: "Customer Success", name: "Client Onboarding", proficiency: "Expert" }, { category: "Customer Success", name: "Retention Management", proficiency: "Proficient" },
+      { category: "Support", name: "Ticket Resolution", proficiency: "Expert" }, { category: "Support", name: "Escalation Management", proficiency: "Proficient" },
+      { category: "Communication", name: "QBR Facilitation", proficiency: "Proficient" }, { category: "Communication", name: "Knowledge-base Writing", proficiency: "Expert" },
+    ],
+    tools: [{ name: "Zendesk", proficiency: "Expert" }, { name: "Intercom", proficiency: "Expert" }, { name: "Gainsight", proficiency: "Intermediate" }, { name: "HubSpot CRM", proficiency: "Proficient" }, { name: "Slack", proficiency: "Expert" }],
+    portfolio: ["Client Onboarding Playbook", "Quarterly Business Review Deck", "Customer Health Score Framework"],
+    certifications: [{ title: "Customer Success Management Fundamentals", organization: "SuccessCOACHING", completed: "2025" }, { title: "Zendesk Support Administrator", organization: "Zendesk", completed: "2024" }],
+    workSetup: { ...standardWorkSetup, primaryDevice: "Windows desktop with dual monitors", primaryIsp: "100 Mbps fiber" },
+    valuesBreakdown: { Empathy: 97, Reliability: 92, Communication: 95, Ownership: 88 }, disc: { Dominance: 61, Influence: 87, Steadiness: 92, Conscientiousness: 82 },
+  },
+  c5: {
+    nationality: "Filipino", languages: ["English", "Filipino", "Cebuano"],
+    education: { level: "Bachelor's degree", school: "Ateneo de Davao University", location: "Davao, Philippines", graduation: "2018", degree: "BS Business Management" },
+    preferredIndustry: "E-commerce & Logistics", preferredRoles: ["Operations Coordinator", "Process Improvement Specialist", "Project Coordinator"], availability: "Immediately available", engagement: "Full-time",
+    experience: [
+      { title: "Operations Coordinator", employer: "ParcelPeak Commerce", location: "Remote", start: "2021", end: "Present", summary: "Coordinates order operations, vendor SLAs, process documentation, automations, and daily exception reporting for a growing online retailer." },
+      { title: "Logistics Project Assistant", employer: "Southern Routes Distribution", location: "Davao, Philippines", start: "2018", end: "2021", summary: "Tracked shipments, standardized procedures, prepared KPI reports, and coordinated warehouse improvement projects." },
+    ],
+    coreSkills: [
+      { category: "Operations", name: "SOP Development", proficiency: "Expert" }, { category: "Operations", name: "Workflow Coordination", proficiency: "Expert" },
+      { category: "Automation", name: "No-code Automation", proficiency: "Proficient" }, { category: "Automation", name: "Process Mapping", proficiency: "Expert" },
+      { category: "Reporting", name: "KPI Reporting", proficiency: "Proficient" }, { category: "Reporting", name: "Exception Management", proficiency: "Expert" },
+    ],
+    tools: [{ name: "Notion", proficiency: "Expert" }, { name: "Zapier", proficiency: "Expert" }, { name: "Monday.com", proficiency: "Proficient" }, { name: "Shopify", proficiency: "Proficient" }, { name: "Google Sheets", proficiency: "Expert" }],
+    portfolio: ["Order Exception Dashboard", "Operations SOP Library", "Customer Update Automation"],
+    certifications: [{ title: "Lean Six Sigma Yellow Belt", organization: "CSSC", completed: "2024" }, { title: "Zapier Automation Specialist", organization: "Zapier", completed: "2025" }],
+    workSetup: { ...standardWorkSetup, secondaryDevice: "Chromebook", backupIsp: "Prepaid fiber backup" },
+    valuesBreakdown: { Ownership: 96, Resourcefulness: 95, Reliability: 94, Teamwork: 90 }, disc: { Dominance: 78, Influence: 69, Steadiness: 84, Conscientiousness: 91 },
+  },
+  c6: {
+    nationality: "Nigerian", languages: ["English", "Yoruba"],
+    education: { level: "Bachelor's degree", school: "University of Lagos", location: "Lagos, Nigeria", graduation: "2020", degree: "BSc Marketing" },
+    preferredIndustry: "Education, Nonprofit & SaaS", preferredRoles: ["Marketing Generalist", "Lifecycle Marketing Specialist", "Content Marketer"], availability: "Currently engaged", engagement: "Full-time",
+    experience: [
+      { title: "Marketing Generalist", employer: "LearnForward Africa", location: "Remote", start: "2022", end: "Present", summary: "Runs organic search, lifecycle email, campaign copy, landing-page updates, and monthly growth reporting for an education platform." },
+      { title: "Digital Marketing Associate", employer: "Purpose Digital Agency", location: "Lagos, Nigeria", start: "2020", end: "2022", summary: "Supported nonprofit and startup clients through content production, email campaigns, SEO audits, and website publishing." },
+    ],
+    coreSkills: [
+      { category: "Growth Marketing", name: "Search Engine Optimization", proficiency: "Proficient" }, { category: "Growth Marketing", name: "Campaign Planning", proficiency: "Proficient" },
+      { category: "Content", name: "Conversion Copywriting", proficiency: "Expert" }, { category: "Content", name: "Editorial Planning", proficiency: "Expert" },
+      { category: "Lifecycle", name: "Email Automation", proficiency: "Proficient" }, { category: "Lifecycle", name: "Audience Segmentation", proficiency: "Intermediate" },
+    ],
+    tools: [{ name: "HubSpot Marketing Hub", proficiency: "Proficient" }, { name: "Webflow", proficiency: "Proficient" }, { name: "Semrush", proficiency: "Intermediate" }, { name: "Mailchimp", proficiency: "Expert" }, { name: "Canva Pro", proficiency: "Expert" }],
+    portfolio: ["Education Enrollment Email Series", "Nonprofit SEO Content Plan", "SaaS Landing Page Refresh"],
+    certifications: [{ title: "HubSpot Email Marketing", organization: "HubSpot Academy", completed: "2025" }, { title: "Google Analytics Certification", organization: "Google", completed: "2024", expires: "2026" }],
+    workSetup: { ...standardWorkSetup, primaryDevice: "MacBook Air", primaryIsp: "Fiber broadband", backupIsp: "4G router" },
+    valuesBreakdown: { Creativity: 92, Adaptability: 91, Communication: 90, Ownership: 86 }, disc: { Dominance: 66, Influence: 91, Steadiness: 76, Conscientiousness: 80 },
+  },
+  c7: {
+    nationality: "Filipino", languages: ["English", "Filipino", "Spanish"],
+    education: { level: "Bachelor's degree", school: "Far Eastern University", location: "Manila, Philippines", graduation: "2016", degree: "BS Business Administration" },
+    preferredIndustry: "Real Estate, Mortgage & Title", preferredRoles: ["Transaction Coordinator", "Real Estate Operations Specialist", "Listing Coordinator"], availability: "Immediately available", engagement: "Full-time",
+    experience: [
+      { title: "Senior Transaction Coordinator", employer: "Summit Homes Group", location: "Remote", start: "2019", end: "Present", summary: "Coordinates residential transactions from executed contract through closing, tracks contingencies, organizes documents, and updates all parties." },
+      { title: "Listing Coordinator", employer: "Prime Key Realty", location: "Quezon City, Philippines", start: "2017", end: "2019", summary: "Prepared listing packets, managed MLS data, scheduled vendors, and maintained transaction records for a high-volume sales team." },
+    ],
+    coreSkills: [
+      { category: "Transactions", name: "Contract-to-Close Coordination", proficiency: "Expert" }, { category: "Transactions", name: "Deadline Management", proficiency: "Expert" },
+      { category: "Listings", name: "MLS Administration", proficiency: "Expert" }, { category: "Listings", name: "Vendor Scheduling", proficiency: "Proficient" },
+      { category: "Client Service", name: "Stakeholder Updates", proficiency: "Expert" }, { category: "Client Service", name: "Document Organization", proficiency: "Expert" },
+    ],
+    tools: [{ name: "Dotloop", proficiency: "Expert" }, { name: "DocuSign", proficiency: "Expert" }, { name: "Follow Up Boss", proficiency: "Proficient" }, { name: "Skyslope", proficiency: "Proficient" }, { name: "Google Workspace", proficiency: "Expert" }],
+    portfolio: ["Contract-to-Close Checklist", "Listing Launch Timeline", "Client Milestone Update Templates"],
+    certifications: [{ title: "Real Estate Transaction Coordination", organization: "Transaction Coordinator Academy", completed: "2023" }, { title: "DocuSign Real Estate Specialist", organization: "DocuSign", completed: "2024" }],
+    workSetup: { ...standardWorkSetup, primaryDevice: "Dual-monitor Windows desktop", backupIsp: "5G mobile hotspot" },
+    valuesBreakdown: { Reliability: 98, Detail: 97, Communication: 95, Initiative: 92 }, disc: { Dominance: 71, Influence: 76, Steadiness: 89, Conscientiousness: 97 },
+  },
+  c8: {
+    nationality: "South Korean", languages: ["English", "Korean"],
+    education: { level: "Bachelor's degree", school: "Yonsei University", location: "Seoul, South Korea", graduation: "2018", degree: "BSc Statistics" },
+    preferredIndustry: "Fintech, SaaS & Healthcare", preferredRoles: ["Data & Reporting Analyst", "Business Intelligence Analyst", "Operations Analyst"], availability: "Available in 2 weeks", engagement: "Full-time",
+    experience: [
+      { title: "Data & Reporting Analyst", employer: "NexaPay Technologies", location: "Remote", start: "2021", end: "Present", summary: "Builds leadership dashboards, maintains reporting datasets, automates recurring analysis, and translates business questions into measurable KPIs." },
+      { title: "Junior Business Analyst", employer: "Hanul Health Systems", location: "Seoul, South Korea", start: "2018", end: "2021", summary: "Prepared operational reports, cleaned source data, investigated trends, and supported department planning with ad hoc analysis." },
+    ],
+    coreSkills: [
+      { category: "Analytics", name: "Data Analysis", proficiency: "Expert" }, { category: "Analytics", name: "KPI Design", proficiency: "Expert" },
+      { category: "Data", name: "SQL Querying", proficiency: "Expert" }, { category: "Data", name: "Data Quality Assurance", proficiency: "Proficient" },
+      { category: "Reporting", name: "Dashboard Development", proficiency: "Expert" }, { category: "Reporting", name: "Executive Storytelling", proficiency: "Proficient" },
+    ],
+    tools: [{ name: "Looker Studio", proficiency: "Expert" }, { name: "Microsoft Excel", proficiency: "Expert" }, { name: "PostgreSQL", proficiency: "Proficient" }, { name: "Python", proficiency: "Proficient" }, { name: "Tableau", proficiency: "Proficient" }],
+    portfolio: ["Executive Revenue Dashboard", "Customer Retention Cohort Analysis", "Automated Operations Scorecard"],
+    certifications: [{ title: "Google Business Intelligence", organization: "Google", completed: "2024" }, { title: "Tableau Desktop Specialist", organization: "Tableau", completed: "2025" }],
+    workSetup: { ...standardWorkSetup, primaryDevice: "MacBook Pro", secondaryDevice: "Windows desktop", cpu: "Apple M2 Pro", storage: "1 TB SSD" },
+    valuesBreakdown: { Curiosity: 95, Accuracy: 96, Reliability: 92, Collaboration: 88 }, disc: { Dominance: 63, Influence: 58, Steadiness: 82, Conscientiousness: 98 },
+  },
 };
 
 export const dashboardStats: KpiStat[] = [
@@ -236,14 +404,14 @@ export const cyberbackers: Cyberbacker[] = [
 ];
 
 export const candidates: Candidate[] = [
-  { id: "c1", name: "Sofia Mendoza", initials: "SM", title: "Senior Executive Assistant", availability: "available", rating: 4.9, hourlyRate: 14, yearsExperience: 7, location: "Manila, PH", skills: ["Calendar", "Project Mgmt", "Inbox", "Travel", "CRM"], matchScore: 97, industries: ["Real Estate", "Consulting", "SaaS", "Professional Services"], valuesScore: 96, bio: "Detail-obsessed EA who keeps founders out of the weeds. Built and ran the back-office for two seven-figure agencies and thrives on calendar Tetris and inbox zero.", tools: ["Google Workspace", "Slack", "HubSpot"], timezone: "Eastern", availabilityHours: ["Standard business hours", "Early hours"], workStyle: "Proactive", languages: ["English", "Spanish"], languageProficiency: { English: 5, Spanish: 4 }, certifications: ["Executive Assistant Certification"], education: "Bachelor's degree", functionalExpertise: ["Administrative & Executive Support", "Operations, Reporting & Compliance"], assessmentScore: 96 },
-  { id: "c2", name: "Arjun Patel", initials: "AP", title: "Full-Charge Bookkeeper", availability: "available", rating: 4.8, hourlyRate: 16, yearsExperience: 9, location: "Bengaluru, IN", skills: ["Xero", "QuickBooks", "Payroll", "AR/AP", "Reconciliation"], matchScore: 94, industries: ["Healthcare", "E-commerce", "Professional Services"], valuesScore: 92, bio: "Numbers-first bookkeeper trusted with month-end close for distributed teams. Calm under audit pressure and fluent in both Xero and QuickBooks Online." },
-  { id: "c3", name: "Camille Roy", initials: "CR", title: "Social Media Strategist", availability: "interviewing", rating: 4.7, hourlyRate: 15, yearsExperience: 5, location: "Cebu, PH", skills: ["Content", "Paid Ads", "Analytics", "Canva", "Copywriting"], matchScore: 91, industries: ["Retail", "Hospitality", "Real Estate"], valuesScore: 89, bio: "Brand storyteller who turns scrappy budgets into scroll-stopping campaigns. Owns the full funnel from content calendar to paid amplification and reporting." },
-  { id: "c4", name: "Noah Becker", initials: "NB", title: "Customer Success Specialist", availability: "available", rating: 4.6, hourlyRate: 13, yearsExperience: 4, location: "Cape Town, ZA", skills: ["Zendesk", "Onboarding", "Retention", "QBRs", "Intercom"], matchScore: 88, industries: ["SaaS", "Fintech"], valuesScore: 90, bio: "Empathetic CS specialist who turns first-week jitters into renewals. Loves building onboarding playbooks and cutting churn through proactive check-ins.", tools: ["Zendesk", "Intercom", "Slack"], timezone: "Eastern", availabilityHours: ["Standard business hours", "Evening coverage"], workStyle: "Combination", languages: ["English"], languageProficiency: { English: 5 }, certifications: ["Customer Success Management"], education: "Bachelor's degree", functionalExpertise: ["Customer Service & Client Success"], assessmentScore: 90 },
-  { id: "c5", name: "Live Tan", initials: "LT", title: "Operations Coordinator", availability: "available", rating: 4.8, hourlyRate: 15, yearsExperience: 6, location: "Davao, PH", skills: ["Ops", "SOPs", "Automation", "Zapier", "Notion"], matchScore: 90, industries: ["Logistics", "E-commerce", "Construction"], valuesScore: 93, bio: "Systems thinker who documents everything and automates the rest. Has scaled ops for fast-growing e-commerce brands without dropping a shipment." },
-  { id: "c6", name: "Grace Okafor", initials: "GO", title: "Marketing Generalist", availability: "hired", rating: 4.5, hourlyRate: 14, yearsExperience: 5, location: "Lagos, NG", skills: ["SEO", "Email", "Copy", "HubSpot", "Webflow"], matchScore: 85, industries: ["Education", "Nonprofit", "SaaS"], valuesScore: 87, bio: "Versatile marketer comfortable wearing every hat from SEO to lifecycle email. Ships fast, measures everything, and iterates on what converts." },
-  { id: "c7", name: "Mateo Alvarez", initials: "MA", title: "Real Estate Transaction Coordinator", availability: "available", rating: 4.9, hourlyRate: 15, yearsExperience: 8, location: "Quezon City, PH", skills: ["Contracts", "MLS", "Compliance", "DocuSign", "Scheduling"], matchScore: 95, industries: ["Real Estate", "Mortgage", "Title"], valuesScore: 94, bio: "TC who shepherds deals from contract to close without a single missed deadline. Knows broker compliance cold and keeps every party informed." },
-  { id: "c8", name: "Hana Park", initials: "HP", title: "Data & Reporting Analyst", availability: "interviewing", rating: 4.7, hourlyRate: 17, yearsExperience: 6, location: "Seoul, KR", skills: ["SQL", "Looker", "Excel", "Dashboards", "Python"], matchScore: 92, industries: ["Fintech", "SaaS", "Healthcare"], valuesScore: 91, bio: "Analyst who turns messy spreadsheets into dashboards leadership actually uses. Equally happy writing SQL or explaining the so-what to non-technical teams." },
+  { id: "c1", name: "Sofia Mendoza", initials: "SM", title: "Senior Executive Assistant", availability: "available", rating: 4.9, hourlyRate: 14, yearsExperience: 7, location: "Manila, PH", skills: ["Calendar", "Project Mgmt", "Inbox", "Travel", "CRM"], matchScore: 97, industries: ["Real Estate", "Consulting", "SaaS", "Professional Services"], valuesScore: 96, bio: "Detail-obsessed EA who keeps founders out of the weeds. Built and ran the back-office for two seven-figure agencies and thrives on calendar Tetris and inbox zero.", tools: ["Google Workspace", "Slack", "HubSpot"], timezone: "Eastern", availabilityHours: ["Standard business hours", "Early hours"], workStyle: "Proactive", languages: ["English", "Spanish"], languageProficiency: { English: 5, Spanish: 4 }, certifications: ["Executive Assistant Certification"], education: "Bachelor's degree", functionalExpertise: ["Administrative & Executive Support", "Operations, Reporting & Compliance"], assessmentScore: 96, profile: candidateProfiles.c1 },
+  { id: "c2", name: "Arjun Patel", initials: "AP", title: "Full-Charge Bookkeeper", availability: "available", rating: 4.8, hourlyRate: 16, yearsExperience: 9, location: "Bengaluru, IN", skills: ["Xero", "QuickBooks", "Payroll", "AR/AP", "Reconciliation"], matchScore: 94, industries: ["Healthcare", "E-commerce", "Professional Services"], valuesScore: 92, bio: "Numbers-first bookkeeper trusted with month-end close for distributed teams. Calm under audit pressure and fluent in both Xero and QuickBooks Online.", profile: candidateProfiles.c2 },
+  { id: "c3", name: "Camille Roy", initials: "CR", title: "Social Media Strategist", availability: "interviewing", rating: 4.7, hourlyRate: 15, yearsExperience: 5, location: "Cebu, PH", skills: ["Content", "Paid Ads", "Analytics", "Canva", "Copywriting"], matchScore: 91, industries: ["Retail", "Hospitality", "Real Estate"], valuesScore: 89, bio: "Brand storyteller who turns scrappy budgets into scroll-stopping campaigns. Owns the full funnel from content calendar to paid amplification and reporting.", profile: candidateProfiles.c3 },
+  { id: "c4", name: "Noah Becker", initials: "NB", title: "Customer Success Specialist", availability: "available", rating: 4.6, hourlyRate: 13, yearsExperience: 4, location: "Cape Town, ZA", skills: ["Zendesk", "Onboarding", "Retention", "QBRs", "Intercom"], matchScore: 88, industries: ["SaaS", "Fintech"], valuesScore: 90, bio: "Empathetic CS specialist who turns first-week jitters into renewals. Loves building onboarding playbooks and cutting churn through proactive check-ins.", tools: ["Zendesk", "Intercom", "Slack"], timezone: "Eastern", availabilityHours: ["Standard business hours", "Evening coverage"], workStyle: "Combination", languages: ["English"], languageProficiency: { English: 5 }, certifications: ["Customer Success Management"], education: "Bachelor's degree", functionalExpertise: ["Customer Service & Client Success"], assessmentScore: 90, profile: candidateProfiles.c4 },
+  { id: "c5", name: "Live Tan", initials: "LT", title: "Operations Coordinator", availability: "available", rating: 4.8, hourlyRate: 15, yearsExperience: 6, location: "Davao, PH", skills: ["Ops", "SOPs", "Automation", "Zapier", "Notion"], matchScore: 90, industries: ["Logistics", "E-commerce", "Construction"], valuesScore: 93, bio: "Systems thinker who documents everything and automates the rest. Has scaled ops for fast-growing e-commerce brands without dropping a shipment.", profile: candidateProfiles.c5 },
+  { id: "c6", name: "Grace Okafor", initials: "GO", title: "Marketing Generalist", availability: "hired", rating: 4.5, hourlyRate: 14, yearsExperience: 5, location: "Lagos, NG", skills: ["SEO", "Email", "Copy", "HubSpot", "Webflow"], matchScore: 85, industries: ["Education", "Nonprofit", "SaaS"], valuesScore: 87, bio: "Versatile marketer comfortable wearing every hat from SEO to lifecycle email. Ships fast, measures everything, and iterates on what converts.", profile: candidateProfiles.c6 },
+  { id: "c7", name: "Mateo Alvarez", initials: "MA", title: "Real Estate Transaction Coordinator", availability: "available", rating: 4.9, hourlyRate: 15, yearsExperience: 8, location: "Quezon City, PH", skills: ["Contracts", "MLS", "Document Review", "DocuSign", "Scheduling"], matchScore: 95, industries: ["Real Estate", "Mortgage", "Title"], valuesScore: 94, bio: "TC who shepherds deals from contract to close without a single missed deadline. Keeps every document organized and every party informed.", profile: candidateProfiles.c7 },
+  { id: "c8", name: "Hana Park", initials: "HP", title: "Data & Reporting Analyst", availability: "interviewing", rating: 4.7, hourlyRate: 17, yearsExperience: 6, location: "Seoul, KR", skills: ["SQL", "Looker", "Excel", "Dashboards", "Python"], matchScore: 92, industries: ["Fintech", "SaaS", "Healthcare"], valuesScore: 91, bio: "Analyst who turns messy spreadsheets into dashboards leadership actually uses. Equally happy writing SQL or explaining the so-what to non-technical teams.", profile: candidateProfiles.c8 },
   { id: "c9", name: "Leandre John Sabado", initials: "LS", title: "Software Backer & Web Developer", availability: "available", rating: 4.8, hourlyRate: 17, yearsExperience: 5, location: "Valenzuela, PH", skills: ["React", "TypeScript", "Node.js", "PostgreSQL", "DevOps"], matchScore: 93, industries: ["Technology", "SaaS", "Professional Services"], valuesScore: 94, bio: "Product-minded software professional who turns complex business processes into reliable, easy-to-use web applications.", tools: ["React", "TypeScript", "Node.js", "GitHub", "Docker"], timezone: "PHT (GMT+8)", availabilityHours: ["Standard business hours", "Flexible overlap"], workStyle: "Proactive", languages: ["English", "Filipino"], languageProficiency: { English: 5, Filipino: 5 }, certifications: ["Full Stack Web Development"], education: "Bachelor's degree", functionalExpertise: ["Software Development", "Web Development", "DevOps"], assessmentScore: 94, profile: leandreProfile },
 ];
 
