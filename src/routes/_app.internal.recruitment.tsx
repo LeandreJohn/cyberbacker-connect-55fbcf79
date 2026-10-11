@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { q } from "@/lib/data/queries";
+import { firstName } from "@/lib/utils";
 import type { PipelineStageId } from "@/lib/data/types";
 
 export const Route = createFileRoute("/_app/internal/recruitment")({
@@ -66,7 +67,7 @@ function Recruitment() {
                       <div className="flex items-center gap-2.5">
                         <InitialsAvatar initials={c.initials} size="sm" />
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">{c.name}</p>
+                          <p className="truncate text-sm font-medium">{firstName(c.name)}</p>
                           <p className="truncate text-xs text-muted-foreground">{c.role}</p>
                         </div>
                       </div>

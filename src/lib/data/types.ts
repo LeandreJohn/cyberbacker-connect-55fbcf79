@@ -70,6 +70,41 @@ export interface TrainingRecord {
   progress: number; // 0-100
 }
 
+export type ProfileProficiency = "Basic" | "Intermediate" | "Proficient" | "Expert";
+
+export interface ProfileSkill {
+  category: string;
+  name: string;
+  proficiency: ProfileProficiency;
+}
+
+export interface WorkExperienceItem {
+  title: string;
+  employer: string;
+  location: string;
+  start: string;
+  end: string;
+  summary: string;
+}
+
+export interface TalentProfile {
+  nationality: string;
+  languages: string[];
+  education: { level: string; school: string; location: string; graduation: string; degree: string };
+  preferredIndustry: string;
+  preferredRoles: string[];
+  availability: string;
+  engagement: string;
+  experience: WorkExperienceItem[];
+  coreSkills: ProfileSkill[];
+  tools: Omit<ProfileSkill, "category">[];
+  portfolio: string[];
+  certifications: { title: string; organization: string; completed: string; expires?: string }[];
+  workSetup: { primaryDevice: string; secondaryDevice: string; webcam: boolean; headset: boolean; primaryIsp: string; backupIsp: string; cpu: string; ram: string; storage: string };
+  valuesBreakdown: Record<string, number>;
+  disc: Record<string, number>;
+}
+
 export interface Cyberbacker {
   id: string;
   name: string;
@@ -93,6 +128,9 @@ export interface Cyberbacker {
   attendanceHistory?: AttendanceDay[];
   reviews?: PerformanceReview[];
   trainings?: TrainingRecord[];
+  bio?: string;
+  location?: string;
+  profile?: TalentProfile;
 }
 
 export interface Candidate {
@@ -121,6 +159,7 @@ export interface Candidate {
   education?: import("@/lib/jobs/matching").EducationLevel;
   functionalExpertise?: string[];
   assessmentScore?: number;
+  profile?: TalentProfile;
 }
 
 export interface AttendanceEntry {

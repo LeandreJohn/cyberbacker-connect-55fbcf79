@@ -16,13 +16,15 @@ import { navGroups } from "./nav-config";
 // Bundled in the app so the brand mark renders even offline.
 import wordmarkDarkText from "@/assets/cyberbacker-mark-dark.png";
 import wordmarkLightText from "@/assets/cyberbacker-wordmark-light.png";
+import { useDemoAccount } from "@/lib/demo-auth";
 
 export function AppSidebar() {
   const { state, setOpenMobile, isMobile } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const account = useDemoAccount();
 
-  const exactRoutes = new Set(["/", "/internal"]);
+  const exactRoutes = new Set(["/dashboard", "/internal"]);
   const isActive = (to: string) =>
     exactRoutes.has(to) ? pathname === to : pathname.startsWith(to);
 
@@ -30,7 +32,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border">
         <Link
-          to="/"
+          to={account?.home ?? "/dashboard"}
           onClick={() => isMobile && setOpenMobile(false)}
           aria-label="Cyberbacker home"
           className={
@@ -62,7 +64,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {navGroups.map((group) => (
+        {navGroups.filter((group) => account?.role === "superadmin" ? group.label === "Internal" : group.label === "Client").map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {group.label}
@@ -91,6 +93,12 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+        {account?.role === "superadmin" && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Account</SidebarGroupLabel>
+            <SidebarGroupContent><SidebarMenu><SidebarMenuItem><SidebarMenuButton asChild isActive={pathname === "/settings"} tooltip="User Settings"><Link to="/settings" onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-2.5"><span className="grid h-4 w-4 place-items-center text-xs font-bold">⚙</span><span>User Settings</span></Link></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );

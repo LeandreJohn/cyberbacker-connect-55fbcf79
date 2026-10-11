@@ -9,12 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppAttendanceRouteImport } from './routes/_app.attendance'
 import { Route as AppBillingRouteImport } from './routes/_app.billing'
 import { Route as AppContractsRouteImport } from './routes/_app.contracts'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppJobBuilderRouteImport } from './routes/_app.job-builder'
 import { Route as AppKnowledgeBaseRouteImport } from './routes/_app.knowledge-base'
 import { Route as AppMarketplaceRouteImport } from './routes/_app.marketplace'
@@ -34,19 +36,24 @@ import { Route as AppInternalFinanceRouteImport } from './routes/_app.internal.f
 import { Route as AppInternalRecruitmentRouteImport } from './routes/_app.internal.recruitment'
 import { Route as AppInternalTicketsRouteImport } from './routes/_app.internal.tickets'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppRoute,
 } as any)
 const AppAttendanceRoute = AppAttendanceRouteImport.update({
   id: '/attendance',
@@ -61,6 +68,11 @@ const AppBillingRoute = AppBillingRouteImport.update({
 const AppContractsRoute = AppContractsRouteImport.update({
   id: '/contracts',
   path: '/contracts',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppJobBuilderRoute = AppJobBuilderRouteImport.update({
@@ -155,11 +167,13 @@ const AppInternalTicketsRoute = AppInternalTicketsRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AppIndexRoute
+  '/': typeof IndexRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/attendance': typeof AppAttendanceRoute
   '/billing': typeof AppBillingRoute
   '/contracts': typeof AppContractsRoute
+  '/dashboard': typeof AppDashboardRoute
   '/job-builder': typeof AppJobBuilderRoute
   '/knowledge-base': typeof AppKnowledgeBaseRoute
   '/marketplace': typeof AppMarketplaceRoute
@@ -180,10 +194,13 @@ export interface FileRoutesByFullPath {
   '/internal/': typeof AppInternalIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/attendance': typeof AppAttendanceRoute
   '/billing': typeof AppBillingRoute
   '/contracts': typeof AppContractsRoute
+  '/dashboard': typeof AppDashboardRoute
   '/job-builder': typeof AppJobBuilderRoute
   '/knowledge-base': typeof AppKnowledgeBaseRoute
   '/marketplace': typeof AppMarketplaceRoute
@@ -193,7 +210,6 @@ export interface FileRoutesByTo {
   '/rewards': typeof AppRewardsRoute
   '/settings': typeof AppSettingsRoute
   '/support': typeof AppSupportRoute
-  '/': typeof AppIndexRoute
   '/internal/admin': typeof AppInternalAdminRoute
   '/internal/analytics': typeof AppInternalAnalyticsRoute
   '/internal/clients': typeof AppInternalClientsRoute
@@ -206,11 +222,14 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/_app/attendance': typeof AppAttendanceRoute
   '/_app/billing': typeof AppBillingRoute
   '/_app/contracts': typeof AppContractsRoute
+  '/_app/dashboard': typeof AppDashboardRoute
   '/_app/job-builder': typeof AppJobBuilderRoute
   '/_app/knowledge-base': typeof AppKnowledgeBaseRoute
   '/_app/marketplace': typeof AppMarketplaceRoute
@@ -220,7 +239,6 @@ export interface FileRoutesById {
   '/_app/rewards': typeof AppRewardsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/support': typeof AppSupportRoute
-  '/_app/': typeof AppIndexRoute
   '/_app/internal/admin': typeof AppInternalAdminRoute
   '/_app/internal/analytics': typeof AppInternalAnalyticsRoute
   '/_app/internal/clients': typeof AppInternalClientsRoute
@@ -235,10 +253,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/forgot-password'
     | '/login'
     | '/attendance'
     | '/billing'
     | '/contracts'
+    | '/dashboard'
     | '/job-builder'
     | '/knowledge-base'
     | '/marketplace'
@@ -259,10 +279,13 @@ export interface FileRouteTypes {
     | '/internal/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
+    | '/forgot-password'
     | '/login'
     | '/attendance'
     | '/billing'
     | '/contracts'
+    | '/dashboard'
     | '/job-builder'
     | '/knowledge-base'
     | '/marketplace'
@@ -272,7 +295,6 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/settings'
     | '/support'
-    | '/'
     | '/internal/admin'
     | '/internal/analytics'
     | '/internal/clients'
@@ -284,11 +306,14 @@ export interface FileRouteTypes {
     | '/internal'
   id:
     | '__root__'
+    | '/'
     | '/_app'
+    | '/forgot-password'
     | '/login'
     | '/_app/attendance'
     | '/_app/billing'
     | '/_app/contracts'
+    | '/_app/dashboard'
     | '/_app/job-builder'
     | '/_app/knowledge-base'
     | '/_app/marketplace'
@@ -298,7 +323,6 @@ export interface FileRouteTypes {
     | '/_app/rewards'
     | '/_app/settings'
     | '/_app/support'
-    | '/_app/'
     | '/_app/internal/admin'
     | '/_app/internal/analytics'
     | '/_app/internal/clients'
@@ -311,17 +335,33 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -330,13 +370,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_app/': {
-      id: '/_app/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
     }
     '/_app/attendance': {
       id: '/_app/attendance'
@@ -357,6 +390,13 @@ declare module '@tanstack/react-router' {
       path: '/contracts'
       fullPath: '/contracts'
       preLoaderRoute: typeof AppContractsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/job-builder': {
@@ -492,6 +532,7 @@ interface AppRouteChildren {
   AppAttendanceRoute: typeof AppAttendanceRoute
   AppBillingRoute: typeof AppBillingRoute
   AppContractsRoute: typeof AppContractsRoute
+  AppDashboardRoute: typeof AppDashboardRoute
   AppJobBuilderRoute: typeof AppJobBuilderRoute
   AppKnowledgeBaseRoute: typeof AppKnowledgeBaseRoute
   AppMarketplaceRoute: typeof AppMarketplaceRoute
@@ -501,7 +542,6 @@ interface AppRouteChildren {
   AppRewardsRoute: typeof AppRewardsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppSupportRoute: typeof AppSupportRoute
-  AppIndexRoute: typeof AppIndexRoute
   AppInternalAdminRoute: typeof AppInternalAdminRoute
   AppInternalAnalyticsRoute: typeof AppInternalAnalyticsRoute
   AppInternalClientsRoute: typeof AppInternalClientsRoute
@@ -517,6 +557,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAttendanceRoute: AppAttendanceRoute,
   AppBillingRoute: AppBillingRoute,
   AppContractsRoute: AppContractsRoute,
+  AppDashboardRoute: AppDashboardRoute,
   AppJobBuilderRoute: AppJobBuilderRoute,
   AppKnowledgeBaseRoute: AppKnowledgeBaseRoute,
   AppMarketplaceRoute: AppMarketplaceRoute,
@@ -526,7 +567,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppRewardsRoute: AppRewardsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppSupportRoute: AppSupportRoute,
-  AppIndexRoute: AppIndexRoute,
   AppInternalAdminRoute: AppInternalAdminRoute,
   AppInternalAnalyticsRoute: AppInternalAnalyticsRoute,
   AppInternalClientsRoute: AppInternalClientsRoute,
@@ -541,7 +581,9 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport

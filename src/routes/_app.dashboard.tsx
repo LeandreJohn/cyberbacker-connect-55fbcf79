@@ -27,7 +27,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { JobDescriptionBuilder } from "@/components/jobs/JobDescriptionBuilder";
 import logoLight from "@/assets/cyberbacker-logo-light.png";
 
-export const Route = createFileRoute("/_app/")({
+export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
     meta: [
       { title: "Client Dashboard — Cyberbacker" },

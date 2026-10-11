@@ -16,9 +16,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { q } from "@/lib/data/queries";
 import { submitReview } from "@/lib/data/api";
 import type { Review } from "@/lib/data/types";
-import { cn } from "@/lib/utils";
+import { cn, firstName } from "@/lib/utils";
+
+interface ReviewsSearch { cyberbacker?: string }
 
 export const Route = createFileRoute("/_app/reviews")({
+  validateSearch: (search: Record<string, unknown>): ReviewsSearch => ({ cyberbacker: typeof search.cyberbacker === "string" ? search.cyberbacker : undefined }),
   head: () => ({
     meta: [
       { title: "Reviews & Ratings — Cyberbacker" },
@@ -64,8 +67,9 @@ function ReviewsPage() {
   const { data: reviews } = useSuspenseQuery(q.reviews());
   const { data: team } = useSuspenseQuery(q.cyberbackers());
   const qc = useQueryClient();
+  const search = Route.useSearch();
 
-  const [cbId, setCbId] = useState(team[0]?.id ?? "");
+  const [cbId, setCbId] = useState(team.some((cb) => cb.id === search.cyberbacker) ? search.cyberbacker ?? "" : team[0]?.id ?? "");
   const [overall, setOverall] = useState(0);
   const [scores, setScores] = useState<Record<(typeof CATS)[number], number>>({
     communication: 0, quality: 0, reliability: 0, timeliness: 0,
@@ -120,7 +124,7 @@ function ReviewsPage() {
             <CardContent className="flex items-center gap-3 p-4">
               <InitialsAvatar initials={cb.initials} />
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{cb.name}</p>
+                <p className="truncate text-sm font-medium">{firstName(cb.name)}</p>
                 <div className="flex items-center gap-1.5">
                   <Stars value={Math.round(avg)} size="sm" />
                   <span className="text-xs text-muted-foreground">{avg ? avg.toFixed(1) : "—"} · {count}</span>
@@ -140,7 +144,7 @@ function ReviewsPage() {
               <Select value={cbId} onValueChange={setCbId}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {team.map((t) => <SelectItem key={t.id} value={t.id}>{t.name} — {t.role}</SelectItem>)}
+                  {team.map((t) => <SelectItem key={t.id} value={t.id}>{firstName(t.name)} — {t.role}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -183,7 +187,7 @@ function ReviewsPage() {
               {reviews.slice(0, 8).map((r) => (
                 <div key={r.id} className="space-y-1.5 py-3 first:pt-0">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-sm font-medium">{r.cyberbackerName}</p>
+                    <p className="text-sm font-medium">{firstName(r.cyberbackerName)}</p>
                     <div className="flex items-center gap-2">
                       <Stars value={r.overall} size="sm" />
                       <span className="text-xs text-muted-foreground">{r.date}</span>

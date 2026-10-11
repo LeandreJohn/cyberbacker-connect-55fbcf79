@@ -3,10 +3,8 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
   Calendar,
-  Check,
   Heart,
   MapPin,
-  Play,
   Search,
   SlidersHorizontal,
   Star,
@@ -28,7 +26,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -56,7 +53,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
+import { cn, firstName } from "@/lib/utils";
+import { TalentProfileContent } from "@/components/shared/TalentProfileContent";
 import { q } from "@/lib/data/queries";
 import {
   EXPERIENCE_TIERS,
@@ -251,10 +249,10 @@ function Marketplace() {
       const next = new Set(prev);
       if (next.has(c.id)) {
         next.delete(c.id);
-        toast(`Removed ${c.name} from shortlist`);
+        toast(`Removed ${firstName(c.name)} from shortlist`);
       } else {
         next.add(c.id);
-        toast.success(`${c.name} added to shortlist`);
+        toast.success(`${firstName(c.name)} added to shortlist`);
       }
       return next;
     });
@@ -272,7 +270,7 @@ function Marketplace() {
   };
 
   const scheduleInterview = (c: Candidate) =>
-    toast.success(`Interview request sent for ${c.name}`, {
+    toast.success(`Interview request sent for ${firstName(c.name)}`, {
       description: "Our team will confirm a time within 24 hours.",
     });
 
@@ -497,7 +495,7 @@ function Marketplace() {
                 <CardHeader className="flex-row items-start gap-3 space-y-0">
                   <InitialsAvatar initials={c.initials} size="lg" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold">{c.name}</p>
+                    <p className="truncate font-semibold">{firstName(c.name)}</p>
                     <p className="truncate text-sm text-muted-foreground">{c.title}</p>
                     <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                       <MapPin className="h-3 w-3" /> {c.location}
@@ -615,91 +613,10 @@ function Marketplace() {
           {activeCandidate && (
             <>
               <SheetHeader className="space-y-0 text-left">
-                <SheetTitle className="sr-only">{activeCandidate.name} profile</SheetTitle>
+                <SheetTitle className="sr-only">{firstName(activeCandidate.name)} profile</SheetTitle>
               </SheetHeader>
               <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <InitialsAvatar initials={activeCandidate.initials} size="lg" />
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-lg font-semibold">{activeCandidate.name}</h2>
-                    <p className="text-sm text-muted-foreground">{activeCandidate.title}</p>
-                    <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                      <MapPin className="h-3 w-3" /> {activeCandidate.location}
-                    </p>
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
-                        {jdMatches?.get(activeCandidate.id)?.score ?? activeCandidate.matchScore}% match
-                      </Badge>
-                      <StatusBadge
-                        label={activeCandidate.availability}
-                        tone={toneFor(activeCandidate.availability)}
-                      />
-                      <span className="flex items-center gap-1 text-sm font-medium">
-                        <Star className="h-4 w-4 fill-warning text-warning" />
-                        {activeCandidate.rating}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Intro video placeholder */}
-                <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed bg-gradient-powder text-powder-foreground">
-                  <div className="grid h-12 w-12 place-items-center rounded-full bg-background/30">
-                    <Play className="h-5 w-5" />
-                  </div>
-                  <p className="text-sm font-medium">Intro video coming soon</p>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <Stat label="Experience" value={`${activeCandidate.yearsExperience} yrs`} />
-                  <Stat label="Values Score" value={String(activeCandidate.valuesScore)} />
-                  <Stat label="Rate" value={`$${activeCandidate.hourlyRate}/hr`} />
-                </div>
-
-                <div>
-                  <div className="mb-1 flex items-center justify-between text-sm">
-                    <span className="font-medium">Values Assessment Score</span>
-                    <span className="text-muted-foreground">
-                      {activeCandidate.valuesScore}/100
-                    </span>
-                  </div>
-                  <Progress value={activeCandidate.valuesScore} className="h-2" />
-                </div>
-
-                <Separator />
-
-                <Section title="About">
-                  <p className="text-sm text-muted-foreground">{activeCandidate.bio}</p>
-                </Section>
-
-                <Section title="Skills">
-                  <div className="flex flex-wrap gap-1.5">
-                    {activeCandidate.skills.map((s) => (
-                      <Badge key={s} variant="secondary" className="font-normal">
-                        {s}
-                      </Badge>
-                    ))}
-                  </div>
-                </Section>
-
-                <Section title="Industry experience">
-                  <div className="flex flex-wrap gap-1.5">
-                    {activeCandidate.industries.map((i) => (
-                      <Badge key={i} variant="outline" className="font-normal">
-                        {i}
-                      </Badge>
-                    ))}
-                  </div>
-                </Section>
-
-                {jdMatches?.get(activeCandidate.id) && (
-                  <Section title="Job description match">
-                    <div className="space-y-2 rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
-                      <p><span className="font-medium text-foreground">Strengths:</span> {jdMatches.get(activeCandidate.id)?.strengths.join(" · ") || "General profile fit"}</p>
-                      <p><span className="font-medium text-foreground">Gaps:</span> {jdMatches.get(activeCandidate.id)?.gaps.join(" · ") || "No material gaps identified"}</p>
-                    </div>
-                  </Section>
-                )}
+                <TalentProfileContent name={activeCandidate.name} initials={activeCandidate.initials} title={activeCandidate.title} location={activeCandidate.location} bio={activeCandidate.bio} yearsExperience={activeCandidate.yearsExperience} valuesScore={activeCandidate.valuesScore} rating={activeCandidate.rating} skills={activeCandidate.skills} tools={activeCandidate.tools} profile={activeCandidate.profile} />
 
                 <div className="flex flex-col gap-2 pb-2 sm:flex-row">
                   <Button
@@ -740,11 +657,11 @@ function Marketplace() {
               <div className="hidden gap-2 sm:flex">
                 {compareCandidates.map((c) => (
                   <Badge key={c.id} variant="secondary" className="gap-1 font-normal">
-                    {c.name}
+                    {firstName(c.name)}
                     <button
                       type="button"
                       onClick={() => toggleCompare(c)}
-                      aria-label={`Remove ${c.name}`}
+                      aria-label={`Remove ${firstName(c.name)}`}
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -782,7 +699,7 @@ function Marketplace() {
                       <div className="flex items-center gap-2">
                         <InitialsAvatar initials={c.initials} />
                         <div className="min-w-0">
-                          <p className="truncate font-semibold">{c.name}</p>
+                          <p className="truncate font-semibold">{firstName(c.name)}</p>
                           <p className="truncate text-xs font-normal text-muted-foreground">
                             {c.title}
                           </p>
@@ -851,26 +768,6 @@ function Marketplace() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border bg-muted/30 p-3">
-      <p className="text-base font-semibold">{value}</p>
-      <p className="text-xs text-muted-foreground">{label}</p>
-    </div>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-2">
-      <h3 className="flex items-center gap-1.5 text-sm font-semibold">
-        <Check className="h-3.5 w-3.5 text-primary" /> {title}
-      </h3>
-      {children}
     </div>
   );
 }
