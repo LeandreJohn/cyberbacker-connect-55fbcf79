@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { Monitor, Moon, Sun } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -13,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
-import { q } from "@/lib/data/queries";
+import { useDemoAccount } from "@/lib/demo-auth";
 
 export const Route = createFileRoute("/_app/settings")({
   head: () => ({
@@ -22,7 +21,6 @@ export const Route = createFileRoute("/_app/settings")({
       { name: "description", content: "Manage your profile, notifications and appearance." },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(q.currentUser()),
   component: Settings,
 });
 
@@ -34,8 +32,9 @@ const notifPrefs = [
 ];
 
 function Settings() {
-  const { data: user } = useSuspenseQuery(q.currentUser());
+  const user = useDemoAccount();
   const { theme, setTheme } = useTheme();
+  if (!user) return null;
 
   const themes = [
     { id: "light", label: "Light", icon: Sun },
@@ -82,7 +81,7 @@ function Settings() {
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="role">Role</Label>
-                  <Input id="role" defaultValue={user.role} disabled />
+                  <Input id="role" defaultValue={user.title} disabled />
                 </div>
               </div>
               <Separator />
