@@ -41,7 +41,7 @@ export const navGroups: NavGroup[] = [
   {
     label: "Client",
     items: [
-      { title: "Dashboard", to: "/", icon: LayoutDashboard },
+      { title: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
       { title: "My Cyberbackers", to: "/my-cyberbackers", icon: Users },
       { title: "Hiring Marketplace", to: "/marketplace", icon: Store },
       { title: "Job Description Builder", to: "/job-builder", icon: FilePen },
