@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { scoreCandidate, tierExperienceMatches, type JobMatchProfile } from "./matching";
+import { scoreCandidate, setCappedWeight, tierExperienceMatches, type JobMatchProfile } from "./matching";
 
 const profile: JobMatchProfile = {
   title: "Executive Assistant",
@@ -58,4 +58,28 @@ test("missing a required skill fails constraints while a preferred skill does no
 
 test("an explicit operational mismatch fails constraints", () => {
   expect(scoreCandidate(profile, { ...candidate, timezone: "Pacific" }).passesConstraints).toBe(false);
+});
+
+test("scoring weights can never exceed 100 percent", () => {
+  const weights = { skills: 40, experience: 25, responsibilities: 20, assessment: 10, education: 5 };
+  expect(setCappedWeight(weights, "skills", 80)).toEqual({ ...weights, skills: 40 });
+  expect(setCappedWeight({ ...weights, education: 0 }, "skills", 45).skills).toBe(45);
+});
+
+test("lower-score mode keeps candidates missing a must-have in results", () => {
+  const strict = scoreCandidate({ ...profile, requiredSkills: ["Bookkeeping"], mustHaveBehavior: "filter" }, candidate);
+  const flexible = scoreCandidate({ ...profile, requiredSkills: ["Bookkeeping"], mustHaveBehavior: "lower-score" }, candidate);
+  expect(strict.passesConstraints).toBe(false);
+  expect(flexible.passesConstraints).toBe(true);
+  expect(flexible.score).toBeLessThan(scoreCandidate(profile, candidate).score);
+});
+
+test("language proficiency and required education act as constraints", () => {
+  const expanded = { ...profile, languages: [{ language: "English", proficiency: 5 }], education: "Bachelor's degree" as const, educationRequired: true };
+  expect(scoreCandidate(expanded, { ...candidate, languageProficiency: { English: 4 }, education: "Bachelor's degree" }).passesConstraints).toBe(false);
+  expect(scoreCandidate(expanded, { ...candidate, languageProficiency: { English: 5 }, education: "Some college / Undergraduate" }).passesConstraints).toBe(false);
+});
+
+test("shift compatibility is enforced", () => {
+  expect(scoreCandidate({ ...profile, shift: "Evening coverage" }, candidate).passesConstraints).toBe(false);
 });
