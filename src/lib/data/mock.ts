@@ -36,6 +36,38 @@ export const currentUser: CurrentUser = {
   initials: "JA",
 };
 
+const leandreProfile = {
+  nationality: "Filipino",
+  languages: ["English", "Filipino"],
+  education: { level: "Bachelor's degree", school: "De La Salle Araneta University", location: "Philippines", graduation: "2022", degree: "BS Computer Science" },
+  preferredIndustry: "Technology & SaaS",
+  preferredRoles: ["Software Backer", "Web Developer", "DevOps Backend Engineer"],
+  availability: "Immediately available",
+  engagement: "Full-time",
+  experience: [
+    { title: "Full Stack Web Developer", employer: "Technology Services Company", location: "Philippines", start: "2023", end: "Present", summary: "Builds and maintains responsive web applications, reusable interfaces, APIs, and cloud deployment workflows." },
+    { title: "Web Developer", employer: "Digital Solutions Studio", location: "Philippines", start: "2021", end: "2023", summary: "Delivered business websites and internal tools while collaborating with design and operations teams." },
+  ],
+  coreSkills: [
+    { category: "Software Development", name: "Frontend Development", proficiency: "Expert" as const },
+    { category: "Software Development", name: "Backend Development", proficiency: "Proficient" as const },
+    { category: "Software Development", name: "API Integration", proficiency: "Proficient" as const },
+    { category: "Operations", name: "Technical Documentation", proficiency: "Expert" as const },
+    { category: "Collaboration", name: "Cross-functional Communication", proficiency: "Proficient" as const },
+    { category: "Quality", name: "Testing & Debugging", proficiency: "Expert" as const },
+  ],
+  tools: [
+    { name: "React", proficiency: "Expert" as const }, { name: "TypeScript", proficiency: "Expert" as const },
+    { name: "Node.js", proficiency: "Proficient" as const }, { name: "PostgreSQL", proficiency: "Proficient" as const },
+    { name: "GitHub", proficiency: "Expert" as const }, { name: "Docker", proficiency: "Intermediate" as const },
+  ],
+  portfolio: ["Client Success Dashboard", "Recruitment Workflow Platform", "Business Operations Portal"],
+  certifications: [{ title: "Full Stack Web Development", organization: "Professional Training Program", completed: "2023" }],
+  workSetup: { primaryDevice: "Windows workstation", secondaryDevice: "Laptop", webcam: true, headset: true, primaryIsp: "Fiber connection", backupIsp: "Mobile hotspot", cpu: "Intel Core i7", ram: "16 GB", storage: "512 GB SSD" },
+  valuesBreakdown: { Excellence: 94, Reliability: 96, Teamwork: 91, Initiative: 95 },
+  disc: { Dominance: 72, Influence: 68, Steadiness: 81, Conscientiousness: 92 },
+};
+
 export const dashboardStats: KpiStat[] = [
   { id: "k1", label: "Active Cyberbackers", value: "6", change: 12.5, trend: "up", hint: "vs last month" },
   { id: "k2", label: "Hours This Week", value: "214", change: 8.1, trend: "up", hint: "of 240 capacity" },
@@ -212,7 +244,7 @@ export const candidates: Candidate[] = [
   { id: "c6", name: "Grace Okafor", initials: "GO", title: "Marketing Generalist", availability: "hired", rating: 4.5, hourlyRate: 14, yearsExperience: 5, location: "Lagos, NG", skills: ["SEO", "Email", "Copy", "HubSpot", "Webflow"], matchScore: 85, industries: ["Education", "Nonprofit", "SaaS"], valuesScore: 87, bio: "Versatile marketer comfortable wearing every hat from SEO to lifecycle email. Ships fast, measures everything, and iterates on what converts." },
   { id: "c7", name: "Mateo Alvarez", initials: "MA", title: "Real Estate Transaction Coordinator", availability: "available", rating: 4.9, hourlyRate: 15, yearsExperience: 8, location: "Quezon City, PH", skills: ["Contracts", "MLS", "Compliance", "DocuSign", "Scheduling"], matchScore: 95, industries: ["Real Estate", "Mortgage", "Title"], valuesScore: 94, bio: "TC who shepherds deals from contract to close without a single missed deadline. Knows broker compliance cold and keeps every party informed." },
   { id: "c8", name: "Hana Park", initials: "HP", title: "Data & Reporting Analyst", availability: "interviewing", rating: 4.7, hourlyRate: 17, yearsExperience: 6, location: "Seoul, KR", skills: ["SQL", "Looker", "Excel", "Dashboards", "Python"], matchScore: 92, industries: ["Fintech", "SaaS", "Healthcare"], valuesScore: 91, bio: "Analyst who turns messy spreadsheets into dashboards leadership actually uses. Equally happy writing SQL or explaining the so-what to non-technical teams." },
-  { id: "c9", name: "Daniel Cruz", initials: "DC", title: "Inside Sales Development Rep", availability: "available", rating: 4.6, hourlyRate: 14, yearsExperience: 4, location: "Cebu, PH", skills: ["Outreach", "CRM", "Cold Calls", "LinkedIn", "Sequences"], matchScore: 89, industries: ["SaaS", "Real Estate", "Insurance"], valuesScore: 88, bio: "High-energy SDR who books qualified meetings without sounding like a script. Disciplined with the CRM and relentless on follow-up cadences.", tools: ["HubSpot", "Slack", "Google Workspace"], timezone: "Eastern", availabilityHours: ["Standard business hours"], workStyle: "Proactive", languages: ["English"], languageProficiency: { English: 5 }, certifications: [], education: "Some college / Undergraduate", functionalExpertise: ["Sales & Lead Generation"], assessmentScore: 88 },
+  { id: "c9", name: "Leandre John Sabado", initials: "LS", title: "Software Backer & Web Developer", availability: "available", rating: 4.8, hourlyRate: 17, yearsExperience: 5, location: "Valenzuela, PH", skills: ["React", "TypeScript", "Node.js", "PostgreSQL", "DevOps"], matchScore: 93, industries: ["Technology", "SaaS", "Professional Services"], valuesScore: 94, bio: "Product-minded software professional who turns complex business processes into reliable, easy-to-use web applications.", tools: ["React", "TypeScript", "Node.js", "GitHub", "Docker"], timezone: "PHT (GMT+8)", availabilityHours: ["Standard business hours", "Flexible overlap"], workStyle: "Proactive", languages: ["English", "Filipino"], languageProficiency: { English: 5, Filipino: 5 }, certifications: ["Full Stack Web Development"], education: "BS Computer Science", functionalExpertise: ["Software Development", "Web Development", "DevOps"], assessmentScore: 94, profile: leandreProfile },
 ];
 
 export const attendance: AttendanceEntry[] = [
