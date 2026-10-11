@@ -1,9 +1,8 @@
-import { Award, BriefcaseBusiness, Check, GraduationCap, Laptop, MapPin, Star } from "lucide-react";
+import { Award, BriefcaseBusiness, Check, GraduationCap, MapPin, Star } from "lucide-react";
 
 import { InitialsAvatar } from "./InitialsAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TalentProfile } from "@/lib/data/types";
 import { firstName } from "@/lib/utils";
@@ -66,6 +65,9 @@ export function TalentProfileContent(props: TalentProfileContentProps) {
             </ProfileSection>
             <ProfileSection title="Assessment overview">
               <div className="space-y-3">{Object.entries(profile.valuesBreakdown).map(([label, value]) => <Score key={label} label={label} value={value}/>)}</div>
+            </ProfileSection>
+            <ProfileSection title="DISC work style">
+              <div className="grid gap-3 sm:grid-cols-2">{Object.entries(profile.disc).map(([label, value]) => <div key={label} className="rounded-md border p-3"><Score label={label} value={value} /></div>)}</div>
             </ProfileSection>
           </>}
         </TabsContent>
