@@ -39,7 +39,7 @@ export const currentUser: CurrentUser = {
 
 const leandreProfile = {
   nationality: "Filipino",
-  languages: ["English", "Filipino"],
+  languages: [{ language: "English", proficiency: 5 }, { language: "Filipino", proficiency: 5 }],
   education: { level: "Bachelor's degree", school: "De La Salle Araneta University", location: "Philippines", graduation: "2022", degree: "BS Computer Science" },
   preferredIndustry: "Technology & SaaS",
   preferredRoles: ["Software Backer", "Web Developer", "DevOps Backend Engineer"],
@@ -65,8 +65,8 @@ const leandreProfile = {
   portfolio: ["Client Success Dashboard", "Recruitment Workflow Platform", "Business Operations Portal"],
   certifications: [{ title: "Full Stack Web Development", organization: "Professional Training Program", completed: "2023" }],
   workSetup: { primaryDevice: "Windows workstation", secondaryDevice: "Laptop", webcam: true, headset: true, primaryIsp: "Fiber connection", backupIsp: "Mobile hotspot", cpu: "Intel Core i7", ram: "16 GB", storage: "512 GB SSD" },
-  valuesBreakdown: { Excellence: 94, Reliability: 96, Teamwork: 91, Initiative: 95 },
-  disc: { Dominance: 72, Influence: 68, Steadiness: 81, Conscientiousness: 92 },
+  valuesBreakdown: { AES: 88, ECO: 72, IND: 91, POL: 69, ALT: 84, REG: 77, THE: 93 },
+  disc: { D: 72, I: 68, S: 81, C: 92 },
 };
 
 const standardWorkSetup = {
@@ -83,7 +83,7 @@ const standardWorkSetup = {
 
 const candidateProfiles: Record<string, TalentProfile> = {
   c1: {
-    nationality: "Filipino", languages: ["English", "Spanish", "Filipino"],
+    nationality: "Filipino", languages: [{ language: "English", proficiency: 5 }, { language: "Spanish", proficiency: 4 }, { language: "Filipino", proficiency: 5 }],
     education: { level: "Bachelor's degree", school: "University of the Philippines", location: "Manila, Philippines", graduation: "2017", degree: "BA Communication" },
     preferredIndustry: "Real Estate & Professional Services", preferredRoles: ["Senior Executive Assistant", "Chief of Staff Support", "Operations Assistant"], availability: "Immediately available", engagement: "Full-time",
     experience: [
@@ -99,10 +99,10 @@ const candidateProfiles: Record<string, TalentProfile> = {
     portfolio: ["Executive Weekly Brief Template", "International Travel Planning System", "Leadership Meeting Workflow"],
     certifications: [{ title: "Executive Assistant Certification", organization: "Cyberbacker Academy", completed: "2024" }, { title: "Project Management Foundations", organization: "LinkedIn Learning", completed: "2023" }],
     workSetup: { ...standardWorkSetup, cpu: "Intel Core i7", primaryDevice: "Dual-monitor Windows workstation" },
-    valuesBreakdown: { Excellence: 97, Reliability: 98, Initiative: 96, Teamwork: 94 }, disc: { Dominance: 69, Influence: 78, Steadiness: 86, Conscientiousness: 94 },
+    valuesBreakdown: { AES: 94, ECO: 67, IND: 82, POL: 74, ALT: 89, REG: 91, THE: 96 }, disc: { D: 69, I: 78, S: 86, C: 94 },
   },
   c2: {
-    nationality: "Indian", languages: ["English", "Hindi", "Kannada"],
+    nationality: "Indian", languages: [{ language: "English", proficiency: 5 }, { language: "Hindi", proficiency: 5 }, { language: "Kannada", proficiency: 4 }],
     education: { level: "Bachelor's degree", school: "Bangalore University", location: "Bengaluru, India", graduation: "2015", degree: "Bachelor of Commerce" },
     preferredIndustry: "Healthcare & Professional Services", preferredRoles: ["Full-Charge Bookkeeper", "Senior Accounting Assistant", "Payroll Specialist"], availability: "Available in 1 week", engagement: "Full-time",
     experience: [
@@ -118,10 +118,10 @@ const candidateProfiles: Record<string, TalentProfile> = {
     portfolio: ["Multi-entity Month-end Checklist", "Cash Flow Forecast Model", "Payroll Reconciliation Workbook"],
     certifications: [{ title: "QuickBooks Online ProAdvisor", organization: "Intuit", completed: "2024", expires: "2027" }, { title: "Xero Advisor Certification", organization: "Xero", completed: "2025" }],
     workSetup: { ...standardWorkSetup, primaryDevice: "Dual-monitor Windows workstation", backupIsp: "5G mobile connection" },
-    valuesBreakdown: { Accuracy: 98, Reliability: 96, Ownership: 93, Teamwork: 89 }, disc: { Dominance: 58, Influence: 55, Steadiness: 88, Conscientiousness: 97 },
+    valuesBreakdown: { AES: 86, ECO: 92, IND: 71, POL: 64, ALT: 76, REG: 95, THE: 83 }, disc: { D: 58, I: 55, S: 88, C: 97 },
   },
   c3: {
-    nationality: "Filipino", languages: ["English", "French", "Filipino"],
+    nationality: "Filipino", languages: [{ language: "English", proficiency: 5 }, { language: "French", proficiency: 3 }, { language: "Filipino", proficiency: 5 }],
     education: { level: "Bachelor's degree", school: "University of San Carlos", location: "Cebu, Philippines", graduation: "2019", degree: "BA Advertising Arts" },
     preferredIndustry: "Retail, Hospitality & Lifestyle", preferredRoles: ["Social Media Strategist", "Content Marketing Manager", "Paid Social Specialist"], availability: "Available in 2 weeks", engagement: "Full-time",
     experience: [
@@ -137,10 +137,10 @@ const candidateProfiles: Record<string, TalentProfile> = {
     portfolio: ["Hospitality Brand Launch Campaign", "90-day Content Calendar", "Paid Social Performance Report"],
     certifications: [{ title: "Meta Certified Digital Marketing Associate", organization: "Meta", completed: "2024", expires: "2026" }, { title: "Content Marketing", organization: "HubSpot Academy", completed: "2025" }],
     workSetup: { ...standardWorkSetup, primaryDevice: "MacBook Pro", secondaryDevice: "Windows laptop", storage: "1 TB SSD" },
-    valuesBreakdown: { Creativity: 96, Initiative: 91, Adaptability: 94, Teamwork: 90 }, disc: { Dominance: 64, Influence: 92, Steadiness: 73, Conscientiousness: 84 },
+    valuesBreakdown: { AES: 78, ECO: 61, IND: 88, POL: 72, ALT: 93, REG: 66, THE: 90 }, disc: { D: 64, I: 92, S: 73, C: 84 },
   },
   c4: {
-    nationality: "South African", languages: ["English", "Afrikaans"],
+    nationality: "South African", languages: [{ language: "English", proficiency: 5 }, { language: "Afrikaans", proficiency: 5 }],
     education: { level: "Bachelor's degree", school: "University of Cape Town", location: "Cape Town, South Africa", graduation: "2021", degree: "BCom Management Studies" },
     preferredIndustry: "SaaS & Fintech", preferredRoles: ["Customer Success Specialist", "Onboarding Specialist", "Client Experience Coordinator"], availability: "Immediately available", engagement: "Full-time",
     experience: [
@@ -156,10 +156,10 @@ const candidateProfiles: Record<string, TalentProfile> = {
     portfolio: ["Client Onboarding Playbook", "Quarterly Business Review Deck", "Customer Health Score Framework"],
     certifications: [{ title: "Customer Success Management Fundamentals", organization: "SuccessCOACHING", completed: "2025" }, { title: "Zendesk Support Administrator", organization: "Zendesk", completed: "2024" }],
     workSetup: { ...standardWorkSetup, primaryDevice: "Windows desktop with dual monitors", primaryIsp: "100 Mbps fiber" },
-    valuesBreakdown: { Empathy: 97, Reliability: 92, Communication: 95, Ownership: 88 }, disc: { Dominance: 61, Influence: 87, Steadiness: 92, Conscientiousness: 82 },
+    valuesBreakdown: { AES: 91, ECO: 68, IND: 73, POL: 81, ALT: 95, REG: 79, THE: 84 }, disc: { D: 61, I: 87, S: 92, C: 82 },
   },
   c5: {
-    nationality: "Filipino", languages: ["English", "Filipino", "Cebuano"],
+    nationality: "Filipino", languages: [{ language: "English", proficiency: 5 }, { language: "Filipino", proficiency: 5 }, { language: "Cebuano", proficiency: 5 }],
     education: { level: "Bachelor's degree", school: "Ateneo de Davao University", location: "Davao, Philippines", graduation: "2018", degree: "BS Business Management" },
     preferredIndustry: "E-commerce & Logistics", preferredRoles: ["Operations Coordinator", "Process Improvement Specialist", "Project Coordinator"], availability: "Immediately available", engagement: "Full-time",
     experience: [
@@ -175,10 +175,10 @@ const candidateProfiles: Record<string, TalentProfile> = {
     portfolio: ["Order Exception Dashboard", "Operations SOP Library", "Customer Update Automation"],
     certifications: [{ title: "Lean Six Sigma Yellow Belt", organization: "CSSC", completed: "2024" }, { title: "Zapier Automation Specialist", organization: "Zapier", completed: "2025" }],
     workSetup: { ...standardWorkSetup, secondaryDevice: "Chromebook", backupIsp: "Prepaid fiber backup" },
-    valuesBreakdown: { Ownership: 96, Resourcefulness: 95, Reliability: 94, Teamwork: 90 }, disc: { Dominance: 78, Influence: 69, Steadiness: 84, Conscientiousness: 91 },
+    valuesBreakdown: { AES: 84, ECO: 79, IND: 93, POL: 70, ALT: 82, REG: 88, THE: 76 }, disc: { D: 78, I: 69, S: 84, C: 91 },
   },
   c6: {
-    nationality: "Nigerian", languages: ["English", "Yoruba"],
+    nationality: "Nigerian", languages: [{ language: "English", proficiency: 5 }, { language: "Yoruba", proficiency: 5 }],
     education: { level: "Bachelor's degree", school: "University of Lagos", location: "Lagos, Nigeria", graduation: "2020", degree: "BSc Marketing" },
     preferredIndustry: "Education, Nonprofit & SaaS", preferredRoles: ["Marketing Generalist", "Lifecycle Marketing Specialist", "Content Marketer"], availability: "Currently engaged", engagement: "Full-time",
     experience: [
@@ -194,10 +194,10 @@ const candidateProfiles: Record<string, TalentProfile> = {
     portfolio: ["Education Enrollment Email Series", "Nonprofit SEO Content Plan", "SaaS Landing Page Refresh"],
     certifications: [{ title: "HubSpot Email Marketing", organization: "HubSpot Academy", completed: "2025" }, { title: "Google Analytics Certification", organization: "Google", completed: "2024", expires: "2026" }],
     workSetup: { ...standardWorkSetup, primaryDevice: "MacBook Air", primaryIsp: "Fiber broadband", backupIsp: "4G router" },
-    valuesBreakdown: { Creativity: 92, Adaptability: 91, Communication: 90, Ownership: 86 }, disc: { Dominance: 66, Influence: 91, Steadiness: 76, Conscientiousness: 80 },
+    valuesBreakdown: { AES: 76, ECO: 74, IND: 89, POL: 68, ALT: 94, REG: 63, THE: 87 }, disc: { D: 66, I: 91, S: 76, C: 80 },
   },
   c7: {
-    nationality: "Filipino", languages: ["English", "Filipino", "Spanish"],
+    nationality: "Filipino", languages: [{ language: "English", proficiency: 5 }, { language: "Filipino", proficiency: 5 }, { language: "Spanish", proficiency: 3 }],
     education: { level: "Bachelor's degree", school: "Far Eastern University", location: "Manila, Philippines", graduation: "2016", degree: "BS Business Administration" },
     preferredIndustry: "Real Estate, Mortgage & Title", preferredRoles: ["Transaction Coordinator", "Real Estate Operations Specialist", "Listing Coordinator"], availability: "Immediately available", engagement: "Full-time",
     experience: [
@@ -213,10 +213,10 @@ const candidateProfiles: Record<string, TalentProfile> = {
     portfolio: ["Contract-to-Close Checklist", "Listing Launch Timeline", "Client Milestone Update Templates"],
     certifications: [{ title: "Real Estate Transaction Coordination", organization: "Transaction Coordinator Academy", completed: "2023" }, { title: "DocuSign Real Estate Specialist", organization: "DocuSign", completed: "2024" }],
     workSetup: { ...standardWorkSetup, primaryDevice: "Dual-monitor Windows desktop", backupIsp: "5G mobile hotspot" },
-    valuesBreakdown: { Reliability: 98, Detail: 97, Communication: 95, Initiative: 92 }, disc: { Dominance: 71, Influence: 76, Steadiness: 89, Conscientiousness: 97 },
+    valuesBreakdown: { AES: 89, ECO: 83, IND: 77, POL: 75, ALT: 80, REG: 97, THE: 85 }, disc: { D: 71, I: 76, S: 89, C: 97 },
   },
   c8: {
-    nationality: "South Korean", languages: ["English", "Korean"],
+    nationality: "South Korean", languages: [{ language: "English", proficiency: 5 }, { language: "Korean", proficiency: 5 }],
     education: { level: "Bachelor's degree", school: "Yonsei University", location: "Seoul, South Korea", graduation: "2018", degree: "BSc Statistics" },
     preferredIndustry: "Fintech, SaaS & Healthcare", preferredRoles: ["Data & Reporting Analyst", "Business Intelligence Analyst", "Operations Analyst"], availability: "Available in 2 weeks", engagement: "Full-time",
     experience: [
@@ -232,7 +232,7 @@ const candidateProfiles: Record<string, TalentProfile> = {
     portfolio: ["Executive Revenue Dashboard", "Customer Retention Cohort Analysis", "Automated Operations Scorecard"],
     certifications: [{ title: "Google Business Intelligence", organization: "Google", completed: "2024" }, { title: "Tableau Desktop Specialist", organization: "Tableau", completed: "2025" }],
     workSetup: { ...standardWorkSetup, primaryDevice: "MacBook Pro", secondaryDevice: "Windows desktop", cpu: "Apple M2 Pro", storage: "1 TB SSD" },
-    valuesBreakdown: { Curiosity: 95, Accuracy: 96, Reliability: 92, Collaboration: 88 }, disc: { Dominance: 63, Influence: 58, Steadiness: 82, Conscientiousness: 98 },
+    valuesBreakdown: { AES: 81, ECO: 90, IND: 86, POL: 62, ALT: 74, REG: 96, THE: 92 }, disc: { D: 63, I: 58, S: 82, C: 98 },
   },
 };
 
