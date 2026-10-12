@@ -87,9 +87,31 @@ export interface WorkExperienceItem {
   summary: string;
 }
 
+export interface LanguageRating {
+  language: string;
+  proficiency: 1 | 2 | 3 | 4 | 5;
+}
+
+export interface ValuesAssessmentScores {
+  AES: number;
+  ECO: number;
+  IND: number;
+  POL: number;
+  ALT: number;
+  REG: number;
+  THE: number;
+}
+
+export interface DiscAssessmentScores {
+  D: number;
+  I: number;
+  S: number;
+  C: number;
+}
+
 export interface TalentProfile {
   nationality: string;
-  languages: string[];
+  languages: LanguageRating[];
   education: { level: string; school: string; location: string; graduation: string; degree: string };
   preferredIndustry: string;
   preferredRoles: string[];
@@ -101,8 +123,8 @@ export interface TalentProfile {
   portfolio: string[];
   certifications: { title: string; organization: string; completed: string; expires?: string }[];
   workSetup: { primaryDevice: string; secondaryDevice: string; webcam: boolean; headset: boolean; primaryIsp: string; backupIsp: string; cpu: string; ram: string; storage: string };
-  valuesBreakdown: Record<string, number>;
-  disc: Record<string, number>;
+  valuesBreakdown: ValuesAssessmentScores;
+  disc: DiscAssessmentScores;
 }
 
 export interface Cyberbacker {
