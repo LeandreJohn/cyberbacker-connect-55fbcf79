@@ -100,6 +100,6 @@ function LanguageRatings({ languages }: { languages: TalentProfile["languages"] 
   return <div className="rounded-md bg-muted/40 p-3"><p className="text-xs text-muted-foreground">Languages</p><div className="mt-2 space-y-2">{languages.map(({ language, proficiency }) => <div key={language} className="flex items-center justify-between gap-3"><span className="text-sm font-medium">{language}</span><span className="text-xs font-semibold text-primary">{proficiency}/5</span></div>)}</div></div>;
 }
 
-function AssessmentPanel({ title, scores, columns }: { title: string; scores: Record<string, number>; columns: string }) {
+function AssessmentPanel({ title, scores, columns }: { title: string; scores: object; columns: string }) {
   return <div className="rounded-md border p-4"><div className="mb-4 flex items-center gap-2"><FileChartColumn className="h-5 w-5 text-primary"/><h4 className="font-semibold">{title}</h4></div><div className={`grid gap-2 ${columns}`}>{Object.entries(scores).map(([label, value]) => <div key={label} className="rounded-md bg-muted/40 p-3"><p className="text-xs font-medium text-muted-foreground">{label}</p><p className="mt-1 text-xl font-bold">{value}</p></div>)}</div></div>;
 }
