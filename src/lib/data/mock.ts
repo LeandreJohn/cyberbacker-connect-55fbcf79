@@ -37,7 +37,7 @@ export const currentUser: CurrentUser = {
   initials: "JA",
 };
 
-const leandreProfile = {
+const leandreProfile: TalentProfile = {
   nationality: "Filipino",
   languages: [{ language: "English", proficiency: 5 }, { language: "Filipino", proficiency: 5 }],
   education: { level: "Bachelor's degree", school: "De La Salle Araneta University", location: "Philippines", graduation: "2022", degree: "BS Computer Science" },
