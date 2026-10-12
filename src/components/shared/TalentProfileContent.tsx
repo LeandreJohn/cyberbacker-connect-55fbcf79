@@ -1,4 +1,4 @@
-import { Award, BriefcaseBusiness, Check, GraduationCap, MapPin, Star } from "lucide-react";
+import { Award, BriefcaseBusiness, Check, FileChartColumn, GraduationCap, MapPin, Star } from "lucide-react";
 
 import { InitialsAvatar } from "./InitialsAvatar";
 import { Badge } from "@/components/ui/badge";
@@ -58,16 +58,16 @@ export function TalentProfileContent(props: TalentProfileContentProps) {
           </div>
           {profile && <>
             <ProfileSection title="Personal information">
-              <div className="grid gap-3 sm:grid-cols-2"><Info label="Nationality" value={profile.nationality} /><Info label="Languages" value={profile.languages.join(", ")} /><Info label="Preferred industry" value={profile.preferredIndustry} /><Info label="Availability" value={profile.availability} /></div>
+              <div className="grid gap-3 sm:grid-cols-2"><Info label="Nationality" value={profile.nationality} /><LanguageRatings languages={profile.languages} /><Info label="Preferred industry" value={profile.preferredIndustry} /><Info label="Availability" value={profile.availability} /></div>
             </ProfileSection>
             <ProfileSection title="Education">
               <div className="flex gap-3 rounded-md border p-4"><GraduationCap className="mt-0.5 h-5 w-5 text-primary"/><div><p className="font-semibold">{profile.education.degree}</p><p className="text-sm text-muted-foreground">{profile.education.school}</p><p className="mt-1 text-xs text-muted-foreground">{profile.education.location} · Graduated {profile.education.graduation}</p></div></div>
             </ProfileSection>
-            <ProfileSection title="Assessment overview">
-              <div className="space-y-3">{Object.entries(profile.valuesBreakdown).map(([label, value]) => <Score key={label} label={label} value={value}/>)}</div>
-            </ProfileSection>
-            <ProfileSection title="DISC work style">
-              <div className="grid gap-3 sm:grid-cols-2">{Object.entries(profile.disc).map(([label, value]) => <div key={label} className="rounded-md border p-3"><Score label={label} value={value} /></div>)}</div>
+            <ProfileSection title="Assessments">
+              <div className="grid gap-4 lg:grid-cols-2">
+                <AssessmentPanel title="Values Assessment" scores={profile.valuesBreakdown} columns="grid-cols-2 sm:grid-cols-3" />
+                <AssessmentPanel title="DISC Assessment" scores={profile.disc} columns="grid-cols-2 sm:grid-cols-4" />
+              </div>
             </ProfileSection>
           </>}
         </TabsContent>
@@ -95,3 +95,11 @@ function ProfileSection({ title, children }: { title: string; children: React.Re
 function Metric({ label, value }: { label: string; value: string }) { return <div className="rounded-md border bg-muted/30 p-3"><p className="text-base font-semibold">{value}</p><p className="text-xs text-muted-foreground">{label}</p></div>; }
 function Info({ label, value }: { label: string; value: string }) { return <div className="rounded-md bg-muted/40 p-3"><p className="text-xs text-muted-foreground">{label}</p><p className="mt-0.5 text-sm font-medium">{value}</p></div>; }
 function Score({ label, value, caption }: { label: string; value: number; caption?: string }) { return <div><div className="mb-1 flex justify-between gap-3 text-sm"><span className="font-medium">{label}</span><span className="text-xs text-muted-foreground">{caption ?? `${value}%`}</span></div><Progress value={value} className="h-1.5"/></div>; }
+
+function LanguageRatings({ languages }: { languages: TalentProfile["languages"] }) {
+  return <div className="rounded-md bg-muted/40 p-3"><p className="text-xs text-muted-foreground">Languages</p><div className="mt-2 space-y-2">{languages.map(({ language, proficiency }) => <div key={language} className="flex items-center justify-between gap-3"><span className="text-sm font-medium">{language}</span><span className="text-xs font-semibold text-primary">{proficiency}/5</span></div>)}</div></div>;
+}
+
+function AssessmentPanel({ title, scores, columns }: { title: string; scores: Record<string, number>; columns: string }) {
+  return <div className="rounded-md border p-4"><div className="mb-4 flex items-center gap-2"><FileChartColumn className="h-5 w-5 text-primary"/><h4 className="font-semibold">{title}</h4></div><div className={`grid gap-2 ${columns}`}>{Object.entries(scores).map(([label, value]) => <div key={label} className="rounded-md bg-muted/40 p-3"><p className="text-xs font-medium text-muted-foreground">{label}</p><p className="mt-1 text-xl font-bold">{value}</p></div>)}</div></div>;
+}
