@@ -37,14 +37,14 @@ test("temporary duration is no longer supported", () => {
   expect(validDuration("Long-term / ongoing")).toBe(true);
 });
 test("save-only skill years and assessment targets do not affect matching", () => {
-  const job = createBlankJob();
-  const candidate = { title: "Assistant", skills: [], industries: [], yearsExperience: 3 };
+  const job = { ...createBlankJob(), skillRequirements: [{ name: "Dialpad", level: "Advanced" as const, kind: "tool" as const, necessity: "must" as const }] };
+  const candidate = { title: "Assistant", skills: ["Dialpad"], industries: [], yearsExperience: 3 };
   const original = scoreCandidate(job, candidate);
   const changed = scoreCandidate({ ...job, assessmentPreferencesEnabled: true, assessmentPreferences: { values: { AES: 99 }, authentic: { D: 100 }, modified: { C: 0 } }, skillRequirements: job.skillRequirements.map((item) => ({ ...item, yearsExperience: 20 })), languages: job.languages.map((item) => ({ ...item, speaking: 1, reading: 5, writing: 2, primary: true })) }, candidate);
   expect(changed).toEqual(original);
 });
 test("preference exports include entered skill years and distinct DISC targets", () => {
-  const text = preferenceText({ ...normalizeJob(createBlankJob()), skillRequirements: [{ name: "Dialpad", level: "Advanced", kind: "tool", necessity: "must", yearsExperience: 2.5 }], assessmentPreferencesEnabled: true, assessmentPreferences: { values: { AES: 63 }, authentic: { D: 67 }, modified: { D: 70 } } });
+  const text = preferenceText({ ...normalizeJob(createBlankJob()), skillRequirements: [{ name: "Dialpad", level: "Advanced", yearsExperience: 2.5 }], assessmentPreferencesEnabled: true, assessmentPreferences: { values: { AES: 63 }, authentic: { D: 67 }, modified: { D: 70 } } });
   expect(text).toContain("Dialpad: Advanced · 2.5 years");
   expect(text).toContain("DISC Authentic: D 67");
   expect(text).toContain("DISC Modified: D 70");
