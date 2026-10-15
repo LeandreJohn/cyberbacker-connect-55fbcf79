@@ -31,21 +31,25 @@ const candidate = {
 };
 
 describe("experience tiers", () => {
-  test("Beginner includes 0–1 year", () => {
+  test("Beginner includes 0–2 years", () => {
     expect(tierExperienceMatches("beginner", 0)).toBe(true);
     expect(tierExperienceMatches("beginner", 1)).toBe(true);
-    expect(tierExperienceMatches("beginner", 2)).toBe(false);
+    expect(tierExperienceMatches("beginner", 2)).toBe(true);
+    expect(tierExperienceMatches("beginner", 3)).toBe(false);
   });
 
-  test("Intermediate includes 1–4 years", () => {
-    expect(tierExperienceMatches("intermediate", 1)).toBe(true);
+  test("Intermediate includes 2–5 years", () => {
+    expect(tierExperienceMatches("intermediate", 1)).toBe(false);
+    expect(tierExperienceMatches("intermediate", 2)).toBe(true);
     expect(tierExperienceMatches("intermediate", 4)).toBe(true);
-    expect(tierExperienceMatches("intermediate", 5)).toBe(false);
+    expect(tierExperienceMatches("intermediate", 5)).toBe(true);
+    expect(tierExperienceMatches("intermediate", 6)).toBe(false);
   });
 
-  test("Advanced includes 4+ years", () => {
+  test("Advanced includes 5+ years", () => {
     expect(tierExperienceMatches("advanced", 3)).toBe(false);
-    expect(tierExperienceMatches("advanced", 4)).toBe(true);
+    expect(tierExperienceMatches("advanced", 4)).toBe(false);
+    expect(tierExperienceMatches("advanced", 5)).toBe(true);
   });
 });
 
