@@ -50,6 +50,7 @@ export const navGroups: NavGroup[] = [
       { title: "Performance Reports", to: "/performance", icon: TrendingUp },
       { title: "Support Center", to: "/support", icon: LifeBuoy },
       { title: "Knowledge Base", to: "/knowledge-base", icon: BookOpen },
+      { title: "Cyberbacker University", to: "/cyberbacker-university", icon: BookOpen },
       { title: "Contracts", to: "/contracts", icon: FileText },
       { title: "Billing", to: "/billing", icon: CreditCard },
       { title: "Rewards & Coupons", to: "/rewards", icon: Gift },
@@ -68,6 +69,7 @@ export const navGroups: NavGroup[] = [
       { title: "Analytics Dashboard", to: "/internal/analytics", icon: BarChart3 },
       { title: "Executive Dashboard", to: "/internal/executive", icon: Gauge },
       { title: "System Administration", to: "/internal/admin", icon: ShieldCheck },
+      { title: "Cyberbacker University", to: "/cyberbacker-university", icon: BookOpen },
     ],
   },
 ];

@@ -70,7 +70,7 @@ export function useDemoAccount() {
 }
 
 export function canAccessPath(role: DemoRole, pathname: string) {
-  if (pathname === "/settings") return true;
+  if (pathname === "/settings" || pathname === "/cyberbacker-university") return true;
   if (role === "superadmin") return pathname === "/internal" || pathname.startsWith("/internal/");
   return !pathname.startsWith("/internal") && pathname !== "/" && pathname !== "/forgot-password";
 }

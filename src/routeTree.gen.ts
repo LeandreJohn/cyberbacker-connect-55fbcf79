@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppAttendanceRouteImport } from './routes/_app.attendance'
 import { Route as AppBillingRouteImport } from './routes/_app.billing'
 import { Route as AppContractsRouteImport } from './routes/_app.contracts'
+import { Route as AppCyberbackerUniversityRouteImport } from './routes/_app.cyberbacker-university'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppJobBuilderRouteImport } from './routes/_app.job-builder'
 import { Route as AppKnowledgeBaseRouteImport } from './routes/_app.knowledge-base'
@@ -70,6 +71,12 @@ const AppContractsRoute = AppContractsRouteImport.update({
   path: '/contracts',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCyberbackerUniversityRoute =
+  AppCyberbackerUniversityRouteImport.update({
+    id: '/cyberbacker-university',
+    path: '/cyberbacker-university',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -173,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/attendance': typeof AppAttendanceRoute
   '/billing': typeof AppBillingRoute
   '/contracts': typeof AppContractsRoute
+  '/cyberbacker-university': typeof AppCyberbackerUniversityRoute
   '/dashboard': typeof AppDashboardRoute
   '/job-builder': typeof AppJobBuilderRoute
   '/knowledge-base': typeof AppKnowledgeBaseRoute
@@ -200,6 +208,7 @@ export interface FileRoutesByTo {
   '/attendance': typeof AppAttendanceRoute
   '/billing': typeof AppBillingRoute
   '/contracts': typeof AppContractsRoute
+  '/cyberbacker-university': typeof AppCyberbackerUniversityRoute
   '/dashboard': typeof AppDashboardRoute
   '/job-builder': typeof AppJobBuilderRoute
   '/knowledge-base': typeof AppKnowledgeBaseRoute
@@ -229,6 +238,7 @@ export interface FileRoutesById {
   '/_app/attendance': typeof AppAttendanceRoute
   '/_app/billing': typeof AppBillingRoute
   '/_app/contracts': typeof AppContractsRoute
+  '/_app/cyberbacker-university': typeof AppCyberbackerUniversityRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/job-builder': typeof AppJobBuilderRoute
   '/_app/knowledge-base': typeof AppKnowledgeBaseRoute
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/attendance'
     | '/billing'
     | '/contracts'
+    | '/cyberbacker-university'
     | '/dashboard'
     | '/job-builder'
     | '/knowledge-base'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/attendance'
     | '/billing'
     | '/contracts'
+    | '/cyberbacker-university'
     | '/dashboard'
     | '/job-builder'
     | '/knowledge-base'
@@ -313,6 +325,7 @@ export interface FileRouteTypes {
     | '/_app/attendance'
     | '/_app/billing'
     | '/_app/contracts'
+    | '/_app/cyberbacker-university'
     | '/_app/dashboard'
     | '/_app/job-builder'
     | '/_app/knowledge-base'
@@ -390,6 +403,13 @@ declare module '@tanstack/react-router' {
       path: '/contracts'
       fullPath: '/contracts'
       preLoaderRoute: typeof AppContractsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/cyberbacker-university': {
+      id: '/_app/cyberbacker-university'
+      path: '/cyberbacker-university'
+      fullPath: '/cyberbacker-university'
+      preLoaderRoute: typeof AppCyberbackerUniversityRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/dashboard': {
@@ -532,6 +552,7 @@ interface AppRouteChildren {
   AppAttendanceRoute: typeof AppAttendanceRoute
   AppBillingRoute: typeof AppBillingRoute
   AppContractsRoute: typeof AppContractsRoute
+  AppCyberbackerUniversityRoute: typeof AppCyberbackerUniversityRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppJobBuilderRoute: typeof AppJobBuilderRoute
   AppKnowledgeBaseRoute: typeof AppKnowledgeBaseRoute
@@ -557,6 +578,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAttendanceRoute: AppAttendanceRoute,
   AppBillingRoute: AppBillingRoute,
   AppContractsRoute: AppContractsRoute,
+  AppCyberbackerUniversityRoute: AppCyberbackerUniversityRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppJobBuilderRoute: AppJobBuilderRoute,
   AppKnowledgeBaseRoute: AppKnowledgeBaseRoute,
