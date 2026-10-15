@@ -5,13 +5,14 @@ export type EducationLevel = "No preference" | "High school" | "Some college / U
 
 export interface TierDefinition { label: string; experience: string; description: string; blurb: string; }
 export const EXPERIENCE_TIERS: Record<ExperienceTier, TierDefinition> = {
-  beginner: { label: "Beginner", experience: "0–1 year", description: "Early-career talent ready for structured training and close guidance.", blurb: "We are looking for an early-career professional who is coachable, organized, and ready to learn our processes with structured support." },
-  intermediate: { label: "Intermediate", experience: "1–4 years", description: "Proven fundamentals with enough experience to own routine work.", blurb: "We are looking for a capable professional who can independently manage recurring work while learning the nuances of our business." },
-  advanced: { label: "Advanced", experience: "4+ years", description: "Deep experience and ready to lead the work with minimal ramp-up.", blurb: "We need an experienced professional who can take ownership quickly, improve the process, and deliver with minimal supervision." },
+  beginner: { label: "Beginner", experience: "0–2 years", description: "Early-career talent ready for structured training and close guidance.", blurb: "We are looking for an early-career professional who is coachable, organized, and ready to learn our processes with structured support." },
+  intermediate: { label: "Intermediate", experience: "2–5 years", description: "Proven fundamentals with enough experience to own routine work.", blurb: "We are looking for a capable professional who can independently manage recurring work while learning the nuances of our business." },
+  advanced: { label: "Advanced", experience: "5+ years", description: "Deep experience and ready to lead the work with minimal ramp-up.", blurb: "We need an experienced professional who can take ownership quickly, improve the process, and deliver with minimal supervision." },
 };
 
-export interface SkillRequirement { name: string; level: SkillLevel; kind: "skill" | "tool"; necessity: "must" | "preferred"; }
-export interface LanguageRequirement { language: string; proficiency: number; }
+export interface SkillRequirement { name: string; level: SkillLevel; kind: "skill" | "tool"; necessity: "must" | "preferred"; yearsExperience?: number; }
+export interface LanguageRequirement { language: string; proficiency: number; primary?: boolean; speaking?: number; reading?: number; writing?: number; }
+export interface AssessmentPreferences { values: Partial<Record<"AES" | "ECO" | "IND" | "POL" | "ALT" | "REG" | "THE", number>>; authentic: Partial<Record<"D" | "I" | "S" | "C", number>>; modified: Partial<Record<"D" | "I" | "S" | "C", number>>; }
 export interface ScoringWeights { skills: number; experience: number; responsibilities: number; assessment: number; education: number; }
 export const DEFAULT_SCORING_WEIGHTS: ScoringWeights = { skills: 40, experience: 25, responsibilities: 20, assessment: 10, education: 5 };
 export const scoringTotal = (weights: ScoringWeights) => Object.values(weights).reduce((sum, value) => sum + value, 0);
@@ -26,7 +27,7 @@ export interface JobMatchProfile {
   timezone: string; availabilityHours: string; workStyle: string; language: string; certification: string;
   skillRequirements?: SkillRequirement[]; languages?: LanguageRequirement[]; minimumYears?: number; functionalExpertise?: string[];
   education?: EducationLevel; educationRequired?: boolean; engagementType?: string; shift?: string; startTiming?: string; availabilityNotes?: string;
-  mustHaveBehavior?: MustHaveBehavior; weights?: ScoringWeights;
+  assessmentPreferences?: AssessmentPreferences; assessmentPreferencesEnabled?: boolean; mustHaveBehavior?: MustHaveBehavior; weights?: ScoringWeights;
 }
 export interface MatchableCandidate {
   title: string; yearsExperience: number; skills: string[]; industries: string[]; tools?: string[]; timezone?: string;
@@ -39,7 +40,7 @@ const SKILL_ALIASES: Record<string, string> = { "calendar management": "calendar
 const normalizeTerm = (value: string) => SKILL_ALIASES[value.toLowerCase().trim()] ?? value.toLowerCase().trim();
 const normalizedWords = (value: string) => normalizeTerm(value).split(/[^a-z0-9]+/).filter((word) => word.length > 2 && !["management", "assistant", "specialist"].includes(word));
 export function termsMatch(left: string, right: string) { const a = normalizeTerm(left); const b = normalizeTerm(right); if (!a || !b) return false; if (a.includes(b) || b.includes(a)) return true; const leftWords = normalizedWords(a); const rightWords = normalizedWords(b); return leftWords.some((word) => rightWords.includes(word)); }
-export function tierExperienceMatches(tier: ExperienceTier, years: number) { if (tier === "beginner") return years >= 0 && years <= 1; if (tier === "intermediate") return years >= 1 && years <= 4; return years >= 4; }
+export function tierExperienceMatches(tier: ExperienceTier, years: number) { if (tier === "beginner") return years >= 0 && years <= 2; if (tier === "intermediate") return years >= 2 && years <= 5; return years >= 5; }
 function arrayHasMatch(needles: string[], haystack: string[]) { return needles.filter((needle) => haystack.some((value) => termsMatch(needle, value))); }
 const EDUCATION_RANK: Record<EducationLevel, number> = { "No preference": 0, "High school": 1, "Some college / Undergraduate": 2, "Associate degree": 3, "Bachelor's degree": 4, "Master's degree": 5, Doctorate: 6 };
 
