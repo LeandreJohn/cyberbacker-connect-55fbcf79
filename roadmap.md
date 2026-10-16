@@ -11,5 +11,5 @@
 - [x] Remove temporary duration and normalize saved jobs.
 - [x] Add blank Cyberbacker University page and sidebar entry.
 - [x] Test rules and verify save/reopen and layouts in the preview.
-- [ ] Redesign Requirements with separated input/actions, stacked requirement groups, and expandable suggestions.
-- [ ] Verify Requirements editing, save/reopen, and desktop/mobile layouts.
+- [x] Redesign Requirements with separated input/actions, stacked requirement groups, and expandable suggestions.
+- [x] Verify Requirements editing, save/reopen, and desktop/mobile layouts.
