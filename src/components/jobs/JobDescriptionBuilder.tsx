@@ -92,7 +92,7 @@ export function JobDescriptionBuilder({ compact, initialJob, onSave, onBack }: {
                     <span className="flex shrink-0 items-center gap-3"><Badge variant="outline">{available.length}</Badge><ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"/></span>
                   </Button>
                 </CollapsibleTrigger>
-                <CollapsibleContent><div className="flex flex-wrap gap-2 pb-5">{available.map((item) => <Button key={item} type="button" variant="outline" size="sm" className="h-auto max-w-full whitespace-normal text-left" onClick={() => addRequirement(item, "preferred", kind)}><Plus className="h-3.5 w-3.5 shrink-0"/>{item}</Button>)}</div></CollapsibleContent>
+                <CollapsibleContent><div className="flex flex-wrap gap-2 pb-5">{available.map((item) => <Button key={item} type="button" variant="outline" size="sm" className="h-auto min-h-9 max-w-full whitespace-normal py-2 text-left" onClick={() => addRequirement(item, "preferred", kind)}><Plus className="h-3.5 w-3.5 shrink-0"/>{item}</Button>)}</div></CollapsibleContent>
               </Collapsible>;
             })}
           </div>
@@ -131,7 +131,7 @@ export function JobDescriptionBuilder({ compact, initialJob, onSave, onBack }: {
           </section>
           <section className="space-y-4 border-t pt-6" aria-label="Functional expertise">
             <Label className="text-base">Functional expertise</Label>
-            <div className="flex flex-wrap gap-2">{EXPERTISE.map((item) => <Button key={item} type="button" size="sm" className="h-auto max-w-full whitespace-normal text-left" variant={job.functionalExpertise.includes(item) ? "default" : "outline"} onClick={() => update("functionalExpertise", job.functionalExpertise.includes(item) ? job.functionalExpertise.filter((current) => current !== item) : [...job.functionalExpertise, item])}>{item}</Button>)}</div>
+            <div className="flex flex-wrap gap-2">{EXPERTISE.map((item) => <Button key={item} type="button" size="sm" className="h-auto min-h-9 max-w-full whitespace-normal py-2 text-left" variant={job.functionalExpertise.includes(item) ? "default" : "outline"} onClick={() => update("functionalExpertise", job.functionalExpertise.includes(item) ? job.functionalExpertise.filter((current) => current !== item) : [...job.functionalExpertise, item])}>{item}</Button>)}</div>
           </section>
           <section className="space-y-4 border-t pt-6" aria-label="Education requirements">
             <h3 className="font-semibold">Education</h3>
