@@ -4,3 +4,4 @@
 - Demo account selection is presentation-only browser state; never treat it as secure authorization until FastAPI authentication replaces it.
 - Builder preference models and normalization live in the jobs data/helpers layer; save-only preferences must stay independent of candidate matching so collecting intake details cannot accidentally change ranking.
 - Cyberbacker University is a shared shell route available to both demo roles, so its single blank page stays consistent across workspaces.
+- Requirements control layouts use the builder card's container width rather than viewport breakpoints, so they fit both split-preview and single-column forms.
