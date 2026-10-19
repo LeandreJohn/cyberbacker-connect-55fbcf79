@@ -215,8 +215,6 @@ function Marketplace() {
           return b.yearsExperience - a.yearsExperience;
         case "values":
           return b.valuesScore - a.valuesScore;
-        case "rate":
-          return a.hourlyRate - b.hourlyRate;
         default:
           return (jdMatches?.get(b.id)?.score ?? b.matchScore) - (jdMatches?.get(a.id)?.score ?? a.matchScore);
       }
@@ -353,7 +351,6 @@ function Marketplace() {
                 <SelectItem value="rating">Highest rating</SelectItem>
                 <SelectItem value="values">Values score</SelectItem>
                 <SelectItem value="experience">Most experience</SelectItem>
-                <SelectItem value="rate">Lowest rate</SelectItem>
               </SelectContent>
             </Select>
 
@@ -547,7 +544,6 @@ function Marketplace() {
                       <Star className="h-4 w-4 fill-warning text-warning" /> {c.rating}
                     </span>
                     <span className="text-muted-foreground">{c.yearsExperience} yrs exp</span>
-                    <span className="font-semibold">${c.hourlyRate}/hr</span>
                   </div>
 
                   {jdMatch && (
@@ -720,7 +716,6 @@ function Marketplace() {
                 <CompareRow label="Experience" cells={compareCandidates.map((c) => `${c.yearsExperience} yrs`)} />
                 <CompareRow label="Rating" cells={compareCandidates.map((c) => `${c.rating} ★`)} />
                 <CompareRow label="Values score" cells={compareCandidates.map((c) => `${c.valuesScore}/100`)} />
-                <CompareRow label="Rate" cells={compareCandidates.map((c) => `$${c.hourlyRate}/hr`)} />
                 <CompareRow label="Location" cells={compareCandidates.map((c) => c.location)} />
                 <CompareRow
                   label="Skills"
