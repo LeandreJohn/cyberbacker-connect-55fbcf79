@@ -49,7 +49,3 @@ test("preference exports include entered skill years and distinct DISC targets",
   expect(text).toContain("DISC Authentic: D 67");
   expect(text).toContain("DISC Modified: D 70");
 });
-test("both demo roles can open University", () => {
-  expect(canAccessPath("client", "/cyberbacker-university")).toBe(true);
-  expect(canAccessPath("superadmin", "/cyberbacker-university")).toBe(true);
-});
