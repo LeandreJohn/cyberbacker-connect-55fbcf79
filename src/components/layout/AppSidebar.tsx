@@ -93,12 +93,6 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
-        {account?.role === "superadmin" && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Account</SidebarGroupLabel>
-            <SidebarGroupContent><SidebarMenu><SidebarMenuItem><SidebarMenuButton asChild isActive={pathname === "/settings"} tooltip="User Settings"><Link to="/settings" onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-2.5"><span className="grid h-4 w-4 place-items-center text-xs font-bold">⚙</span><span>User Settings</span></Link></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
     </Sidebar>
   );
