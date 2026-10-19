@@ -21,6 +21,7 @@ import {
   TrendingUp,
   UserSquare,
   Users,
+  UsersRound,
   Workflow,
   Star,
   FilePen,
@@ -70,7 +71,7 @@ export const navGroups: NavGroup[] = [
       { title: "Analytics Dashboard", to: "/internal/analytics", icon: BarChart3 },
       { title: "Executive Dashboard", to: "/internal/executive", icon: Gauge },
       { title: "System Administration", to: "/internal/admin", icon: ShieldCheck },
-      { title: "Cyberbacker University", to: "/cyberbacker-university", icon: GraduationCap },
+      { title: "User Management", to: "/internal/users", icon: UsersRound },
     ],
   },
 ];

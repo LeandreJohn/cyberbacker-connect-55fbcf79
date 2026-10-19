@@ -100,7 +100,7 @@ function MyCyberbackers() {
         ))}
       </div>
       <Sheet open={Boolean(active)} onOpenChange={(open) => !open && setActiveId(null)}>
-        <SheetContent className="w-full overflow-y-auto sm:max-w-2xl"><SheetHeader><SheetTitle className="sr-only">Cyberbacker profile</SheetTitle></SheetHeader>{active && <TalentProfileContent name={active.name} initials={active.initials} title={active.role} location={active.location ?? "Philippines"} bio={active.bio ?? `${firstName(active.name)} is a trusted member of your Cyberbacker team with a strong record of reliable delivery.`} valuesScore={active.performance} skills={active.skills} />}</SheetContent>
+        <SheetContent className="w-full overflow-y-auto sm:max-w-2xl"><SheetHeader><SheetTitle className="sr-only">Cyberbacker profile</SheetTitle></SheetHeader>{active && <TalentProfileContent name={active.name} initials={active.initials} title={active.role} location={active.location ?? "Philippines"} bio={active.bio ?? `${firstName(active.name)} is a trusted member of your Cyberbacker team with a strong record of reliable delivery.`} valuesScore={active.performance} skills={active.skills} profile={active.profile} editableMemberId={active.id} />}</SheetContent>
       </Sheet>
     </div>
   );

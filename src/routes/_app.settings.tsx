@@ -13,6 +13,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { useDemoAccount } from "@/lib/demo-auth";
+import { useState } from "react";
+import { toast } from "sonner";
+import { validatePasswordChange } from "@/lib/password-rules";
 
 export const Route = createFileRoute("/_app/settings")({
   head: () => ({
@@ -49,6 +52,7 @@ function Settings() {
       <Tabs defaultValue="profile" className="space-y-4">
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="password">Change password</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
@@ -92,6 +96,8 @@ function Settings() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="password"><ChangePasswordCard /></TabsContent>
 
         <TabsContent value="notifications">
           <Card>
@@ -143,5 +149,33 @@ function Settings() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function ChangePasswordCard() {
+  const [f, setF] = useState({ current: "", next: "", confirm: "" });
+  const [error, setError] = useState<string | null>(null);
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const err = validatePasswordChange(f.current, f.next, f.confirm);
+    setError(err);
+    if (err) return;
+    setF({ current: "", next: "", confirm: "" });
+    toast.success("Password updated");
+  };
+  const field = (id: keyof typeof f, label: string) => (
+    <div className="space-y-1.5"><Label htmlFor={`pw-${id}`}>{label}</Label><Input id={`pw-${id}`} type="password" autoComplete={id === "current" ? "current-password" : "new-password"} value={f[id]} onChange={(e) => setF({ ...f, [id]: e.target.value })} /></div>
+  );
+  return (
+    <Card>
+      <CardHeader><CardTitle>Change password</CardTitle><CardDescription>Use at least 8 characters, different from your current password</CardDescription></CardHeader>
+      <CardContent>
+        <form onSubmit={submit} className="max-w-md space-y-4">
+          {field("current", "Current password")}{field("next", "New password")}{field("confirm", "Confirm new password")}
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <div className="flex justify-end"><Button type="submit">Update password</Button></div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
