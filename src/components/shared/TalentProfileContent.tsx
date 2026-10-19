@@ -38,7 +38,7 @@ export function TalentProfileContent(props: TalentProfileContentProps) {
   const baseSkills = profile?.coreSkills ?? (editable ? props.skills.map((name) => ({ category: "Core skills", name, proficiency: "Proficient" as ProfileProficiency })) : undefined);
   const allSkills = baseSkills ? [...baseSkills, ...(editable ? memberSkills.added : [])] : undefined;
   const ratingFor = (name: string) => editable ? <StarRating value={memberSkills.ratings[name] ?? 0} label={name} onChange={(v) => rateSkill(props.editableMemberId!, name, v)} /> : null;
-  const groupedSkills = allSkills?.reduce<Record<string, typeof profile.coreSkills>>((groups, skill) => {
+  const groupedSkills = allSkills?.reduce<Record<string, NonNullable<typeof allSkills>>>((groups, skill) => {
     (groups[skill.category] ??= []).push(skill);
     return groups;
   }, {});
