@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import { createBlankJob, normalizeJob } from "@/lib/data/jobs";
-import { makePrimary, normalizeLanguages, optionalNumber, preferenceText, ratingValue, validDuration } from "./requirements";
+import { createBlankJob, migrateWeights, normalizeJob } from "@/lib/data/jobs";
+import { setRankedScore, rankOf, makePrimary, normalizeLanguages, optionalNumber, preferenceText, ratingValue, validDuration } from "./requirements";
 import { scoreCandidate } from "./matching";
 import { canAccessPath } from "@/lib/demo-auth";
 
@@ -28,7 +28,7 @@ test("old jobs preserve overall ratings and initialize new language details", ()
   const job = normalizeJob({ ...createBlankJob(), duration: "Temporary / project-based" });
   expect(job.languages[0]).toEqual({ language: "English", proficiency: 4, primary: true, speaking: 4, reading: 4, writing: 4 });
   expect(job.skillRequirements).toEqual([]);
-  expect(job.assessmentPreferences).toEqual({ values: {}, authentic: {}, modified: {} });
+  expect(job.assessmentPreferences).toEqual({ values: {}, natural: {}, modified: {} });
   expect(job.duration).toBe("");
 });
 test("temporary duration is no longer supported", () => {
@@ -40,12 +40,37 @@ test("save-only skill years and assessment targets do not affect matching", () =
   const job = { ...createBlankJob(), skillRequirements: [{ name: "Dialpad", level: "Advanced" as const, kind: "tool" as const, necessity: "must" as const }] };
   const candidate = { title: "Assistant", skills: ["Dialpad"], industries: [], yearsExperience: 3 };
   const original = scoreCandidate(job, candidate);
-  const changed = scoreCandidate({ ...job, assessmentPreferencesEnabled: true, assessmentPreferences: { values: { AES: 99 }, authentic: { D: 100 }, modified: { C: 0 } }, skillRequirements: job.skillRequirements.map((item) => ({ ...item, yearsExperience: 20 })), languages: job.languages.map((item) => ({ ...item, speaking: 1, reading: 5, writing: 2, primary: true })) }, candidate);
+  const changed = scoreCandidate({ ...job, assessmentPreferencesEnabled: true, assessmentPreferences: { values: { AES: 99 }, natural: { D: 100 }, modified: { C: 0 } }, skillRequirements: job.skillRequirements.map((item) => ({ ...item, yearsExperience: 20 })), languages: job.languages.map((item) => ({ ...item, speaking: 1, reading: 5, writing: 2, primary: true })) }, candidate);
   expect(changed).toEqual(original);
 });
 test("preference exports include entered skill years and distinct DISC targets", () => {
-  const text = preferenceText({ ...normalizeJob(createBlankJob()), skillRequirements: [{ name: "Dialpad", level: "Advanced", yearsExperience: 2.5 }], assessmentPreferencesEnabled: true, assessmentPreferences: { values: { AES: 63 }, authentic: { D: 67 }, modified: { D: 70 } } });
+  const text = preferenceText({ ...normalizeJob(createBlankJob()), skillRequirements: [{ name: "Dialpad", level: "Advanced", yearsExperience: 2.5 }], assessmentPreferencesEnabled: true, assessmentPreferences: { values: { AES: 63 }, natural: { D: 67 }, modified: { D: 70 } } });
   expect(text).toContain("Dialpad: Advanced · 2.5 years");
-  expect(text).toContain("DISC Authentic: D 67");
-  expect(text).toContain("DISC Modified: D 70");
+  expect(text).toContain("DISC Natural: #1 D 67");
+  expect(text).toContain("DISC Modified: #1 D 70");
+});
+
+test("values allow at most 4 ranked scores and clearing moves ranks up", () => {
+  let v: Record<string, number | undefined> = {};
+  for (const k of ["AES", "ECO", "IND", "POL", "ALT"]) v = setRankedScore(v, k, 50, 4);
+  expect(Object.keys(v)).toEqual(["AES", "ECO", "IND", "POL"]);
+  v = setRankedScore(v, "AES", undefined, 4);
+  expect(rankOf(v, "ECO")).toBe(1);
+  v = setRankedScore(v, "IND", 90, 4);
+  expect(rankOf(v, "IND")).toBe(2);
+});
+test("DISC natural and modified allow only top 2", () => {
+  let d: Record<string, number | undefined> = {};
+  for (const k of ["D", "I", "S"]) d = setRankedScore(d, k, 60, 2);
+  expect(Object.keys(d)).toEqual(["D", "I"]);
+});
+test("default weights total 100 with Values and DISC at 5%", () => {
+  const w = createBlankJob().weights;
+  expect(w.values).toBe(5); expect(w.disc).toBe(5);
+  expect(Object.values(w).reduce((a, b) => a + b, 0)).toBe(100);
+});
+test("legacy assessment weight splits into values and disc; authentic becomes natural", () => {
+  expect(migrateWeights({ skills: 40, experience: 25, responsibilities: 20, assessment: 10, education: 5 } as never)).toEqual({ skills: 40, experience: 25, responsibilities: 20, values: 5, disc: 5, education: 5 });
+  const job = normalizeJob({ ...createBlankJob(), assessmentPreferences: { authentic: { D: 1, I: 2, S: 3 } } as never });
+  expect(job.assessmentPreferences?.natural).toEqual({ D: 1, I: 2 });
 });
