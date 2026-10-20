@@ -65,7 +65,7 @@ test("an explicit operational mismatch fails constraints", () => {
 });
 
 test("scoring weights can never exceed 100 percent", () => {
-  const weights = { skills: 40, experience: 25, responsibilities: 20, assessment: 10, education: 5 };
+  const weights = { skills: 40, experience: 25, responsibilities: 20, values: 5, disc: 5, education: 5 };
   expect(setCappedWeight(weights, "skills", 80)).toEqual({ ...weights, skills: 40 });
   expect(setCappedWeight({ ...weights, education: 0 }, "skills", 45).skills).toBe(45);
 });

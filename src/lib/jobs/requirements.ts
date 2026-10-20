@@ -13,11 +13,25 @@ export function normalizeLanguages(items: LanguageRequirement[]): LanguageRequir
   return items.map((item, index) => ({ ...item, proficiency: ratingValue(item.proficiency), primary: index === primaryIndex, speaking: ratingValue(item.speaking ?? item.proficiency), reading: ratingValue(item.reading ?? item.proficiency), writing: ratingValue(item.writing ?? item.proficiency) }));
 }
 export const makePrimary = (items: LanguageRequirement[], language: string) => normalizeLanguages(items.map((item) => ({ ...item, primary: item.language === language })));
-export function preferenceText(job: { skillRequirements: { name: string; level: string; yearsExperience?: number }[]; languages: LanguageRequirement[]; assessmentPreferencesEnabled?: boolean; assessmentPreferences?: { values: object; authentic: object; modified: object } }) {
+export function preferenceText(job: { skillRequirements: { name: string; level: string; yearsExperience?: number }[]; languages: LanguageRequirement[]; assessmentPreferencesEnabled?: boolean; assessmentPreferences?: { values: object; natural: object; modified: object } }) {
   const lines = ["Skill & tool experience:", ...job.skillRequirements.map((item) => `• ${item.name}: ${item.level}${item.yearsExperience == null ? "" : ` · ${item.yearsExperience} years`}`), "", "Language competencies:", ...job.languages.map((item) => `• ${item.language}${item.primary ? " (Primary)" : ""}: overall ${item.proficiency}/5 · Speaking ${item.speaking ?? item.proficiency}/5 · Reading ${item.reading ?? item.proficiency}/5 · Writing ${item.writing ?? item.proficiency}/5`)];
   if (job.assessmentPreferencesEnabled && job.assessmentPreferences) {
-    const scores = (items: object) => Object.entries(items).filter(([, value]) => value != null).map(([key, value]) => `${key} ${value}`).join(" · ") || "No preference";
-    lines.push("", "Desired assessment scores:", `Values: ${scores(job.assessmentPreferences.values)}`, `DISC Authentic: ${scores(job.assessmentPreferences.authentic)}`, `DISC Modified: ${scores(job.assessmentPreferences.modified)}`);
+    const scores = (items: object) => Object.entries(items).filter(([, value]) => value != null).map(([key, value], index) => `#${index + 1} ${key} ${value}`).join(" · ") || "No preference";
+    lines.push("", "Desired assessment scores:", `Values: ${scores(job.assessmentPreferences.values)}`, `DISC Natural: ${scores(job.assessmentPreferences.natural)}`, `DISC Modified: ${scores(job.assessmentPreferences.modified)}`);
   }
   return lines.join("\n");
 }
+export const VALUES_LIMIT = 4;
+export const DISC_LIMIT = 2;
+/** Scores rank by entry order (object insertion order); clearing a score removes it so later ones move up. */
+export function setRankedScore<T extends Record<string, number | undefined>>(scores: T, key: string, value: number | undefined, limit: number): T {
+  const next: Record<string, number> = {};
+  for (const [name, score] of Object.entries(scores)) if (score != null && name !== key) next[name] = score;
+  const exists = scores[key] != null;
+  if (value == null) return next as T;
+  if (!exists && Object.keys(next).length >= limit) return scores;
+  if (exists) { const ordered: Record<string, number> = {}; for (const [name, score] of Object.entries(scores)) if (score != null) ordered[name] = name === key ? value : score; return ordered as T; }
+  return { ...next, [key]: value } as T;
+}
+export const rankOf = (scores: Record<string, number | undefined>, key: string) => { const keys = Object.entries(scores).filter(([, v]) => v != null).map(([k]) => k); const i = keys.indexOf(key); return i < 0 ? undefined : i + 1; };
+export function limitScores(scores: Record<string, number | undefined> | undefined, limit: number) { return Object.fromEntries(Object.entries(scores ?? {}).filter(([, v]) => v != null).slice(0, limit)) as Record<string, number>; }

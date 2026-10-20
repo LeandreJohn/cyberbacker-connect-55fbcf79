@@ -12,9 +12,9 @@ export const EXPERIENCE_TIERS: Record<ExperienceTier, TierDefinition> = {
 
 export interface SkillRequirement { name: string; level: SkillLevel; kind: "skill" | "tool"; necessity: "must" | "preferred"; yearsExperience?: number; }
 export interface LanguageRequirement { language: string; proficiency: number; primary?: boolean; speaking?: number; reading?: number; writing?: number; }
-export interface AssessmentPreferences { values: Partial<Record<"AES" | "ECO" | "IND" | "POL" | "ALT" | "REG" | "THE", number>>; authentic: Partial<Record<"D" | "I" | "S" | "C", number>>; modified: Partial<Record<"D" | "I" | "S" | "C", number>>; }
-export interface ScoringWeights { skills: number; experience: number; responsibilities: number; assessment: number; education: number; }
-export const DEFAULT_SCORING_WEIGHTS: ScoringWeights = { skills: 40, experience: 25, responsibilities: 20, assessment: 10, education: 5 };
+export interface AssessmentPreferences { values: Partial<Record<"AES" | "ECO" | "IND" | "POL" | "ALT" | "REG" | "THE", number>>; natural: Partial<Record<"D" | "I" | "S" | "C", number>>; modified: Partial<Record<"D" | "I" | "S" | "C", number>>; }
+export interface ScoringWeights { skills: number; experience: number; responsibilities: number; values: number; disc: number; education: number; }
+export const DEFAULT_SCORING_WEIGHTS: ScoringWeights = { skills: 40, experience: 25, responsibilities: 20, values: 5, disc: 5, education: 5 };
 export const scoringTotal = (weights: ScoringWeights) => Object.values(weights).reduce((sum, value) => sum + value, 0);
 export function setCappedWeight(weights: ScoringWeights, key: keyof ScoringWeights, requested: number) {
   const otherTotal = scoringTotal(weights) - weights[key];
@@ -70,7 +70,7 @@ export function scoreCandidate(profile: JobMatchProfile, candidate: MatchableCan
   const contextHaystack = [candidate.title, ...candidate.skills, ...candidate.industries, ...(candidate.functionalExpertise ?? [])];
   const contextHits = arrayHasMatch(contextTerms, contextHaystack);
   const responsibilityScore = contextTerms.length ? Math.min(weights.responsibilities, (contextHits.length / contextTerms.length) * weights.responsibilities) : weights.responsibilities;
-  const assessmentScore = ((candidate.assessmentScore ?? 80) / 100) * weights.assessment;
+  const assessmentScore = ((candidate.assessmentScore ?? 80) / 100) * ((weights.values ?? 0) + (weights.disc ?? 0));
   const educationScore = educationPass ? weights.education : 0;
   const strengths = [requiredHits.length ? `${requiredHits.length}/${mustHaves.length} must-have skills` : "Experience aligned", experiencePass ? `${candidate.yearsExperience} years of experience` : "", shiftPass ? "Shift compatible" : "", languagePass && requestedLanguages.length ? "Language requirements met" : "", preferredHits.length ? `${preferredHits.length} preferred skill${preferredHits.length === 1 ? "" : "s"}` : ""].filter(Boolean).slice(0, 3);
   const gaps = [...mustHaves.filter((skill) => !requiredHits.includes(skill)).map((skill) => `Missing ${skill}`), !experiencePass ? `Below ${profile.minimumYears ?? EXPERIENCE_TIERS[profile.tier].experience} experience` : "", !shiftPass ? "Shift mismatch" : "", !languagePass ? "Language proficiency mismatch" : "", !educationPass ? "Education requirement not met" : ""].filter(Boolean).slice(0, 3);
