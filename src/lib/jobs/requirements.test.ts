@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import { createBlankJob, migrateWeights, normalizeJob } from "@/lib/data/jobs";
 import { setRankedScore, rankOf, makePrimary, normalizeLanguages, optionalNumber, preferenceText, ratingValue, validDuration } from "./requirements";
 import { scoreCandidate } from "./matching";
+import { parseJobText } from "./import";
 import { canAccessPath } from "@/lib/demo-auth";
 
 test("raw assessment scores are optional and bounded 0–100", () => {
@@ -73,4 +74,11 @@ test("legacy assessment weight splits into values and disc; authentic becomes na
   expect(migrateWeights({ skills: 40, experience: 25, responsibilities: 20, assessment: 10, education: 5 } as never)).toEqual({ skills: 40, experience: 25, responsibilities: 20, values: 5, disc: 5, education: 5 });
   const job = normalizeJob({ ...createBlankJob(), assessmentPreferences: { authentic: { D: 1, I: 2, S: 3 } } as never });
   expect(job.assessmentPreferences?.natural).toEqual({ D: 1, I: 2 });
+});
+
+test("imported text detects title, bullets, and specific tools", () => {
+  const d = parseJobText("Job Title: Executive Assistant\nResponsibilities:\n• Manage inbox in Google Workspace\n- Log calls in Dialpad and HubSpot");
+  expect(d.title).toBe("Executive Assistant");
+  expect(d.responsibilities).toHaveLength(2);
+  expect(d.tools).toEqual(expect.arrayContaining(["Dialpad", "HubSpot CRM", "Google Workspace"]));
 });

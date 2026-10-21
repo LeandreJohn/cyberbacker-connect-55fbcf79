@@ -37,6 +37,7 @@ import { Route as AppInternalFinanceRouteImport } from './routes/_app.internal.f
 import { Route as AppInternalRecruitmentRouteImport } from './routes/_app.internal.recruitment'
 import { Route as AppInternalTicketsRouteImport } from './routes/_app.internal.tickets'
 import { Route as AppInternalUsersRouteImport } from './routes/_app.internal.users'
+import { Route as AppJobBuilderImportRouteImport } from './routes/_app.job-builder_.import'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -178,6 +179,11 @@ const AppInternalUsersRoute = AppInternalUsersRouteImport.update({
   path: '/internal/users',
   getParentRoute: () => AppRoute,
 } as any)
+const AppJobBuilderImportRoute = AppJobBuilderImportRouteImport.update({
+  id: '/job-builder_/import',
+  path: '/job-builder/import',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -206,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/internal/recruitment': typeof AppInternalRecruitmentRoute
   '/internal/tickets': typeof AppInternalTicketsRoute
   '/internal/users': typeof AppInternalUsersRoute
+  '/job-builder/import': typeof AppJobBuilderImportRoute
   '/internal/': typeof AppInternalIndexRoute
 }
 export interface FileRoutesByTo {
@@ -235,6 +242,7 @@ export interface FileRoutesByTo {
   '/internal/recruitment': typeof AppInternalRecruitmentRoute
   '/internal/tickets': typeof AppInternalTicketsRoute
   '/internal/users': typeof AppInternalUsersRoute
+  '/job-builder/import': typeof AppJobBuilderImportRoute
   '/internal': typeof AppInternalIndexRoute
 }
 export interface FileRoutesById {
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/_app/internal/recruitment': typeof AppInternalRecruitmentRoute
   '/_app/internal/tickets': typeof AppInternalTicketsRoute
   '/_app/internal/users': typeof AppInternalUsersRoute
+  '/_app/job-builder_/import': typeof AppJobBuilderImportRoute
   '/_app/internal/': typeof AppInternalIndexRoute
 }
 export interface FileRouteTypes {
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/internal/recruitment'
     | '/internal/tickets'
     | '/internal/users'
+    | '/job-builder/import'
     | '/internal/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -326,6 +336,7 @@ export interface FileRouteTypes {
     | '/internal/recruitment'
     | '/internal/tickets'
     | '/internal/users'
+    | '/job-builder/import'
     | '/internal'
   id:
     | '__root__'
@@ -356,6 +367,7 @@ export interface FileRouteTypes {
     | '/_app/internal/recruitment'
     | '/_app/internal/tickets'
     | '/_app/internal/users'
+    | '/_app/job-builder_/import'
     | '/_app/internal/'
   fileRoutesById: FileRoutesById
 }
@@ -564,6 +576,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppInternalUsersRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/job-builder_/import': {
+      id: '/_app/job-builder_/import'
+      path: '/job-builder/import'
+      fullPath: '/job-builder/import'
+      preLoaderRoute: typeof AppJobBuilderImportRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -591,6 +610,7 @@ interface AppRouteChildren {
   AppInternalRecruitmentRoute: typeof AppInternalRecruitmentRoute
   AppInternalTicketsRoute: typeof AppInternalTicketsRoute
   AppInternalUsersRoute: typeof AppInternalUsersRoute
+  AppJobBuilderImportRoute: typeof AppJobBuilderImportRoute
   AppInternalIndexRoute: typeof AppInternalIndexRoute
 }
 
@@ -618,6 +638,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppInternalRecruitmentRoute: AppInternalRecruitmentRoute,
   AppInternalTicketsRoute: AppInternalTicketsRoute,
   AppInternalUsersRoute: AppInternalUsersRoute,
+  AppJobBuilderImportRoute: AppJobBuilderImportRoute,
   AppInternalIndexRoute: AppInternalIndexRoute,
 }
 
