@@ -8,7 +8,6 @@ import { InitialsAvatar } from "@/components/shared/InitialsAvatar";
 import { StatusBadge, toneFor, prettify } from "@/components/shared/StatusBadge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { q } from "@/lib/data/queries";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
