@@ -8,7 +8,6 @@ import { InitialsAvatar } from "@/components/shared/InitialsAvatar";
 import { StatusBadge, toneFor, prettify } from "@/components/shared/StatusBadge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { q } from "@/lib/data/queries";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -59,13 +58,7 @@ function MyCyberbackers() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex flex-wrap gap-1.5">
-                {cb.skills.map((s) => (
-                  <Badge key={s} variant="secondary" className="font-normal">
-                    {s}
-                  </Badge>
-                ))}
-              </div>
+              <p className="text-sm text-muted-foreground"><span className="font-medium text-foreground">Covers:</span> {cb.skills.join(" · ")}</p>
               <div>
                 <div className="mb-1 flex justify-between text-xs">
                   <span className="text-muted-foreground">Performance</span>

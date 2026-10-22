@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { useDemoAccount } from "@/lib/demo-auth";
 import { useState } from "react";
 import { toast } from "sonner";
+import { KPI_WIDGETS, saveWidgets, toggleWidget, useDashboardWidgets } from "@/lib/data/dashboard-widgets";
 import { validatePasswordChange } from "@/lib/password-rules";
 
 export const Route = createFileRoute("/_app/settings")({
@@ -53,6 +54,7 @@ function Settings() {
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="password">Change password</TabsTrigger>
+          {user.role === "client" && <TabsTrigger value="dashboard">Dashboard</TabsTrigger>}
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
@@ -98,6 +100,8 @@ function Settings() {
         </TabsContent>
 
         <TabsContent value="password"><ChangePasswordCard /></TabsContent>
+
+        <TabsContent value="dashboard"><DashboardWidgetsCard /></TabsContent>
 
         <TabsContent value="notifications">
           <Card>
@@ -175,6 +179,23 @@ function ChangePasswordCard() {
           {error && <p className="text-sm text-destructive">{error}</p>}
           <div className="flex justify-end"><Button type="submit">Update password</Button></div>
         </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DashboardWidgetsCard() {
+  const widgets = useDashboardWidgets();
+  return (
+    <Card>
+      <CardHeader><CardTitle>Dashboard KPI widgets</CardTitle><CardDescription>Choose which KPI cards appear on your dashboard. At least one must stay on.</CardDescription></CardHeader>
+      <CardContent className="divide-y divide-border">
+        {KPI_WIDGETS.map((w) => (
+          <div key={w.key} className="flex items-center justify-between py-4 first:pt-0">
+            <Label htmlFor={`kpi-${w.key}`} className="text-sm font-medium">{w.label}</Label>
+            <Switch id={`kpi-${w.key}`} checked={widgets[w.key]} onCheckedChange={(on) => { const next = toggleWidget(widgets, w.key, on); if (next === widgets) return toast.error("Keep at least one widget on."); saveWidgets(next); }} />
+          </div>
+        ))}
       </CardContent>
     </Card>
   );

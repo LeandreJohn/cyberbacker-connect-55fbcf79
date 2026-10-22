@@ -50,7 +50,7 @@ function Billing() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard label="Current Plan" value="Scale" icon={Wallet} hint="6 Cyberbackers · billed monthly" />
         <StatCard
           label="Next Invoice"
@@ -58,7 +58,6 @@ function Billing() {
           icon={CalendarClock}
           hint={due ? `Due ${due.dueOn}` : "All paid"}
         />
-        <StatCard label="Lifetime Spend" value="$53,840" icon={CreditCard} hint="since Aug 2024" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

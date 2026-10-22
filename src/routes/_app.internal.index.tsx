@@ -132,6 +132,26 @@ function Operations() {
         <StatCard label="Client Satisfaction" value={`${CSAT} / 5`} change={2.1} trend="up" icon={Smile} hint="CSAT" />
       </div>
 
+
+      <Card>
+        <CardHeader className="flex-row items-center justify-between"><CardTitle>Upcoming client renewals</CardTitle><Link to="/internal/clients" className="text-sm text-primary hover:underline">All clients</Link></CardHeader>
+        <CardContent className="overflow-x-auto p-0">
+          <table className="w-full text-sm">
+            <thead className="border-b text-left text-xs text-muted-foreground"><tr><th className="px-6 py-3 font-medium">Client</th><th className="px-6 py-3 font-medium">Plan</th><th className="px-6 py-3 font-medium">Renewal date</th><th className="px-6 py-3 text-right font-medium">Days left</th></tr></thead>
+            <tbody>
+              {clients.filter((c) => c.status !== "churned").map((c) => ({ ...c, days: Math.ceil((new Date(c.renewalDate).getTime() - Date.now()) / 86400000) })).sort((a, b) => a.days - b.days).map((c) => (
+                <tr key={c.id} className="border-b last:border-0">
+                  <td className="px-6 py-3 font-medium">{c.company}</td>
+                  <td className="px-6 py-3">{c.plan}</td>
+                  <td className="px-6 py-3">{new Date(c.renewalDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
+                  <td className="px-6 py-3 text-right"><StatusBadge label={c.days < 0 ? "Overdue" : `${c.days} days`} tone={c.days <= 14 ? "warning" : "neutral"} dot={false} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="recruitment" className="space-y-4">
         <TabsList className="flex h-auto flex-wrap">
           <TabsTrigger value="recruitment">Recruitment</TabsTrigger>
