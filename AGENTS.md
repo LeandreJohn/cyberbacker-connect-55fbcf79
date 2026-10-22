@@ -6,3 +6,4 @@
 - Cyberbacker University is a client-only route; superadmins manage staff via /internal/users instead.
 - Client skill ratings/added skills for team members live in src/lib/data/member-skills.ts (browser storage) until the FastAPI backend replaces it.
 - Requirements control layouts use the builder card's container width rather than viewport breakpoints, so they fit both split-preview and single-column forms.
+- Pasted/uploaded job descriptions are parsed fully in the browser (pdfjs-dist, mammoth) by a pure helper in src/lib/jobs/import.ts and handed to the builder via sessionStorage, keeping the app static-hostable.
