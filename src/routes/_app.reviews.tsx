@@ -13,6 +13,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { COMPANY_CATEGORIES, addCompanyReview, getCompanyReviews, type CompanyCategory, type CompanyReview } from "@/lib/data/company-reviews";
+import { useEffect } from "react";
 import { q } from "@/lib/data/queries";
 import { submitReview } from "@/lib/data/api";
 import type { Review } from "@/lib/data/types";
@@ -117,7 +120,9 @@ function ReviewsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Reviews & Ratings" description="Rate your Cyberbackers and help us keep quality high." />
-
+      <Tabs defaultValue="team" className="space-y-6">
+        <TabsList><TabsTrigger value="team">Rate my Cyberbackers</TabsTrigger><TabsTrigger value="company">Rate Cyberbacker</TabsTrigger></TabsList>
+      <TabsContent value="team" className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {summary.map(({ cb, count, avg }) => (
           <Card key={cb.id}>
@@ -203,6 +208,61 @@ function ReviewsPage() {
           </Card>
         </div>
       </div>
+      </TabsContent>
+      <TabsContent value="company"><CompanyReviewTab /></TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+const emptyCompanyScores = (): Record<CompanyCategory, number> => ({ service: 0, communication: 0, matching: 0, support: 0, value: 0 });
+function CompanyReviewTab() {
+  const [reviews, setReviews] = useState<CompanyReview[]>([]);
+  useEffect(() => setReviews(getCompanyReviews()), []);
+  const [overall, setOverall] = useState(0);
+  const [scores, setScores] = useState(emptyCompanyScores);
+  const [comment, setComment] = useState("");
+  const [recommend, setRecommend] = useState(true);
+  const avg = reviews.length ? reviews.reduce((s, r) => s + r.overall, 0) / reviews.length : 0;
+  const submit = () => {
+    if (!overall) return toast.error("Choose an overall rating.");
+    if (COMPANY_CATEGORIES.some((c) => !scores[c.key])) return toast.error("Please rate every category.");
+    setReviews(addCompanyReview({ overall, scores, comment, recommend, author: "Jordan Avery" }));
+    toast.success("Thanks for rating Cyberbacker!");
+    setOverall(0); setScores(emptyCompanyScores()); setComment("");
+  };
+  return (
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+      <Card className="lg:col-span-2">
+        <CardHeader><CardTitle>Rate Cyberbacker as a company</CardTitle></CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-2"><Label>Overall rating</Label><Stars value={overall} onChange={setOverall} /></div>
+          <div className="space-y-3">
+            {COMPANY_CATEGORIES.map((c) => (
+              <div key={c.key} className="flex items-center justify-between gap-3">
+                <Label>{c.label}</Label>
+                <Stars size="sm" value={scores[c.key]} onChange={(v) => setScores((s) => ({ ...s, [c.key]: v }))} />
+              </div>
+            ))}
+          </div>
+          <div className="space-y-2"><Label htmlFor="company-comment">Comments</Label><Textarea id="company-comment" rows={4} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="How has working with Cyberbacker been?" /></div>
+          <div className="flex items-center justify-between rounded-lg border border-border p-3"><Label htmlFor="company-rec">Would you recommend Cyberbacker?</Label><Switch id="company-rec" checked={recommend} onCheckedChange={setRecommend} /></div>
+          <Button className="w-full" onClick={submit}>Submit review</Button>
+        </CardContent>
+      </Card>
+      <Card className="lg:col-span-3">
+        <CardHeader className="flex-row items-center justify-between"><CardTitle>Your company reviews</CardTitle><div className="flex items-center gap-2"><Stars size="sm" value={Math.round(avg)} /><span className="text-sm text-muted-foreground">{avg ? avg.toFixed(1) : "—"} · {reviews.length}</span></div></CardHeader>
+        <CardContent className="space-y-4">
+          {reviews.map((r) => (
+            <div key={r.id} className="space-y-2 rounded-lg border border-border p-4">
+              <div className="flex items-center justify-between"><Stars size="sm" value={r.overall} /><span className="text-xs text-muted-foreground">{new Date(r.date).toLocaleDateString()}</span></div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">{COMPANY_CATEGORIES.map((c) => <span key={c.key}>{c.label}: {r.scores[c.key]}/5</span>)}</div>
+              {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
+              {r.recommend && <p className="flex items-center gap-1 text-xs text-success"><ThumbsUp className="h-3 w-3" /> Recommends Cyberbacker</p>}
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     </div>
   );
 }
