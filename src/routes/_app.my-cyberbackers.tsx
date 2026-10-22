@@ -59,13 +59,7 @@ function MyCyberbackers() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex flex-wrap gap-1.5">
-                {cb.skills.map((s) => (
-                  <Badge key={s} variant="secondary" className="font-normal">
-                    {s}
-                  </Badge>
-                ))}
-              </div>
+              <p className="text-sm text-muted-foreground"><span className="font-medium text-foreground">Covers:</span> {cb.skills.join(" · ")}</p>
               <div>
                 <div className="mb-1 flex justify-between text-xs">
                   <span className="text-muted-foreground">Performance</span>
