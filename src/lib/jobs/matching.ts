@@ -12,7 +12,7 @@ export const EXPERIENCE_TIERS: Record<ExperienceTier, TierDefinition> = {
 
 export interface SkillRequirement { name: string; level: SkillLevel; kind: "skill" | "tool"; necessity: "must" | "preferred"; yearsExperience?: number; }
 export interface LanguageRequirement { language: string; proficiency: number; primary?: boolean; speaking?: number; reading?: number; writing?: number; }
-export interface AssessmentPreferences { values: Partial<Record<"AES" | "ECO" | "IND" | "POL" | "ALT" | "REG" | "THE", number>>; natural: Partial<Record<"D" | "I" | "S" | "C", number>>; modified: Partial<Record<"D" | "I" | "S" | "C", number>>; }
+export interface AssessmentPreferences { values: Partial<Record<"AES" | "ECO" | "IND" | "POL" | "ALT" | "REG" | "THE", number | null>>; natural: Partial<Record<"D" | "I" | "S" | "C", number | null>>; modified: Partial<Record<"D" | "I" | "S" | "C", number | null>>; }
 export interface ScoringWeights { skills: number; experience: number; responsibilities: number; values: number; disc: number; education: number; }
 export const DEFAULT_SCORING_WEIGHTS: ScoringWeights = { skills: 40, experience: 25, responsibilities: 20, values: 5, disc: 5, education: 5 };
 export const scoringTotal = (weights: ScoringWeights) => Object.values(weights).reduce((sum, value) => sum + value, 0);
