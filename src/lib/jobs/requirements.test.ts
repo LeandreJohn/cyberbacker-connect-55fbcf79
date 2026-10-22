@@ -99,3 +99,12 @@ test("left-to-right ranking enforces limits and reorders", () => {
   for (const k of ["D", "I", "S"]) d = addRanked(d, k, 2);
   expect(rankedKeys(d)).toEqual(["D", "I"]);
 });
+
+import { normalizeRanked, VALUE_KEYS } from "./requirements";
+test("all values ranked; only top 4 keep scores", () => {
+  let v = normalizeRanked({ IND: 70 }, VALUE_KEYS, 4);
+  expect(Object.keys(v)).toEqual(["IND", "AES", "ECO", "POL", "ALT", "REG", "THE"]);
+  v = normalizeRanked(moveRanked(v, "IND", 5), VALUE_KEYS, 4);
+  expect(Object.keys(v)[5]).toBe("IND");
+  expect(v.IND).toBeNull();
+});

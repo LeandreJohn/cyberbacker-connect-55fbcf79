@@ -16,7 +16,7 @@ export const makePrimary = (items: LanguageRequirement[], language: string) => n
 export function preferenceText(job: { skillRequirements: { name: string; level: string; yearsExperience?: number }[]; languages: LanguageRequirement[]; assessmentPreferencesEnabled?: boolean; assessmentPreferences?: { values: object; natural: object; modified: object } }) {
   const lines = ["Skill & tool experience:", ...job.skillRequirements.map((item) => `• ${item.name}: ${item.level}${item.yearsExperience == null ? "" : ` · ${item.yearsExperience} years`}`), "", "Language competencies:", ...job.languages.map((item) => `• ${item.language}${item.primary ? " (Primary)" : ""}: overall ${item.proficiency}/5 · Speaking ${item.speaking ?? item.proficiency}/5 · Reading ${item.reading ?? item.proficiency}/5 · Writing ${item.writing ?? item.proficiency}/5`)];
   if (job.assessmentPreferencesEnabled && job.assessmentPreferences) {
-    const scores = (items: object) => Object.entries(items).filter(([, value]) => value !== undefined).map(([key, value], index) => `#${index + 1} ${key} ${value ?? "—"}`).join(" · ") || "No preference";
+    const scores = (items: object) => Object.entries(items).filter(([, value]) => value !== undefined).map(([key, value], index) => `#${index + 1} ${key}${value == null ? "" : ` ${value}`}`).join(" · ") || "No preference";
     lines.push("", "Desired assessment scores:", `Values: ${scores(job.assessmentPreferences.values)}`, `DISC Natural: ${scores(job.assessmentPreferences.natural)}`, `DISC Modified: ${scores(job.assessmentPreferences.modified)}`);
   }
   return lines.join("\n");
@@ -43,3 +43,12 @@ export function addRanked<T extends Ranked>(scores: T, key: string, limit: numbe
 export function removeRanked<T extends Ranked>(scores: T, key: string): T { return rebuild(scores, rankedKeys(scores).filter((k) => k !== key)); }
 export function moveRanked<T extends Ranked>(scores: T, key: string, toIndex: number): T { const keys = rankedKeys(scores).filter((k) => k !== key); if (keys.length === rankedKeys(scores).length) return scores; keys.splice(Math.max(0, Math.min(keys.length, toIndex)), 0, key); return rebuild(scores, keys); }
 export function setScoreInPlace<T extends Ranked>(scores: T, key: string, value: number | undefined): T { if (!rankedKeys(scores).includes(key)) return scores; return { ...scores, [key]: value ?? null }; }
+
+export const VALUE_KEYS = ["AES", "ECO", "IND", "POL", "ALT", "REG", "THE"] as const;
+export const DISC_KEYS = ["D", "I", "S", "C"] as const;
+/** Full order of all keys (left = most important); scores beyond `limit` are cleared. */
+export function normalizeRanked<T extends Ranked>(scores: T | undefined, allKeys: readonly string[], limit: number): T {
+  const existing = rankedKeys(scores ?? {}).filter((k) => allKeys.includes(k));
+  const keys = [...existing, ...allKeys.filter((k) => !existing.includes(k))];
+  return Object.fromEntries(keys.map((k, i) => [k, i < limit ? (scores?.[k] ?? null) : null])) as T;
+}
