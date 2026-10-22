@@ -50,7 +50,7 @@ function Billing() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard label="Current Plan" value="Scale" icon={Wallet} hint="6 Cyberbackers · billed monthly" />
         <StatCard
           label="Next Invoice"
