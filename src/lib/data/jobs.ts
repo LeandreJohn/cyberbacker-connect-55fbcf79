@@ -1,6 +1,6 @@
 import type { AssessmentPreferences, EducationLevel, ExperienceTier, JobMatchProfile, LanguageRequirement, MustHaveBehavior, ScoringWeights, SkillRequirement } from "@/lib/jobs/matching";
 import { DEFAULT_SCORING_WEIGHTS } from "@/lib/jobs/matching";
-import { DISC_LIMIT, VALUES_LIMIT, limitScores, normalizeLanguages, optionalNumber, validDuration } from "@/lib/jobs/requirements";
+import { DISC_LIMIT, VALUES_LIMIT, DISC_KEYS, VALUE_KEYS, normalizeRanked, normalizeLanguages, optionalNumber, validDuration } from "@/lib/jobs/requirements";
 
 export interface SavedJob extends JobMatchProfile {
   id: string; department: string; duration: string; tasks: string[]; certification: string; communication: string; checkIns: string;
@@ -21,7 +21,7 @@ export function saveJob(job: SavedJob) { const jobs = getSavedJobs(); const next
 
 type LegacyPreferences = Partial<AssessmentPreferences> & { authentic?: AssessmentPreferences["natural"] };
 export function migratePreferences(prefs?: LegacyPreferences): AssessmentPreferences {
-  return { values: limitScores(prefs?.values, VALUES_LIMIT), natural: limitScores(prefs?.natural ?? prefs?.authentic, DISC_LIMIT), modified: limitScores(prefs?.modified, DISC_LIMIT) };
+  return { values: normalizeRanked(prefs?.values, VALUE_KEYS, VALUES_LIMIT), natural: normalizeRanked(prefs?.natural ?? prefs?.authentic, DISC_KEYS, DISC_LIMIT), modified: normalizeRanked(prefs?.modified, DISC_KEYS, DISC_LIMIT) };
 }
 export function migrateWeights(weights?: Partial<ScoringWeights> & { assessment?: number }): ScoringWeights {
   if (!weights) return { ...DEFAULT_SCORING_WEIGHTS };

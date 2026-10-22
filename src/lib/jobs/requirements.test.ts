@@ -29,7 +29,7 @@ test("old jobs preserve overall ratings and initialize new language details", ()
   const job = normalizeJob({ ...createBlankJob(), duration: "Temporary / project-based" });
   expect(job.languages[0]).toEqual({ language: "English", proficiency: 4, primary: true, speaking: 4, reading: 4, writing: 4 });
   expect(job.skillRequirements).toEqual([]);
-  expect(job.assessmentPreferences).toEqual({ values: {}, natural: {}, modified: {} });
+  expect(Object.keys(job.assessmentPreferences?.values ?? {})).toEqual(["AES", "ECO", "IND", "POL", "ALT", "REG", "THE"]);
   expect(job.duration).toBe("");
 });
 test("temporary duration is no longer supported", () => {
@@ -73,7 +73,7 @@ test("default weights total 100 with Values and DISC at 5%", () => {
 test("legacy assessment weight splits into values and disc; authentic becomes natural", () => {
   expect(migrateWeights({ skills: 40, experience: 25, responsibilities: 20, assessment: 10, education: 5 } as never)).toEqual({ skills: 40, experience: 25, responsibilities: 20, values: 5, disc: 5, education: 5 });
   const job = normalizeJob({ ...createBlankJob(), assessmentPreferences: { authentic: { D: 1, I: 2, S: 3 } } as never });
-  expect(job.assessmentPreferences?.natural).toEqual({ D: 1, I: 2 });
+  expect(job.assessmentPreferences?.natural).toEqual({ D: 1, I: 2, S: null, C: null });
 });
 
 test("imported text detects title, bullets, and specific tools", () => {
@@ -98,4 +98,13 @@ test("left-to-right ranking enforces limits and reorders", () => {
   let d: Record<string, number | null> = {};
   for (const k of ["D", "I", "S"]) d = addRanked(d, k, 2);
   expect(rankedKeys(d)).toEqual(["D", "I"]);
+});
+
+import { normalizeRanked, VALUE_KEYS } from "./requirements";
+test("all values ranked; only top 4 keep scores", () => {
+  let v = normalizeRanked({ IND: 70 }, VALUE_KEYS, 4);
+  expect(Object.keys(v)).toEqual(["IND", "AES", "ECO", "POL", "ALT", "REG", "THE"]);
+  v = normalizeRanked(moveRanked(v, "IND", 5), VALUE_KEYS, 4);
+  expect(Object.keys(v)[5]).toBe("IND");
+  expect(v.IND).toBeNull();
 });
