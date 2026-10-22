@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
+import { useDashboardWidgets } from "@/lib/data/dashboard-widgets";
 import { StatCard } from "@/components/shared/StatCard";
 import { InitialsAvatar } from "@/components/shared/InitialsAvatar";
 import { StatusBadge, toneFor, prettify } from "@/components/shared/StatusBadge";
@@ -79,6 +80,7 @@ function Dashboard() {
   const { data: activity } = useSuspenseQuery(q.activityFeed());
   const { data: trend } = useSuspenseQuery(q.performanceTrend());
 
+  const widgets = useDashboardWidgets();
   const activeCount = team.filter((c) => c.status === "active").length;
   const openTickets = tickets.filter(
     (t) => t.status === "open" || t.status === "in_progress" || t.status === "pending_client",
@@ -176,31 +178,31 @@ function Dashboard() {
           trend="up"
           hint={`${team.length} total on your team`}
           icon={Users}
-        />
-        <StatCard
+        />}
+        {widgets.attendanceRate && <StatCard
           label="Attendance Rate"
           value={`${attendanceRate}%`}
           change={3.2}
           trend="up"
           hint="present this week"
           icon={Clock}
-        />
-        <StatCard
+        />}
+        {widgets.openTickets && <StatCard
           label="Open Support Tickets"
           value={String(openTickets.length)}
           change={-25}
           trend="down"
           hint="vs last week"
           icon={TicketCheck}
-        />
-        <StatCard
+        />}
+        {widgets.upcomingRenewals && <StatCard
           label="Upcoming Renewals"
           value={String(renewals.length)}
           change={0}
           trend="up"
           hint={`next in ${Math.min(...renewals.map((r) => r.daysUntil))} days`}
           icon={RefreshCw}
-        />
+        />}
       </div>
 
       {/* Open tickets + Upcoming renewals */}
