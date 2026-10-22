@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, ChartNoAxesColumn, ChevronLeft, ChevronRight, GripVertical, Info } from "lucide-react";
+import { ArrowRight, ChartNoAxesColumn, ChevronLeft, ChevronRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,11 +21,11 @@ function RankedRow({ group, label, options, limit, scores: raw, onChange }: { gr
   return <div className="space-y-3">
     {label && <p className="text-xs font-semibold uppercase text-muted-foreground">{label}</p>}
     <div className="flex items-center justify-between text-xs text-muted-foreground"><span>Most important</span><ArrowRight className="h-3.5 w-3.5"/><span>Least important</span></div>
-    <div className="grid grid-cols-4 gap-3 sm:[grid-template-columns:var(--cols)]" style={{ ["--cols" as string]: `repeat(${keys.length}, minmax(0, 1fr))` }}>
+    <div className="grid grid-cols-4 gap-3">
       {keys.map((key, index) => {
         const scored = index < limit;
         return <div key={key} draggable onDragStart={() => setDragging(key)} onDragEnd={() => setDragging(null)} onDragOver={(e) => e.preventDefault()} onDrop={() => { if (dragging) move(dragging, index); setDragging(null); }} className={cn("min-w-0 space-y-2 rounded-lg p-2", scored ? "bg-primary/10 ring-1 ring-primary" : "border border-dashed bg-muted/30", dragging === key && "opacity-50")}>
-          <div className="flex items-center justify-between gap-1"><GripVertical className="h-4 w-4 shrink-0 cursor-grab text-muted-foreground" aria-hidden/><Label htmlFor={`score-${group}-${key}`} className="font-semibold">{key}</Label><span className="text-[10px] font-semibold text-muted-foreground">#{index + 1}</span></div>
+          <div className="flex cursor-grab flex-col items-center"><span className="text-[10px] font-semibold text-muted-foreground">#{index + 1}</span><Label htmlFor={`score-${group}-${key}`} className="font-semibold">{key}</Label></div>
           {scored ? <Input id={`score-${group}-${key}`} aria-label={`${group} ${key} desired score`} type="number" min={0} max={100} step={1} placeholder="—" value={scores[key] ?? ""} className="h-10 bg-background px-0 text-center text-lg font-semibold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" onChange={(e) => onChange(setScoreInPlace(scores, key, optionalNumber(e.target.value, 100)))}/> : <div className="grid h-10 place-items-center text-[11px] text-muted-foreground">Ranked only</div>}
           <div className="flex justify-between"><Button type="button" variant="ghost" size="icon" className="h-7 w-7" aria-label={`Move ${key} left`} disabled={index === 0} onClick={() => move(key, index - 1)}><ChevronLeft className="h-4 w-4"/></Button><Button type="button" variant="ghost" size="icon" className="h-7 w-7" aria-label={`Move ${key} right`} disabled={index === keys.length - 1} onClick={() => move(key, index + 1)}><ChevronRight className="h-4 w-4"/></Button></div>
         </div>;
