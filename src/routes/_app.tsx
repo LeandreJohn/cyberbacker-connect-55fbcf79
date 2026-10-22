@@ -2,6 +2,7 @@ import { createFileRoute, Navigate, Outlet, useRouterState } from "@tanstack/rea
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { TutorialPopup } from "@/components/layout/TutorialPopup";
 import { Topbar } from "@/components/layout/Topbar";
 import { Toaster } from "@/components/ui/sonner";
 import { canAccessPath, useDemoAccount } from "@/lib/demo-auth";
@@ -28,6 +29,7 @@ function AppLayout() {
           </div>
         </main>
       </SidebarInset>
+      <TutorialPopup />
       <Toaster richColors position="top-right" />
     </SidebarProvider>
   );
