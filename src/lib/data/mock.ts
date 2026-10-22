@@ -797,12 +797,12 @@ export const rewards: Reward[] = [
 ];
 
 export const clientAccounts: ClientAccount[] = [
-  { id: "cl1", company: "BrightPath Ventures", initials: "BV", contact: "Jordan Avery", plan: "Scale", cyberbackers: 6, mrr: 9680, status: "active", health: 92, since: "2024-08-01" },
-  { id: "cl2", company: "Northwind Labs", initials: "NL", contact: "Casey Wu", plan: "Growth", cyberbackers: 4, mrr: 6240, status: "active", health: 81, since: "2024-11-15" },
-  { id: "cl3", company: "Harbor & Co", initials: "HC", contact: "Dana Cole", plan: "Starter", cyberbackers: 2, mrr: 3120, status: "at_risk", health: 58, since: "2025-02-20" },
-  { id: "cl4", company: "Vela Studio", initials: "VS", contact: "Sam Ortiz", plan: "Growth", cyberbackers: 3, mrr: 4680, status: "trial", health: 74, since: "2026-05-30" },
-  { id: "cl5", company: "Kestrel Group", initials: "KG", contact: "Robin Hale", plan: "Scale", cyberbackers: 8, mrr: 12480, status: "active", health: 88, since: "2023-12-04" },
-  { id: "cl6", company: "Apex Dental", initials: "AD", contact: "Pat Lee", plan: "Starter", cyberbackers: 1, mrr: 1560, status: "churned", health: 22, since: "2025-06-12" },
+  { id: "cl1", renewalDate: "2026-11-01", company: "BrightPath Ventures", initials: "BV", contact: "Jordan Avery", plan: "Scale", cyberbackers: 6, mrr: 9680, status: "active", health: 92, since: "2024-08-01" },
+  { id: "cl2", renewalDate: "2026-11-15", company: "Northwind Labs", initials: "NL", contact: "Casey Wu", plan: "Growth", cyberbackers: 4, mrr: 6240, status: "active", health: 81, since: "2024-11-15" },
+  { id: "cl3", renewalDate: "2026-10-29", company: "Harbor & Co", initials: "HC", contact: "Dana Cole", plan: "Starter", cyberbackers: 2, mrr: 3120, status: "at_risk", health: 58, since: "2025-02-20" },
+  { id: "cl4", renewalDate: "2026-11-08", company: "Vela Studio", initials: "VS", contact: "Sam Ortiz", plan: "Growth", cyberbackers: 3, mrr: 4680, status: "trial", health: 74, since: "2026-05-30" },
+  { id: "cl5", renewalDate: "2026-12-04", company: "Kestrel Group", initials: "KG", contact: "Robin Hale", plan: "Scale", cyberbackers: 8, mrr: 12480, status: "active", health: 88, since: "2023-12-04" },
+  { id: "cl6", renewalDate: "2026-12-12", company: "Apex Dental", initials: "AD", contact: "Pat Lee", plan: "Starter", cyberbackers: 1, mrr: 1560, status: "churned", health: 22, since: "2025-06-12" },
 ];
 
 export const pipeline: PipelineCandidate[] = [

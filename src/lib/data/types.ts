@@ -326,6 +326,7 @@ export interface ClientAccount {
   status: "active" | "trial" | "churned" | "at_risk";
   health: number; // 0-100
   since: string;
+  renewalDate: string;
 }
 
 export interface PipelineCandidate {
