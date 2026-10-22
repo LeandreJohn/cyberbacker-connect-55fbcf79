@@ -16,6 +16,7 @@ import { useDemoAccount } from "@/lib/demo-auth";
 import { useState } from "react";
 import { toast } from "sonner";
 import { KPI_WIDGETS, saveWidgets, toggleWidget, useDashboardWidgets } from "@/lib/data/dashboard-widgets";
+import { readTutorials, replayAll, saveTutorials, useTutorials } from "@/lib/tutorials";
 import { validatePasswordChange } from "@/lib/password-rules";
 
 export const Route = createFileRoute("/_app/settings")({
@@ -55,6 +56,7 @@ function Settings() {
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="password">Change password</TabsTrigger>
           {user.role === "client" && <TabsTrigger value="dashboard">Dashboard</TabsTrigger>}
+          <TabsTrigger value="tutorials">Tutorials</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
@@ -102,6 +104,8 @@ function Settings() {
         <TabsContent value="password"><ChangePasswordCard /></TabsContent>
 
         <TabsContent value="dashboard"><DashboardWidgetsCard /></TabsContent>
+
+        <TabsContent value="tutorials"><TutorialsCard /></TabsContent>
 
         <TabsContent value="notifications">
           <Card>
@@ -196,6 +200,22 @@ function DashboardWidgetsCard() {
             <Switch id={`kpi-${w.key}`} checked={widgets[w.key]} onCheckedChange={(on) => { const next = toggleWidget(widgets, w.key, on); if (next === widgets) return toast.error("Keep at least one widget on."); saveWidgets(next); }} />
           </div>
         ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+function TutorialsCard() {
+  const state = useTutorials();
+  return (
+    <Card>
+      <CardHeader><CardTitle>Tutorials</CardTitle><CardDescription>Show a short guide the first time you open each page.</CardDescription></CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="tutorials-on" className="text-sm font-medium">Show tutorial popups</Label>
+          <Switch id="tutorials-on" checked={state?.enabled ?? true} onCheckedChange={(enabled) => saveTutorials({ ...readTutorials(), enabled })} />
+        </div>
+        <Button variant="outline" onClick={() => { saveTutorials(replayAll()); toast.success("Tutorials will show again on each page."); }}>Replay all tutorials</Button>
       </CardContent>
     </Card>
   );
