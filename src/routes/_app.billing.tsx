@@ -58,7 +58,6 @@ function Billing() {
           icon={CalendarClock}
           hint={due ? `Due ${due.dueOn}` : "All paid"}
         />
-        <StatCard label="Lifetime Spend" value="$53,840" icon={CreditCard} hint="since Aug 2024" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
