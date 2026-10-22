@@ -217,7 +217,7 @@ function ReviewsPage() {
                       <span className="text-xs text-muted-foreground">{r.date}</span>
                     </div>
                   </div>
-                  <p className="text-xs font-medium text-primary">{expectationLabel(r.expectations)}</p>
+                  <p className="text-xs font-medium text-primary">{expectationLabel(r.expectations ?? r.overall)}</p>
                   {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
                   {r.recommend && (
                     <p className="flex items-center gap-1 text-xs text-success"><ThumbsUp className="h-3 w-3" /> Recommended</p>
@@ -279,7 +279,7 @@ function CompanyReviewTab() {
           {reviews.map((r) => (
             <div key={r.id} className="space-y-2 rounded-lg border border-border p-4">
               <div className="flex items-center justify-between"><Stars size="sm" value={r.overall} /><span className="text-xs text-muted-foreground">{new Date(r.date).toLocaleDateString()}</span></div>
-              <p className="text-xs font-medium text-primary">{expectationLabel(r.expectations)}</p>
+              <p className="text-xs font-medium text-primary">{expectationLabel(r.expectations ?? r.overall)}</p>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">{COMPANY_CATEGORIES.map((c) => <span key={c.key}>{c.label}: {r.scores[c.key]}/5</span>)}</div>
               {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
               {r.recommend && <p className="flex items-center gap-1 text-xs text-success"><ThumbsUp className="h-3 w-3" /> Recommends Cyberbacker</p>}
