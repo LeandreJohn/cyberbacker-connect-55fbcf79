@@ -16,7 +16,7 @@ export const makePrimary = (items: LanguageRequirement[], language: string) => n
 export function preferenceText(job: { skillRequirements: { name: string; level: string; yearsExperience?: number }[]; languages: LanguageRequirement[]; assessmentPreferencesEnabled?: boolean; assessmentPreferences?: { values: object; natural: object; modified: object } }) {
   const lines = ["Skill & tool experience:", ...job.skillRequirements.map((item) => `• ${item.name}: ${item.level}${item.yearsExperience == null ? "" : ` · ${item.yearsExperience} years`}`), "", "Language competencies:", ...job.languages.map((item) => `• ${item.language}${item.primary ? " (Primary)" : ""}: overall ${item.proficiency}/5 · Speaking ${item.speaking ?? item.proficiency}/5 · Reading ${item.reading ?? item.proficiency}/5 · Writing ${item.writing ?? item.proficiency}/5`)];
   if (job.assessmentPreferencesEnabled && job.assessmentPreferences) {
-    const scores = (items: object) => Object.entries(items).filter(([, value]) => value != null).map(([key, value], index) => `#${index + 1} ${key} ${value}`).join(" · ") || "No preference";
+    const scores = (items: object) => Object.entries(items).filter(([, value]) => value !== undefined).map(([key, value], index) => `#${index + 1} ${key} ${value ?? "—"}`).join(" · ") || "No preference";
     lines.push("", "Desired assessment scores:", `Values: ${scores(job.assessmentPreferences.values)}`, `DISC Natural: ${scores(job.assessmentPreferences.natural)}`, `DISC Modified: ${scores(job.assessmentPreferences.modified)}`);
   }
   return lines.join("\n");
@@ -34,4 +34,12 @@ export function setRankedScore<T extends Record<string, number | undefined>>(sco
   return { ...next, [key]: value } as T;
 }
 export const rankOf = (scores: Record<string, number | undefined>, key: string) => { const keys = Object.entries(scores).filter(([, v]) => v != null).map(([k]) => k); const i = keys.indexOf(key); return i < 0 ? undefined : i + 1; };
-export function limitScores(scores: Record<string, number | undefined> | undefined, limit: number) { return Object.fromEntries(Object.entries(scores ?? {}).filter(([, v]) => v != null).slice(0, limit)) as Record<string, number>; }
+export function limitScores(scores: Record<string, number | null | undefined> | undefined, limit: number) { return Object.fromEntries(Object.entries(scores ?? {}).filter(([, v]) => v !== undefined).slice(0, limit)) as Record<string, number | null>; }
+type Ranked = Record<string, number | null | undefined>;
+/** Ordered keys = left-to-right importance. A null score means "added, no score yet". */
+export const rankedKeys = (scores: Ranked) => Object.entries(scores).filter(([, v]) => v !== undefined).map(([k]) => k);
+const rebuild = <T extends Ranked>(scores: T, keys: string[]) => Object.fromEntries(keys.map((k) => [k, scores[k] ?? null])) as T;
+export function addRanked<T extends Ranked>(scores: T, key: string, limit: number): T { const keys = rankedKeys(scores); if (keys.includes(key) || keys.length >= limit) return scores; return rebuild(scores, [...keys, key]); }
+export function removeRanked<T extends Ranked>(scores: T, key: string): T { return rebuild(scores, rankedKeys(scores).filter((k) => k !== key)); }
+export function moveRanked<T extends Ranked>(scores: T, key: string, toIndex: number): T { const keys = rankedKeys(scores).filter((k) => k !== key); if (keys.length === rankedKeys(scores).length) return scores; keys.splice(Math.max(0, Math.min(keys.length, toIndex)), 0, key); return rebuild(scores, keys); }
+export function setScoreInPlace<T extends Ranked>(scores: T, key: string, value: number | undefined): T { if (!rankedKeys(scores).includes(key)) return scores; return { ...scores, [key]: value ?? null }; }

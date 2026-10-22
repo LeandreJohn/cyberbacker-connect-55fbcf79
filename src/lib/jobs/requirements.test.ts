@@ -82,3 +82,20 @@ test("imported text detects title, bullets, and specific tools", () => {
   expect(d.responsibilities).toHaveLength(2);
   expect(d.tools).toEqual(expect.arrayContaining(["Dialpad", "HubSpot CRM", "Google Workspace"]));
 });
+
+import { addRanked, moveRanked, removeRanked, rankedKeys, setScoreInPlace } from "./requirements";
+test("left-to-right ranking enforces limits and reorders", () => {
+  let v: Record<string, number | null> = {};
+  for (const k of ["AES", "ECO", "IND", "POL", "ALT"]) v = addRanked(v, k, 4);
+  expect(rankedKeys(v)).toEqual(["AES", "ECO", "IND", "POL"]);
+  v = moveRanked(v, "POL", 0);
+  expect(rankedKeys(v)).toEqual(["POL", "AES", "ECO", "IND"]);
+  v = setScoreInPlace(v, "ECO", 80);
+  expect(rankedKeys(v)).toEqual(["POL", "AES", "ECO", "IND"]);
+  expect(v.ECO).toBe(80);
+  v = removeRanked(v, "AES");
+  expect(rankedKeys(v)).toEqual(["POL", "ECO", "IND"]);
+  let d: Record<string, number | null> = {};
+  for (const k of ["D", "I", "S"]) d = addRanked(d, k, 2);
+  expect(rankedKeys(d)).toEqual(["D", "I"]);
+});
