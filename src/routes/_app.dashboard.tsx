@@ -145,9 +145,31 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* Recent announcements */}
+      <Card>
+        <CardHeader className="flex-row items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Megaphone className="h-4.5 w-4.5 text-primary" /> Recent announcements
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {announcements.map((a) => (
+            <div key={a.id} className="rounded-lg border border-border p-4">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <StatusBadge label={a.tag} tone={tagTone[a.tag] ?? "neutral"} dot={false} />
+                <span className="text-xs text-muted-foreground">{a.date}</span>
+              </div>
+              <p className="text-sm font-semibold">{a.title}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{a.body}</p>
+              <p className="mt-2 text-xs text-muted-foreground">— {a.author}</p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
       {/* KPI cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
+        {widgets.activeCyberbackers && <StatCard
           label="Active Cyberbackers"
           value={String(activeCount)}
           change={12.5}
@@ -181,25 +203,8 @@ function Dashboard() {
         />
       </div>
 
-      {/* Performance + Quick actions */}
+      {/* Open tickets + Upcoming renewals */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex-row items-center justify-between">
-            <CardTitle>Team performance</CardTitle>
-            <span className="text-xs text-muted-foreground">Last 6 months</span>
-          </CardHeader>
-          <CardContent>
-            <TrendAreaChart
-              data={trend}
-              xKey="label"
-              series={[
-                { key: "productivity", color: chartColors[1], label: "Productivity" },
-                { key: "satisfaction", color: chartColors[4], label: "Satisfaction" },
-              ]}
-            />
-          </CardContent>
-        </Card>
-
         <Card>
           <CardHeader>
             <CardTitle>Quick actions</CardTitle>
@@ -259,56 +264,6 @@ function Dashboard() {
             </button>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Attendance summary + Activity feed */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex-row items-center justify-between">
-            <CardTitle>Attendance summary</CardTitle>
-            <span className="text-xs text-muted-foreground">Today</span>
-          </CardHeader>
-          <CardContent>
-            <DonutChart data={attendanceSummary} height={220} />
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              {attendanceSummary.map((s) => (
-                <div key={s.name} className="flex items-center gap-2">
-                  <span
-                    className="h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ background: s.color }}
-                  />
-                  <span className="text-sm text-muted-foreground">{s.name}</span>
-                  <span className="ml-auto text-sm font-semibold">{s.value}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Recent activity</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {activity.map((a) => (
-              <div key={a.id} className="flex gap-3">
-                <InitialsAvatar initials={a.initials} size="sm" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm leading-snug">
-                    <span className="font-medium">{a.actor}</span>{" "}
-                    <span className="text-muted-foreground">{a.action}</span>{" "}
-                    <span className="font-medium">{a.target}</span>
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{a.time}</p>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Open tickets + Upcoming renewals */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle>Open support tickets</CardTitle>
@@ -375,28 +330,6 @@ function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Recent announcements */}
-      <Card>
-        <CardHeader className="flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Megaphone className="h-4.5 w-4.5 text-primary" /> Recent announcements
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {announcements.map((a) => (
-            <div key={a.id} className="rounded-lg border border-border p-4">
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <StatusBadge label={a.tag} tone={tagTone[a.tag] ?? "neutral"} dot={false} />
-                <span className="text-xs text-muted-foreground">{a.date}</span>
-              </div>
-              <p className="text-sm font-semibold">{a.title}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{a.body}</p>
-              <p className="mt-2 text-xs text-muted-foreground">— {a.author}</p>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
     </div>
   );
 }
