@@ -43,7 +43,7 @@ export function AssessmentPreferences({ enabled, value, onEnabledChange, onChang
     <div className="flex items-center justify-between gap-3"><Label htmlFor="assessment-preferences" className="text-base">Specify desired assessment scores</Label><Switch id="assessment-preferences" checked={enabled} onCheckedChange={onEnabledChange}/></div>
     {enabled && <div className="space-y-4">
       <div className="space-y-4 rounded-lg border p-4 sm:p-5">{header("Values Assessment")}{note(`Arrange all values from most important (left) to least important (right). Set desired scores for the top ${VALUES_LIMIT}. Drag cards or use the arrows to reorder.`)}<RankedRow group="values" options={VALUES} limit={VALUES_LIMIT} scores={value.values} onChange={set("values")}/></div>
-      <div className="space-y-4 rounded-lg border p-4 sm:p-5">{header("DISC Assessment")}{note(`For Natural and Modified, arrange all traits from most important (left) to least important (right). Set desired scores for the top ${DISC_LIMIT}.`)}<div className="grid gap-6 sm:grid-cols-2">{(["natural", "modified"] as const).map((group) => <RankedRow key={group} group={group} label={group} options={DISC} limit={DISC_LIMIT} scores={value[group]} onChange={set(group)}/>)}</div></div>
+      <div className="space-y-4 rounded-lg border p-4 sm:p-5">{header("DISC Assessment")}{note(`For Natural and Modified, arrange all traits from most important (left) to least important (right). Set desired scores for the top ${DISC_LIMIT}.`)}<div className="grid gap-6">{(["natural", "modified"] as const).map((group) => <RankedRow key={group} group={group} label={group} options={DISC} limit={DISC_LIMIT} scores={value[group]} onChange={set(group)}/>)}</div></div>
     </div>}
   </section>;
 }
