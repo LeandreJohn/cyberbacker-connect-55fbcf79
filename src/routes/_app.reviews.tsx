@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { COMPANY_CATEGORIES, addCompanyReview, getCompanyReviews, type CompanyCategory, type CompanyReview } from "@/lib/data/company-reviews";
 import { useEffect } from "react";
+import { expectationLabel } from "@/lib/expectations";
 import { q } from "@/lib/data/queries";
 import { submitReview } from "@/lib/data/api";
 import type { Review } from "@/lib/data/types";
@@ -66,6 +67,20 @@ function Stars({ value, onChange, size = "md" }: { value: number; onChange?: (v:
   );
 }
 
+function ExpectationStars({ value, onChange, id }: { value: number; onChange: (v: number) => void; id: string }) {
+  return (
+    <div className="space-y-2" id={id}>
+      <Label>Meets expectations?</Label>
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <span className="w-20 text-right leading-tight">Doesn't meet expectations</span>
+        <Stars value={value} onChange={onChange} />
+        <span className="w-20 leading-tight">Exceeds expectations</span>
+      </div>
+      <p className="text-sm font-medium text-primary">{value ? expectationLabel(value) : "Select a rating"}</p>
+    </div>
+  );
+}
+
 function ReviewsPage() {
   const { data: reviews } = useSuspenseQuery(q.reviews());
   const { data: team } = useSuspenseQuery(q.cyberbackers());
@@ -79,6 +94,7 @@ function ReviewsPage() {
   });
   const [comment, setComment] = useState("");
   const [recommend, setRecommend] = useState(true);
+  const [expectations, setExpectations] = useState(0);
 
   const mutation = useMutation({
     mutationFn: submitReview,
@@ -88,6 +104,7 @@ function ReviewsPage() {
       setOverall(0);
       setScores({ communication: 0, quality: 0, reliability: 0, timeliness: 0 });
       setComment("");
+      setExpectations(0);
     },
   });
 
@@ -114,7 +131,8 @@ function ReviewsPage() {
     const cb = team.find((t) => t.id === cbId);
     if (!cb || !overall) return toast.error("Choose a Cyberbacker and an overall rating.");
     if (CATS.some((c) => !scores[c])) return toast.error("Please rate every category.");
-    mutation.mutate({ cyberbackerId: cb.id, cyberbackerName: cb.name, overall, ...scores, comment, recommend });
+    if (!expectations) return toast.error("Rate how well they meet expectations.");
+    mutation.mutate({ cyberbackerId: cb.id, cyberbackerName: cb.name, overall, ...scores, expectations, comment, recommend });
   };
 
   return (
@@ -165,6 +183,7 @@ function ReviewsPage() {
                 </div>
               ))}
             </div>
+            <ExpectationStars id="cb-expectations" value={expectations} onChange={setExpectations} />
             <div className="space-y-2">
               <Label htmlFor="comment">Comments</Label>
               <Textarea id="comment" rows={4} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="What went well? What could improve?" />
@@ -198,6 +217,7 @@ function ReviewsPage() {
                       <span className="text-xs text-muted-foreground">{r.date}</span>
                     </div>
                   </div>
+                  <p className="text-xs font-medium text-primary">{expectationLabel(r.expectations)}</p>
                   {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
                   {r.recommend && (
                     <p className="flex items-center gap-1 text-xs text-success"><ThumbsUp className="h-3 w-3" /> Recommended</p>
@@ -223,13 +243,15 @@ function CompanyReviewTab() {
   const [scores, setScores] = useState(emptyCompanyScores);
   const [comment, setComment] = useState("");
   const [recommend, setRecommend] = useState(true);
+  const [expectations, setExpectations] = useState(0);
   const avg = reviews.length ? reviews.reduce((s, r) => s + r.overall, 0) / reviews.length : 0;
   const submit = () => {
     if (!overall) return toast.error("Choose an overall rating.");
     if (COMPANY_CATEGORIES.some((c) => !scores[c.key])) return toast.error("Please rate every category.");
-    setReviews(addCompanyReview({ overall, scores, comment, recommend, author: "Jordan Avery" }));
+    if (!expectations) return toast.error("Rate how well Cyberbacker meets expectations.");
+    setReviews(addCompanyReview({ overall, scores, expectations, comment, recommend, author: "Jordan Avery" }));
     toast.success("Thanks for rating Cyberbacker!");
-    setOverall(0); setScores(emptyCompanyScores()); setComment("");
+    setOverall(0); setScores(emptyCompanyScores()); setComment(""); setExpectations(0);
   };
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
@@ -245,6 +267,7 @@ function CompanyReviewTab() {
               </div>
             ))}
           </div>
+          <ExpectationStars id="company-expectations" value={expectations} onChange={setExpectations} />
           <div className="space-y-2"><Label htmlFor="company-comment">Comments</Label><Textarea id="company-comment" rows={4} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="How has working with Cyberbacker been?" /></div>
           <div className="flex items-center justify-between rounded-lg border border-border p-3"><Label htmlFor="company-rec">Would you recommend Cyberbacker?</Label><Switch id="company-rec" checked={recommend} onCheckedChange={setRecommend} /></div>
           <Button className="w-full" onClick={submit}>Submit review</Button>
@@ -256,6 +279,7 @@ function CompanyReviewTab() {
           {reviews.map((r) => (
             <div key={r.id} className="space-y-2 rounded-lg border border-border p-4">
               <div className="flex items-center justify-between"><Stars size="sm" value={r.overall} /><span className="text-xs text-muted-foreground">{new Date(r.date).toLocaleDateString()}</span></div>
+              <p className="text-xs font-medium text-primary">{expectationLabel(r.expectations)}</p>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">{COMPANY_CATEGORIES.map((c) => <span key={c.key}>{c.label}: {r.scores[c.key]}/5</span>)}</div>
               {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
               {r.recommend && <p className="flex items-center gap-1 text-xs text-success"><ThumbsUp className="h-3 w-3" /> Recommends Cyberbacker</p>}

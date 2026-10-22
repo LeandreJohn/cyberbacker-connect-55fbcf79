@@ -448,6 +448,7 @@ export interface Review {
   quality: number;
   reliability: number;
   timeliness: number;
+  expectations?: number; // 1 = Doesn't meet, 5 = Exceeds
   comment: string;
   recommend: boolean;
   date: string; // ISO

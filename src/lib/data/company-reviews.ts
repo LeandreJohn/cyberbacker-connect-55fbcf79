@@ -6,7 +6,7 @@ export const COMPANY_CATEGORIES = [
   { key: "value", label: "Value for money" },
 ] as const;
 export type CompanyCategory = (typeof COMPANY_CATEGORIES)[number]["key"];
-export interface CompanyReview { id: string; overall: number; scores: Record<CompanyCategory, number>; comment: string; recommend: boolean; date: string; author: string; }
+export interface CompanyReview { id: string; overall: number; scores: Record<CompanyCategory, number>; expectations?: number; comment: string; recommend: boolean; date: string; author: string; }
 
 const KEY = "cb-company-reviews";
 const SEED: CompanyReview[] = [
