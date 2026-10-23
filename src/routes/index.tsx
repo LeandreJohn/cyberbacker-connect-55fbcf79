@@ -42,7 +42,7 @@ function LoginPage() {
   const notYet = () => toast.info("Email and Google sign-in aren't available in the demo yet. Use Demo access below.");
 
   return (
-    <main className="min-h-screen bg-gradient-powder pb-10 lg:bg-none lg:bg-background lg:flex lg:items-center lg:pb-0">
+    <main className="min-h-screen bg-background pb-10 lg:flex lg:items-center lg:pb-0">
       <div className="relative w-full">
       <img src={loginBg} alt="Welcome to your Cyberbacker Client Portal" className="block h-auto w-full" />
       <div className="relative -mt-4 flex justify-center px-4 sm:-mt-20 lg:absolute lg:inset-y-0 lg:right-[6vw] lg:mt-0 lg:items-center lg:px-0">
