@@ -42,10 +42,11 @@ function LoginPage() {
   const notYet = () => toast.info("Email and Google sign-in aren't available in the demo yet. Use Demo access below.");
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background">
-      <img src={loginBg} alt="" className="absolute inset-0 h-full w-full object-cover object-[30%_center]" />
-      <div className="relative flex min-h-screen items-center justify-center p-5 lg:justify-end lg:pr-[7vw]">
-        <div className="w-full max-w-[440px] rounded-2xl border border-border/60 bg-card/95 p-8 shadow-2xl backdrop-blur sm:p-10">
+    <main className="min-h-screen bg-background pb-10 lg:flex lg:items-center lg:pb-0">
+      <div className="relative w-full">
+      <img src={loginBg} alt="Welcome to your Cyberbacker Client Portal" className="block h-auto w-full" />
+      <div className="relative mt-6 flex justify-center px-4 lg:absolute lg:inset-y-0 lg:right-[6vw] lg:mt-0 lg:items-center lg:px-0">
+        <div className="w-full max-w-[440px] rounded-2xl border border-border/60 bg-card/95 p-7 shadow-2xl backdrop-blur sm:p-9 lg:max-w-[400px] xl:max-w-[440px]">
           <h1 className="text-3xl font-bold tracking-normal text-foreground">Welcome back</h1>
           <p className="mt-2 text-sm text-muted-foreground">Sign in to your Cyberbacker Client Portal.</p>
 
@@ -86,6 +87,7 @@ function LoginPage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
       <Toaster position="top-center" />
     </main>
