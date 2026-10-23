@@ -88,6 +88,7 @@ function LoginPage() {
           </div>
         </div>
       </div>
+      </div>
       <Toaster position="top-center" />
     </main>
   );
