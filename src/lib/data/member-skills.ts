@@ -1,16 +1,33 @@
 import { useSyncExternalStore } from "react";
-import type { ProfileProficiency } from "./types";
 
-export interface AddedSkill { category: string; name: string; proficiency: ProfileProficiency }
-export interface MemberSkillState { ratings: Record<string, number>; added: AddedSkill[] }
+/** Client endorsements, kept separate from the member's own profile skills. */
+export interface MemberSkillState { endorsed: string[]; added: string[] }
 
 const KEY = "cb-member-skills";
 const EVENT = "cb-member-skills-change";
-const EMPTY: MemberSkillState = { ratings: {}, added: [] };
+const EMPTY: MemberSkillState = { endorsed: [], added: [] };
 
-export function clampRating(value: number) {
-  if (!Number.isFinite(value)) return 0;
-  return Math.min(5, Math.max(1, Math.round(value)));
+/** Migrates legacy `{ ratings, added: AddedSkill[] }` data into endorsements. */
+export function normalizeState(raw: unknown): MemberSkillState {
+  const r = (raw ?? {}) as { endorsed?: unknown; ratings?: Record<string, number>; added?: unknown[] };
+  const added = (r.added ?? []).map((s) => (typeof s === "string" ? s : (s as { name?: string })?.name ?? "")).filter(Boolean) as string[];
+  const endorsed = Array.isArray(r.endorsed) ? (r.endorsed as string[]) : [...Object.keys(r.ratings ?? {}), ...added];
+  return { endorsed: [...new Set(endorsed)], added: [...new Set(added)] };
+}
+
+export function toggle(state: MemberSkillState, skill: string): MemberSkillState {
+  if (state.endorsed.includes(skill)) return { endorsed: state.endorsed.filter((s) => s !== skill), added: state.added.filter((s) => s !== skill) };
+  return { ...state, endorsed: [...state.endorsed, skill] };
+}
+
+export function addEndorsed(state: MemberSkillState, name: string, existing: string[]): MemberSkillState | null {
+  const n = name.trim();
+  if (!n) return null;
+  const lower = n.toLowerCase();
+  const match = existing.find((s) => s.toLowerCase() === lower);
+  if (match) return state.endorsed.includes(match) ? null : { ...state, endorsed: [...state.endorsed, match] };
+  if (state.added.some((s) => s.toLowerCase() === lower)) return null;
+  return { endorsed: [...state.endorsed, n], added: [...state.added, n] };
 }
 
 let cacheRaw: string | null = null;
@@ -20,27 +37,20 @@ function readAll(): Record<string, MemberSkillState> {
   const raw = window.localStorage.getItem(KEY);
   if (raw !== cacheRaw) {
     cacheRaw = raw;
-    try { cache = raw ? JSON.parse(raw) : {}; } catch { cache = {}; }
+    try { const parsed = raw ? JSON.parse(raw) : {}; cache = Object.fromEntries(Object.entries(parsed).map(([k, v]) => [k, normalizeState(v)])); } catch { cache = {}; }
   }
   return cache;
 }
-function writeAll(all: Record<string, MemberSkillState>) {
-  window.localStorage.setItem(KEY, JSON.stringify(all));
+function write(memberId: string, next: MemberSkillState) {
+  window.localStorage.setItem(KEY, JSON.stringify({ ...readAll(), [memberId]: next }));
   window.dispatchEvent(new Event(EVENT));
 }
 
-export function rateSkill(memberId: string, skill: string, value: number) {
-  const all = readAll(); const cur = all[memberId] ?? EMPTY;
-  writeAll({ ...all, [memberId]: { ...cur, ratings: { ...cur.ratings, [skill]: clampRating(value) } } });
-}
-
-export function addSkill(memberId: string, skill: AddedSkill) {
-  const name = skill.name.trim();
-  if (!name) return false;
-  const all = readAll(); const cur = all[memberId] ?? EMPTY;
-  if (cur.added.some((s) => s.name.toLowerCase() === name.toLowerCase())) return false;
-  writeAll({ ...all, [memberId]: { ...cur, added: [...cur.added, { ...skill, name, category: skill.category.trim() || "Added skills" }] } });
-  return true;
+export function toggleEndorsement(memberId: string, skill: string) { write(memberId, toggle(readAll()[memberId] ?? EMPTY, skill)); }
+export function addEndorsedSkill(memberId: string, name: string, existing: string[]) {
+  const next = addEndorsed(readAll()[memberId] ?? EMPTY, name, existing);
+  if (!next) return false;
+  write(memberId, next); return true;
 }
 
 function subscribe(cb: () => void) {

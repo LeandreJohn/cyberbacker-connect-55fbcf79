@@ -4,7 +4,7 @@
 - Demo account selection is presentation-only browser state; never treat it as secure authorization until FastAPI authentication replaces it.
 - Builder preference models and normalization live in the jobs data/helpers layer; save-only preferences must stay independent of candidate matching so collecting intake details cannot accidentally change ranking.
 - Cyberbacker University is a client-only route; superadmins manage staff via /internal/users instead.
-- Client skill ratings/added skills for team members live in src/lib/data/member-skills.ts (browser storage) until the FastAPI backend replaces it.
+- Client skill endorsements (separate from profile skills) for team members live in src/lib/data/member-skills.ts (browser storage) until the FastAPI backend replaces it.
 - Requirements control layouts use the builder card's container width rather than viewport breakpoints, so they fit both split-preview and single-column forms.
 - Pasted/uploaded job descriptions are parsed fully in the browser (pdfjs-dist, mammoth) by a pure helper in src/lib/jobs/import.ts and handed to the builder via sessionStorage, keeping the app static-hostable.
 - Client dashboard KPI widget choices and company reviews are browser-stored (src/lib/data/dashboard-widgets.ts, company-reviews.ts) until the FastAPI backend replaces them.
