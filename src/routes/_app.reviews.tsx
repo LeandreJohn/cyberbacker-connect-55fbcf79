@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useDemoAccount } from "@/lib/demo-auth";
+import { getToken } from "@/lib/api/client";
+import { fetchCompanyReviews, fetchCyberbackerReviews, fetchCyberbackerSummary, fetchRatingTrend, fromBackendId, postCompanyReview, postCyberbackerReview } from "@/lib/data/reviews-api";
 import { useMemo, useState } from "react";
 import { Star, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
@@ -81,11 +84,26 @@ function ExpectationStars({ value, onChange, id }: { value: number; onChange: (v
   );
 }
 
+/** True when signed in through the real FastAPI login (token present). */
+function useLiveApi() {
+  const account = useDemoAccount();
+  const [live, setLive] = useState(false);
+  useEffect(() => setLive(Boolean(getToken())), [account]);
+  return live;
+}
+
 function ReviewsPage() {
-  const { data: reviews } = useSuspenseQuery(q.reviews());
+  const { data: mockReviews } = useSuspenseQuery(q.reviews());
   const { data: team } = useSuspenseQuery(q.cyberbackers());
   const qc = useQueryClient();
   const search = Route.useSearch();
+  const live = useLiveApi();
+  const nameFor = (id: string) => team.find((t) => t.id === id)?.name ?? "Cyberbacker";
+  const liveReviews = useQuery({ queryKey: ["api", "cb_reviews"], queryFn: () => fetchCyberbackerReviews(nameFor), enabled: live });
+  const liveSummary = useQuery({ queryKey: ["api", "cb_ratings"], queryFn: fetchCyberbackerSummary, enabled: live });
+  const liveTrend = useQuery({ queryKey: ["api", "cb_rating_trend"], queryFn: fetchRatingTrend, enabled: live });
+  const liveError = liveReviews.error ?? liveSummary.error ?? liveTrend.error;
+  const reviews = live ? liveReviews.data ?? [] : mockReviews;
 
   const [cbId, setCbId] = useState(team.some((cb) => cb.id === search.cyberbacker) ? search.cyberbacker ?? "" : team[0]?.id ?? "");
   const [overall, setOverall] = useState(0);
@@ -96,36 +114,54 @@ function ReviewsPage() {
   const [recommend, setRecommend] = useState(true);
   const [expectations, setExpectations] = useState(0);
 
+  const reset = () => {
+    setOverall(0);
+    setScores({ communication: 0, quality: 0, reliability: 0, timeliness: 0 });
+    setComment("");
+    setExpectations(0);
+  };
   const mutation = useMutation({
-    mutationFn: submitReview,
-    onSuccess: (r) => {
-      qc.setQueryData<Review[]>(q.reviews().queryKey, (old) => [r, ...(old ?? [])]);
-      toast.success("Review submitted", { description: `Thanks for rating ${r.cyberbackerName}.` });
-      setOverall(0);
-      setScores({ communication: 0, quality: 0, reliability: 0, timeliness: 0 });
-      setComment("");
-      setExpectations(0);
+    mutationFn: async (input: Parameters<typeof submitReview>[0]) => {
+      if (live) { await postCyberbackerReview(input); return null; }
+      return submitReview(input);
     },
+    onSuccess: (r, input) => {
+      if (r) qc.setQueryData<Review[]>(q.reviews().queryKey, (old) => [r, ...(old ?? [])]);
+      else void qc.invalidateQueries({ queryKey: ["api"] });
+      toast.success("Review submitted", { description: `Thanks for rating ${firstName(input.cyberbackerName)}.` });
+      reset();
+    },
+    onError: (e) => toast.error("Couldn't submit review", { description: e instanceof Error ? e.message : undefined }),
   });
 
-  const summary = useMemo(
-    () =>
-      team.map((cb) => {
-        const rs = reviews.filter((r) => r.cyberbackerId === cb.id);
-        const avg = rs.length ? rs.reduce((s, r) => s + r.overall, 0) / rs.length : 0;
-        return { cb, count: rs.length, avg };
-      }),
-    [team, reviews],
-  );
+  const summary = useMemo(() => {
+    if (live) {
+      return team.map((cb) => {
+        const s = liveSummary.data?.find((x) => fromBackendId(x.id) === cb.id);
+        return { cb, count: s?.review_count ?? 0, avg: s?.average_rating ?? 0 };
+      });
+    }
+    return team.map((cb) => {
+      const rs = reviews.filter((r) => r.cyberbackerId === cb.id);
+      const avg = rs.length ? rs.reduce((s, r) => s + r.overall, 0) / rs.length : 0;
+      return { cb, count: rs.length, avg };
+    });
+  }, [team, reviews, live, liveSummary.data]);
 
   const trend = useMemo(() => {
+    if (live) {
+      return (liveTrend.data ?? []).map((p) => ({
+        month: new Date(`${p.month}-01T00:00:00`).toLocaleDateString("en-US", { month: "short" }),
+        rating: p.average_rating,
+      }));
+    }
     const byMonth = new Map<string, number[]>();
     [...reviews].reverse().forEach((r) => {
       const m = new Date(r.date).toLocaleDateString("en-US", { month: "short" });
       byMonth.set(m, [...(byMonth.get(m) ?? []), r.overall]);
     });
     return [...byMonth].map(([month, v]) => ({ month, rating: +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(2) }));
-  }, [reviews]);
+  }, [reviews, live, liveTrend.data]);
 
   const submit = () => {
     const cb = team.find((t) => t.id === cbId);
@@ -138,6 +174,9 @@ function ReviewsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Reviews & Ratings" description="Rate your Cyberbackers and help us keep quality high." />
+      {live && liveError && (
+        <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">Couldn't load your reviews: {liveError instanceof Error ? liveError.message : "unknown error"}</p>
+      )}
       <Tabs defaultValue="team" className="space-y-6">
         <TabsList><TabsTrigger value="team">Rate my Cyberbackers</TabsTrigger><TabsTrigger value="company">Rate Cyberbacker</TabsTrigger></TabsList>
       <TabsContent value="team" className="space-y-6">
@@ -237,19 +276,38 @@ function ReviewsPage() {
 
 const emptyCompanyScores = (): Record<CompanyCategory, number> => ({ service: 0, communication: 0, matching: 0, support: 0, value: 0 });
 function CompanyReviewTab() {
-  const [reviews, setReviews] = useState<CompanyReview[]>([]);
-  useEffect(() => setReviews(getCompanyReviews()), []);
+  const live = useLiveApi();
+  const user = useDemoAccount();
+  const qc = useQueryClient();
+  const [localReviews, setLocalReviews] = useState<CompanyReview[]>([]);
+  useEffect(() => setLocalReviews(getCompanyReviews()), []);
+  const liveData = useQuery({ queryKey: ["api", "company_reviews"], queryFn: fetchCompanyReviews, enabled: live });
+  const reviews = live ? liveData.data?.reviews ?? [] : localReviews;
   const [overall, setOverall] = useState(0);
   const [scores, setScores] = useState(emptyCompanyScores);
   const [comment, setComment] = useState("");
   const [recommend, setRecommend] = useState(true);
   const [expectations, setExpectations] = useState(0);
-  const avg = reviews.length ? reviews.reduce((s, r) => s + r.overall, 0) / reviews.length : 0;
-  const submit = () => {
+  const [pending, setPending] = useState(false);
+  const avg = live ? liveData.data?.average ?? 0 : reviews.length ? reviews.reduce((s, r) => s + r.overall, 0) / reviews.length : 0;
+  const total = live ? liveData.data?.total ?? 0 : reviews.length;
+  const submit = async () => {
     if (!overall) return toast.error("Choose an overall rating.");
     if (COMPANY_CATEGORIES.some((c) => !scores[c.key])) return toast.error("Please rate every category.");
     if (!expectations) return toast.error("Rate how well Cyberbacker meets expectations.");
-    setReviews(addCompanyReview({ overall, scores, expectations, comment, recommend, author: "Jordan Avery" }));
+    if (live) {
+      setPending(true);
+      try {
+        await postCompanyReview({ overall, scores, expectations, comment, recommend });
+        await qc.invalidateQueries({ queryKey: ["api", "company_reviews"] });
+      } catch (e) {
+        setPending(false);
+        return toast.error("Couldn't submit review", { description: e instanceof Error ? e.message : undefined });
+      }
+      setPending(false);
+    } else {
+      setLocalReviews(addCompanyReview({ overall, scores, expectations, comment, recommend, author: user?.name ?? "Client" }));
+    }
     toast.success("Thanks for rating Cyberbacker!");
     setOverall(0); setScores(emptyCompanyScores()); setComment(""); setExpectations(0);
   };
@@ -270,11 +328,11 @@ function CompanyReviewTab() {
           <ExpectationStars id="company-expectations" value={expectations} onChange={setExpectations} />
           <div className="space-y-2"><Label htmlFor="company-comment">Comments</Label><Textarea id="company-comment" rows={4} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="How has working with Cyberbacker been?" /></div>
           <div className="flex items-center justify-between rounded-lg border border-border p-3"><Label htmlFor="company-rec">Would you recommend Cyberbacker?</Label><Switch id="company-rec" checked={recommend} onCheckedChange={setRecommend} /></div>
-          <Button className="w-full" onClick={submit}>Submit review</Button>
+          <Button className="w-full" onClick={submit} disabled={pending}>{pending ? "Submitting…" : "Submit review"}</Button>
         </CardContent>
       </Card>
       <Card className="lg:col-span-3">
-        <CardHeader className="flex-row items-center justify-between"><CardTitle>Your company reviews</CardTitle><div className="flex items-center gap-2"><Stars size="sm" value={Math.round(avg)} /><span className="text-sm text-muted-foreground">{avg ? avg.toFixed(1) : "—"} · {reviews.length}</span></div></CardHeader>
+        <CardHeader className="flex-row items-center justify-between"><CardTitle>Your company reviews</CardTitle><div className="flex items-center gap-2"><Stars size="sm" value={Math.round(avg)} /><span className="text-sm text-muted-foreground">{avg ? avg.toFixed(1) : "—"} · {total}</span></div></CardHeader>
         <CardContent className="space-y-4">
           {reviews.map((r) => (
             <div key={r.id} className="space-y-2 rounded-lg border border-border p-4">

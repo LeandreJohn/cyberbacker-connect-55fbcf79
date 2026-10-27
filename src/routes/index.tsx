@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
-import { DEMO_ACCOUNTS, selectDemoRole, type DemoRole } from "@/lib/demo-auth";
+import { DEMO_ACCOUNTS, selectDemoRole, selectSession, type DemoRole } from "@/lib/demo-auth";
+import { homeForRole, loginWithPassword } from "@/lib/auth/session";
 import loginBg from "@/assets/cyberbacker-login-bg.png";
 
 export const Route = createFileRoute("/")({
@@ -35,34 +37,54 @@ function GoogleIcon() {
 
 function LoginPage() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const login = (role: DemoRole) => {
     selectDemoRole(role);
     return navigate({ to: DEMO_ACCOUNTS[role].home, replace: true });
   };
-  const notYet = () => toast.info("Email and Google sign-in aren't available in the demo yet. Use Demo access below.");
+  const notYet = () => toast.info("Google sign-in isn't available yet. Use your email and password.");
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!email.trim() || !password) return setError("Enter your email and password.");
+    setPending(true);
+    try {
+      const session = await loginWithPassword(email, password);
+      selectSession(session);
+      await navigate({ to: homeForRole(session.role), replace: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign-in failed.");
+    } finally {
+      setPending(false);
+    }
+  };
 
   return (
-    <main className="min-h-screen bg-background pb-10 lg:flex lg:items-center lg:pb-0">
-      <div className="relative w-full">
-      <img src={loginBg} alt="Welcome to your Cyberbacker Client Portal" className="block h-auto w-full" />
+    <main className="min-h-screen bg-powder pb-10 lg:h-screen lg:overflow-hidden lg:pb-0">
+      <div className="relative w-full lg:h-full">
+      <img src={loginBg} alt="Welcome to your Cyberbacker Client Portal" className="block h-auto w-full lg:h-full lg:object-contain" />
       <div className="relative mt-6 flex justify-center px-4 lg:absolute lg:inset-y-0 lg:right-[6vw] lg:mt-0 lg:items-center lg:px-0">
-        <div className="w-full max-w-[440px] rounded-2xl border border-border/60 bg-card/95 p-7 shadow-2xl backdrop-blur sm:p-9 lg:max-w-[400px] xl:max-w-[440px]">
+        <div className="w-full max-w-[440px] rounded-2xl border border-border/60 bg-card/95 p-7 shadow-2xl backdrop-blur sm:p-9 lg:max-h-[94vh] lg:max-w-[400px] lg:overflow-y-auto lg:p-7 xl:max-w-[440px]">
           <h1 className="text-3xl font-bold tracking-normal text-foreground">Welcome back</h1>
           <p className="mt-2 text-sm text-muted-foreground">Sign in to your Cyberbacker Client Portal.</p>
 
-          <form className="mt-6 space-y-4" onSubmit={(e) => { e.preventDefault(); notYet(); }}>
+          <form className="mt-6 space-y-4" onSubmit={submit}>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@company.com" className="h-12 rounded-lg" />
+              <Input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" className="h-12 rounded-lg" />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
                 <Link to="/forgot-password" className="text-xs font-medium text-primary hover:underline">Forgot password?</Link>
               </div>
-              <Input id="password" type="password" placeholder="Enter your password" className="h-12 rounded-lg" />
+              <Input id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" className="h-12 rounded-lg" />
             </div>
-            <Button type="submit" className="h-12 w-full rounded-lg text-base font-semibold">Log in</Button>
+            {error && <p role="alert" className="text-sm font-medium text-destructive">{error}</p>}
+            <Button type="submit" disabled={pending} className="h-12 w-full rounded-lg text-base font-semibold">{pending ? "Signing in…" : "Log in"}</Button>
           </form>
 
           <div className="my-5 flex items-center gap-4 text-xs text-muted-foreground">
