@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useDemoAccount } from "@/lib/demo-auth";
+import { getToken } from "@/lib/api/client";
+import { fetchCompanyReviews, fetchCyberbackerReviews, fetchCyberbackerSummary, fetchRatingTrend, fromBackendId, postCompanyReview, postCyberbackerReview } from "@/lib/data/reviews-api";
 import { useMemo, useState } from "react";
 import { Star, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
@@ -79,6 +82,14 @@ function ExpectationStars({ value, onChange, id }: { value: number; onChange: (v
       <p className="text-sm font-medium text-primary">{value ? expectationLabel(value) : "Select a rating"}</p>
     </div>
   );
+}
+
+/** True when signed in through the real FastAPI login (token present). */
+function useLiveApi() {
+  const account = useDemoAccount();
+  const [live, setLive] = useState(false);
+  useEffect(() => setLive(Boolean(getToken())), [account]);
+  return live;
 }
 
 function ReviewsPage() {
@@ -163,6 +174,9 @@ function ReviewsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Reviews & Ratings" description="Rate your Cyberbackers and help us keep quality high." />
+      {live && liveError && (
+        <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">Couldn't load your reviews: {liveError instanceof Error ? liveError.message : "unknown error"}</p>
+      )}
       <Tabs defaultValue="team" className="space-y-6">
         <TabsList><TabsTrigger value="team">Rate my Cyberbackers</TabsTrigger><TabsTrigger value="company">Rate Cyberbacker</TabsTrigger></TabsList>
       <TabsContent value="team" className="space-y-6">
@@ -262,19 +276,38 @@ function ReviewsPage() {
 
 const emptyCompanyScores = (): Record<CompanyCategory, number> => ({ service: 0, communication: 0, matching: 0, support: 0, value: 0 });
 function CompanyReviewTab() {
-  const [reviews, setReviews] = useState<CompanyReview[]>([]);
-  useEffect(() => setReviews(getCompanyReviews()), []);
+  const live = useLiveApi();
+  const user = useDemoAccount();
+  const qc = useQueryClient();
+  const [localReviews, setLocalReviews] = useState<CompanyReview[]>([]);
+  useEffect(() => setLocalReviews(getCompanyReviews()), []);
+  const liveData = useQuery({ queryKey: ["api", "company_reviews"], queryFn: fetchCompanyReviews, enabled: live });
+  const reviews = live ? liveData.data?.reviews ?? [] : localReviews;
   const [overall, setOverall] = useState(0);
   const [scores, setScores] = useState(emptyCompanyScores);
   const [comment, setComment] = useState("");
   const [recommend, setRecommend] = useState(true);
   const [expectations, setExpectations] = useState(0);
-  const avg = reviews.length ? reviews.reduce((s, r) => s + r.overall, 0) / reviews.length : 0;
-  const submit = () => {
+  const [pending, setPending] = useState(false);
+  const avg = live ? liveData.data?.average ?? 0 : reviews.length ? reviews.reduce((s, r) => s + r.overall, 0) / reviews.length : 0;
+  const total = live ? liveData.data?.total ?? 0 : reviews.length;
+  const submit = async () => {
     if (!overall) return toast.error("Choose an overall rating.");
     if (COMPANY_CATEGORIES.some((c) => !scores[c.key])) return toast.error("Please rate every category.");
     if (!expectations) return toast.error("Rate how well Cyberbacker meets expectations.");
-    setReviews(addCompanyReview({ overall, scores, expectations, comment, recommend, author: "Jordan Avery" }));
+    if (live) {
+      setPending(true);
+      try {
+        await postCompanyReview({ overall, scores, expectations, comment, recommend });
+        await qc.invalidateQueries({ queryKey: ["api", "company_reviews"] });
+      } catch (e) {
+        setPending(false);
+        return toast.error("Couldn't submit review", { description: e instanceof Error ? e.message : undefined });
+      }
+      setPending(false);
+    } else {
+      setLocalReviews(addCompanyReview({ overall, scores, expectations, comment, recommend, author: user?.name ?? "Client" }));
+    }
     toast.success("Thanks for rating Cyberbacker!");
     setOverall(0); setScores(emptyCompanyScores()); setComment(""); setExpectations(0);
   };
@@ -295,11 +328,11 @@ function CompanyReviewTab() {
           <ExpectationStars id="company-expectations" value={expectations} onChange={setExpectations} />
           <div className="space-y-2"><Label htmlFor="company-comment">Comments</Label><Textarea id="company-comment" rows={4} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="How has working with Cyberbacker been?" /></div>
           <div className="flex items-center justify-between rounded-lg border border-border p-3"><Label htmlFor="company-rec">Would you recommend Cyberbacker?</Label><Switch id="company-rec" checked={recommend} onCheckedChange={setRecommend} /></div>
-          <Button className="w-full" onClick={submit}>Submit review</Button>
+          <Button className="w-full" onClick={submit} disabled={pending}>{pending ? "Submitting…" : "Submit review"}</Button>
         </CardContent>
       </Card>
       <Card className="lg:col-span-3">
-        <CardHeader className="flex-row items-center justify-between"><CardTitle>Your company reviews</CardTitle><div className="flex items-center gap-2"><Stars size="sm" value={Math.round(avg)} /><span className="text-sm text-muted-foreground">{avg ? avg.toFixed(1) : "—"} · {reviews.length}</span></div></CardHeader>
+        <CardHeader className="flex-row items-center justify-between"><CardTitle>Your company reviews</CardTitle><div className="flex items-center gap-2"><Stars size="sm" value={Math.round(avg)} /><span className="text-sm text-muted-foreground">{avg ? avg.toFixed(1) : "—"} · {total}</span></div></CardHeader>
         <CardContent className="space-y-4">
           {reviews.map((r) => (
             <div key={r.id} className="space-y-2 rounded-lg border border-border p-4">
