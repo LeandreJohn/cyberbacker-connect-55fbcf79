@@ -82,10 +82,17 @@ function ExpectationStars({ value, onChange, id }: { value: number; onChange: (v
 }
 
 function ReviewsPage() {
-  const { data: reviews } = useSuspenseQuery(q.reviews());
+  const { data: mockReviews } = useSuspenseQuery(q.reviews());
   const { data: team } = useSuspenseQuery(q.cyberbackers());
   const qc = useQueryClient();
   const search = Route.useSearch();
+  const live = useLiveApi();
+  const nameFor = (id: string) => team.find((t) => t.id === id)?.name ?? "Cyberbacker";
+  const liveReviews = useQuery({ queryKey: ["api", "cb_reviews"], queryFn: () => fetchCyberbackerReviews(nameFor), enabled: live });
+  const liveSummary = useQuery({ queryKey: ["api", "cb_ratings"], queryFn: fetchCyberbackerSummary, enabled: live });
+  const liveTrend = useQuery({ queryKey: ["api", "cb_rating_trend"], queryFn: fetchRatingTrend, enabled: live });
+  const liveError = liveReviews.error ?? liveSummary.error ?? liveTrend.error;
+  const reviews = live ? liveReviews.data ?? [] : mockReviews;
 
   const [cbId, setCbId] = useState(team.some((cb) => cb.id === search.cyberbacker) ? search.cyberbacker ?? "" : team[0]?.id ?? "");
   const [overall, setOverall] = useState(0);
@@ -96,36 +103,54 @@ function ReviewsPage() {
   const [recommend, setRecommend] = useState(true);
   const [expectations, setExpectations] = useState(0);
 
+  const reset = () => {
+    setOverall(0);
+    setScores({ communication: 0, quality: 0, reliability: 0, timeliness: 0 });
+    setComment("");
+    setExpectations(0);
+  };
   const mutation = useMutation({
-    mutationFn: submitReview,
-    onSuccess: (r) => {
-      qc.setQueryData<Review[]>(q.reviews().queryKey, (old) => [r, ...(old ?? [])]);
-      toast.success("Review submitted", { description: `Thanks for rating ${r.cyberbackerName}.` });
-      setOverall(0);
-      setScores({ communication: 0, quality: 0, reliability: 0, timeliness: 0 });
-      setComment("");
-      setExpectations(0);
+    mutationFn: async (input: Parameters<typeof submitReview>[0]) => {
+      if (live) { await postCyberbackerReview(input); return null; }
+      return submitReview(input);
     },
+    onSuccess: (r, input) => {
+      if (r) qc.setQueryData<Review[]>(q.reviews().queryKey, (old) => [r, ...(old ?? [])]);
+      else void qc.invalidateQueries({ queryKey: ["api"] });
+      toast.success("Review submitted", { description: `Thanks for rating ${firstName(input.cyberbackerName)}.` });
+      reset();
+    },
+    onError: (e) => toast.error("Couldn't submit review", { description: e instanceof Error ? e.message : undefined }),
   });
 
-  const summary = useMemo(
-    () =>
-      team.map((cb) => {
-        const rs = reviews.filter((r) => r.cyberbackerId === cb.id);
-        const avg = rs.length ? rs.reduce((s, r) => s + r.overall, 0) / rs.length : 0;
-        return { cb, count: rs.length, avg };
-      }),
-    [team, reviews],
-  );
+  const summary = useMemo(() => {
+    if (live) {
+      return team.map((cb) => {
+        const s = liveSummary.data?.find((x) => fromBackendId(x.id) === cb.id);
+        return { cb, count: s?.review_count ?? 0, avg: s?.average_rating ?? 0 };
+      });
+    }
+    return team.map((cb) => {
+      const rs = reviews.filter((r) => r.cyberbackerId === cb.id);
+      const avg = rs.length ? rs.reduce((s, r) => s + r.overall, 0) / rs.length : 0;
+      return { cb, count: rs.length, avg };
+    });
+  }, [team, reviews, live, liveSummary.data]);
 
   const trend = useMemo(() => {
+    if (live) {
+      return (liveTrend.data ?? []).map((p) => ({
+        month: new Date(`${p.month}-01T00:00:00`).toLocaleDateString("en-US", { month: "short" }),
+        rating: p.average_rating,
+      }));
+    }
     const byMonth = new Map<string, number[]>();
     [...reviews].reverse().forEach((r) => {
       const m = new Date(r.date).toLocaleDateString("en-US", { month: "short" });
       byMonth.set(m, [...(byMonth.get(m) ?? []), r.overall]);
     });
     return [...byMonth].map(([month, v]) => ({ month, rating: +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(2) }));
-  }, [reviews]);
+  }, [reviews, live, liveTrend.data]);
 
   const submit = () => {
     const cb = team.find((t) => t.id === cbId);
