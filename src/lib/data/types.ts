@@ -15,7 +15,7 @@ export type AvailabilityStatus = "available" | "interviewing" | "hired";
 export type TicketStatus = "open" | "in_progress" | "pending_client" | "resolved" | "closed";
 export type TicketPriority = "low" | "medium" | "high" | "urgent";
 export type ContractStatus = "active" | "pending_signature" | "draft" | "expired";
-export type InvoiceStatus = "paid" | "due" | "overdue" | "processing";
+export type InvoiceStatus = "paid" | "due" | "overdue" | "processing" | "sent";
 export type PipelineStageId =
   | "applied"
   | "screening"
