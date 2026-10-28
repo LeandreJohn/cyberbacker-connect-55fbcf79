@@ -10,3 +10,4 @@
 - Client dashboard KPI widget choices and company reviews are browser-stored (src/lib/data/dashboard-widgets.ts, company-reviews.ts) until the FastAPI backend replaces them.
 - FastAPI base URL comes from VITE_API_BASE_URL (.env); all calls go through src/lib/api/client.ts so the static SPA talks to the backend directly from the browser.
 - A real login session (token + name/position in browser storage) supersedes demo account selection; pages use live endpoints only when a token exists so demo access keeps working offline.
+- Invoice auto-pay preference and demo payments are browser-only (src/lib/billing.ts) until FastAPI + Authorize.Net replace them.

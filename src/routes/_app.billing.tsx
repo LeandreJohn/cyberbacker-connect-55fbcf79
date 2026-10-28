@@ -18,6 +18,11 @@ import {
 } from "@/components/ui/table";
 import { CalendarClock, Wallet } from "lucide-react";
 import { q } from "@/lib/data/queries";
+import { useState } from "react";
+import { Switch } from "@/components/ui/switch";
+import { PayInvoiceDialog } from "@/components/billing/PayInvoiceDialog";
+import { canDownloadReceipt, canPay, isAwaitingAutopay, useAutopay } from "@/lib/billing";
+import type { Invoice } from "@/lib/data/types";
 
 export const Route = createFileRoute("/_app/billing")({
   head: () => ({
@@ -36,7 +41,11 @@ export const Route = createFileRoute("/_app/billing")({
 function Billing() {
   const { data: invoices } = useSuspenseQuery(q.invoices());
   const { data: methods } = useSuspenseQuery(q.paymentMethods());
-  const due = invoices.find((i) => i.status === "due");
+  const [paidIds, setPaidIds] = useState<string[]>([]);
+  const [paying, setPaying] = useState<Invoice | null>(null);
+  const [autopay, setAutopay] = useAutopay();
+  const rows = invoices.map((i) => (paidIds.includes(i.id) ? { ...i, status: "paid" as const } : i));
+  const due = rows.find((i) => i.status === "due" || i.status === "sent" || i.status === "overdue");
 
   return (
     <div className="space-y-6">
@@ -62,8 +71,12 @@ function Billing() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardHeader>
+          <CardHeader className="flex-row flex-wrap items-center justify-between gap-3">
             <CardTitle>Invoice history</CardTitle>
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Switch checked={autopay} onCheckedChange={setAutopay} aria-label="Automatic payments" />
+              Automatic payments {autopay ? "on" : "off"}
+            </label>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -74,11 +87,11 @@ function Billing() {
                     <TableHead>Period</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Receipt</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {invoices.map((i) => (
+                  {rows.map((i) => (
                     <TableRow key={i.id}>
                       <TableCell className="font-medium">{i.number}</TableCell>
                       <TableCell className="text-muted-foreground">{i.period}</TableCell>
@@ -87,9 +100,17 @@ function Billing() {
                         <StatusBadge label={prettify(i.status)} tone={toneFor(i.status)} />
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="text-muted-foreground">
-                          <Download className="h-4 w-4" />
-                        </Button>
+                        {canPay(i, autopay) && (
+                          <Button size="sm" onClick={() => setPaying(i)}>Pay</Button>
+                        )}
+                        {isAwaitingAutopay(i, autopay) && (
+                          <span className="text-xs text-muted-foreground">Auto-pay scheduled</span>
+                        )}
+                        {canDownloadReceipt(i) && (
+                          <Button variant="ghost" size="sm" className="text-muted-foreground">
+                            <Download className="mr-1.5 h-4 w-4" /> Receipt
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -129,6 +150,7 @@ function Billing() {
           </CardContent>
         </Card>
       </div>
+      <PayInvoiceDialog invoice={paying} onClose={() => setPaying(null)} onPaid={(id) => setPaidIds((p) => [...p, id])} />
     </div>
   );
 }
