@@ -52,6 +52,7 @@ export function toneFor(status: string): Tone {
     interviewing: "info",
     in_progress: "info",
     processing: "info",
+    sent: "info",
     trial: "info",
     pending_signature: "warning",
     pending_client: "warning",
