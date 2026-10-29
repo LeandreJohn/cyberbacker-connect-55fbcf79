@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { DEMO_ACCOUNTS, selectDemoRole, selectSession, type DemoRole } from "@/lib/demo-auth";
 import { homeForRole, loginWithPassword } from "@/lib/auth/session";
 import loginBg from "@/assets/cyberbacker-login-scene.jpg";
-import logo from "@/assets/cyberbacker-logo-light.png";
+import logo from "@/assets/cyberbacker-logo-dark.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -69,15 +69,14 @@ function LoginPage() {
       <div className="flex min-h-dvh flex-col gap-8 px-5 py-6 sm:px-10 lg:h-full lg:min-h-0 lg:flex-row lg:items-stretch lg:justify-between lg:gap-[3vw] lg:px-[4vw] lg:py-[4vh]">
         <div className="flex min-w-0 flex-col lg:max-w-[56%] lg:flex-1">
           <div>
-            <img src={logo} alt="Cyberbacker" className="h-auto w-[clamp(150px,14vw,260px)]" />
-            <p className="mt-1 pl-[clamp(40px,3.6vw,68px)] text-[clamp(10px,0.75vw,14px)] leading-tight text-foreground/80">We've Got Your Back.<br />World-Class Professional Support.</p>
+            <img src={logo} alt="Cyberbacker" className="h-auto w-[clamp(170px,min(17vw,30vh),340px)]" />
           </div>
           <div className="mt-[clamp(20px,6vh,72px)]">
             <h2 className="font-display font-bold leading-[1.05] tracking-tight">
-              <span className="block text-[clamp(28px,3.4vw,64px)] text-foreground">Welcome to Your</span>
-              <span className="block text-[clamp(32px,4.2vw,84px)] text-primary">Cyberbacker Client Portal</span>
+              <span className="block text-[clamp(28px,min(3.4vw,6vh),64px)] text-foreground">Welcome to Your</span>
+              <span className="block text-[clamp(32px,min(4.4vw,7.6vh),84px)] text-primary">Cyberbacker Client Portal</span>
             </h2>
-            <p className="mt-[clamp(12px,3vh,32px)] max-w-[34ch] text-[clamp(15px,1.35vw,26px)] italic leading-snug text-foreground/85">Bringing visibility, convenience, and control to your Cyberbacker experience.</p>
+            <p className="mt-[clamp(12px,3vh,32px)] max-w-[34ch] text-[clamp(15px,min(1.5vw,2.7vh),26px)] italic leading-snug text-foreground/85">Bringing visibility, convenience, and control to your Cyberbacker experience.</p>
           </div>
           <p className="mt-auto hidden pt-6 text-[clamp(12px,0.9vw,16px)] text-foreground/85 lg:block">© 2026 Cyberbacker. All rights reserved.</p>
         </div>
