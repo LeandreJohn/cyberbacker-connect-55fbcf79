@@ -1,13 +1,12 @@
-import { useEffect, useState } from "react";
 import type { Invoice } from "@/lib/data/types";
 
 const PAYABLE = new Set(["due", "overdue", "sent"]);
 
 /** Manual Pay button: only for unpaid invoices when the client is not on auto-pay. */
-export const canPay = (inv: Pick<Invoice, "status">, autopay: boolean) =>
-  !autopay && PAYABLE.has(inv.status);
-export const isAwaitingAutopay = (inv: Pick<Invoice, "status">, autopay: boolean) =>
-  autopay && PAYABLE.has(inv.status);
+type Payable = Pick<Invoice, "status" | "autopay">;
+export const canPay = (inv: Payable) => !inv.autopay && PAYABLE.has(inv.status);
+/** Subscription invoices (autopay from the backend payload) are charged automatically. */
+export const isAwaitingAutopay = (inv: Payable) => !!inv.autopay && PAYABLE.has(inv.status);
 export const canDownloadReceipt = (inv: Pick<Invoice, "status">) => inv.status === "paid";
 
 export function validateCard(c: { name: string; number: string; expiry: string; cvc: string; zip: string }) {
@@ -20,15 +19,4 @@ export function validateCard(c: { name: string; number: string; expiry: string; 
   if (!/^\d{3,4}$/.test(c.cvc)) errors.cvc = "3 or 4 digits.";
   if (!c.zip.trim()) errors.zip = "Enter billing ZIP.";
   return errors;
-}
-
-const AUTOPAY_KEY = "cb-autopay";
-export function useAutopay() {
-  const [autopay, setAutopay] = useState(false);
-  useEffect(() => setAutopay(localStorage.getItem(AUTOPAY_KEY) === "1"), []);
-  const update = (v: boolean) => {
-    localStorage.setItem(AUTOPAY_KEY, v ? "1" : "0");
-    setAutopay(v);
-  };
-  return [autopay, update] as const;
 }

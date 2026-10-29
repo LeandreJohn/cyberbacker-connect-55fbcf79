@@ -294,6 +294,8 @@ export interface Invoice {
   status: InvoiceStatus;
   issuedOn: string;
   dueOn: string;
+  /** Subscription / auto-payment invoice — no manual Pay button. */
+  autopay?: boolean;
 }
 
 export interface PaymentMethod {
