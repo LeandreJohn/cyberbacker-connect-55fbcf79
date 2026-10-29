@@ -65,7 +65,7 @@ function LoginPage() {
   return (
     <main className="min-h-screen bg-powder pb-10 lg:h-screen lg:overflow-hidden lg:pb-0">
       <div className="relative w-full lg:h-full">
-      <img src={loginBg} alt="Welcome to your Cyberbacker Client Portal" className="block h-auto w-full lg:h-full lg:object-cover lg:object-left" />
+      <img src={loginBg} alt="Welcome to your Cyberbacker Client Portal" className="block h-auto w-full lg:h-full lg:object-cover lg:object-left-top" />
       <div className="relative mt-6 flex justify-center px-4 lg:absolute lg:inset-y-0 lg:right-[6vw] lg:mt-0 lg:items-center lg:px-0">
         <div className="w-full max-w-[440px] rounded-2xl border border-border/60 bg-card/95 p-7 shadow-2xl backdrop-blur sm:p-9 lg:max-h-[94vh] lg:max-w-[400px] lg:overflow-y-auto lg:p-7 xl:max-w-[440px]">
           <h1 className="text-3xl font-bold tracking-normal text-foreground">Welcome back</h1>
