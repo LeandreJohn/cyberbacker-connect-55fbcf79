@@ -19,9 +19,8 @@ import {
 import { CalendarClock, Wallet } from "lucide-react";
 import { q } from "@/lib/data/queries";
 import { useState } from "react";
-import { Switch } from "@/components/ui/switch";
 import { PayInvoiceDialog } from "@/components/billing/PayInvoiceDialog";
-import { canDownloadReceipt, canPay, isAwaitingAutopay, useAutopay } from "@/lib/billing";
+import { canDownloadReceipt, canPay, isAwaitingAutopay } from "@/lib/billing";
 import type { Invoice } from "@/lib/data/types";
 
 export const Route = createFileRoute("/_app/billing")({
@@ -43,7 +42,6 @@ function Billing() {
   const { data: methods } = useSuspenseQuery(q.paymentMethods());
   const [paidIds, setPaidIds] = useState<string[]>([]);
   const [paying, setPaying] = useState<Invoice | null>(null);
-  const [autopay, setAutopay] = useAutopay();
   const rows = invoices.map((i) => (paidIds.includes(i.id) ? { ...i, status: "paid" as const } : i));
   const due = rows.find((i) => i.status === "due" || i.status === "sent" || i.status === "overdue");
 
@@ -73,10 +71,6 @@ function Billing() {
         <Card className="lg:col-span-2">
           <CardHeader className="flex-row flex-wrap items-center justify-between gap-3">
             <CardTitle>Invoice history</CardTitle>
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Switch checked={autopay} onCheckedChange={setAutopay} aria-label="Automatic payments" />
-              Automatic payments {autopay ? "on" : "off"}
-            </label>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -100,10 +94,10 @@ function Billing() {
                         <StatusBadge label={prettify(i.status)} tone={toneFor(i.status)} />
                       </TableCell>
                       <TableCell className="text-right">
-                        {canPay(i, autopay) && (
+                        {canPay(i) && (
                           <Button size="sm" onClick={() => setPaying(i)}>Pay</Button>
                         )}
-                        {isAwaitingAutopay(i, autopay) && (
+                        {isAwaitingAutopay(i) && (
                           <span className="text-xs text-muted-foreground">Auto-pay scheduled</span>
                         )}
                         {canDownloadReceipt(i) && (

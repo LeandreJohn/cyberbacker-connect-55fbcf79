@@ -3,11 +3,11 @@ import { canDownloadReceipt, canPay, validateCard } from "./billing";
 
 describe("billing rules", () => {
   it("shows Pay for due, overdue and sent when not on auto-pay", () => {
-    for (const status of ["due", "overdue", "sent"] as const) expect(canPay({ status }, false)).toBe(true);
-    expect(canPay({ status: "paid" }, false)).toBe(false);
+    for (const status of ["due", "overdue", "sent"] as const) expect(canPay({ status })).toBe(true);
+    expect(canPay({ status: "paid" })).toBe(false);
   });
   it("hides Pay for subscription auto-payment", () => {
-    expect(canPay({ status: "due" }, true)).toBe(false);
+    expect(canPay({ status: "due", autopay: true })).toBe(false);
   });
   it("receipt download only for paid", () => {
     expect(canDownloadReceipt({ status: "paid" })).toBe(true);

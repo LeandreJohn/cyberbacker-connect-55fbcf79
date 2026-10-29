@@ -778,7 +778,7 @@ export const contracts: Contract[] = [
 
 export const invoices: Invoice[] = [
   { id: "iv0", number: "INV-2061", period: "Jul 2026", amount: 9680, status: "due", issuedOn: "2026-07-01", dueOn: "2026-07-15" },
-  { id: "iv1", number: "INV-2048", period: "Jun 2026", amount: 9680, status: "sent", issuedOn: "2026-06-01", dueOn: "2026-06-15" },
+  { id: "iv1", number: "INV-2048", period: "Jun 2026", amount: 9680, status: "sent", issuedOn: "2026-06-01", dueOn: "2026-06-15", autopay: true },
   { id: "iv2", number: "INV-2031", period: "May 2026", amount: 9440, status: "paid", issuedOn: "2026-05-01", dueOn: "2026-05-15" },
   { id: "iv3", number: "INV-2018", period: "Apr 2026", amount: 9120, status: "paid", issuedOn: "2026-04-01", dueOn: "2026-04-15" },
   { id: "iv4", number: "INV-2002", period: "Mar 2026", amount: 8800, status: "paid", issuedOn: "2026-03-01", dueOn: "2026-03-15" },
