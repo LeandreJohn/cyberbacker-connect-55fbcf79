@@ -65,9 +65,9 @@ function LoginPage() {
 
   return (
     <main className="relative isolate min-h-dvh overflow-x-hidden lg:h-dvh lg:overflow-hidden">
-      <img src={loginBg} alt="" aria-hidden className="absolute inset-0 -z-10 h-full w-full object-cover object-left-top" />
+      <img src={loginBg} alt="" aria-hidden className="absolute inset-0 -z-10 h-full w-full object-cover object-[left_70%]" />
       <div className="flex min-h-dvh flex-col gap-8 px-5 py-6 sm:px-10 lg:h-full lg:min-h-0 lg:flex-row lg:items-stretch lg:justify-between lg:gap-[3vw] lg:px-[4vw] lg:py-[4vh]">
-        <div className="flex min-w-0 flex-col lg:max-w-[56%] lg:flex-1">
+        <div className="flex min-w-0 flex-col lg:max-w-[64%] lg:flex-1">
           <div>
             <img src={logo} alt="Cyberbacker" className="h-auto w-[clamp(170px,min(17vw,30vh),340px)]" />
           </div>
