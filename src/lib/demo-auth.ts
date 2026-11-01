@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from "react";
-import { setToken } from "@/lib/api/client";
+import { apiFetch, getToken, setToken } from "@/lib/api/client";
 import { SESSION_KEY, type AuthSession } from "@/lib/auth/session";
+import { resetDemoApi } from "@/lib/mocks/demo-api";
+import type { UserOut } from "@/lib/types";
 
 export type DemoRole = "client" | "superadmin";
 
@@ -30,7 +32,7 @@ export const DEMO_ACCOUNTS: Record<DemoRole, DemoAccount> = {
     id: "u_admin",
     role: "superadmin",
     name: "Leandre John Sabado",
-    title: "Superadmin",
+    title: "SuperAdmin",
     email: "leandrejs@cyberbacker.com",
     company: "Cyberbacker",
     initials: "LS",
@@ -38,12 +40,14 @@ export const DEMO_ACCOUNTS: Record<DemoRole, DemoAccount> = {
   },
 };
 
-const STORAGE_KEY = "cb-demo-account";
+const SESSION_STORAGE_KEY = "cb-auth-session";
+const DEMO_KEY = "cb-demo-session"; // sessionStorage: { mode: "demo", role }
+const LEGACY_DEMO_KEY = "cb-demo-account"; // pre-demo-mode storage; cleaned up
 const EVENT = "cb-demo-account-change";
 
 function readSessionRaw(): string | null {
   if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(SESSION_KEY);
+  return window.localStorage.getItem(SESSION_STORAGE_KEY);
 }
 
 function parseSession(raw: string | null): AuthSession | null {
@@ -56,32 +60,73 @@ function parseSession(raw: string | null): AuthSession | null {
   }
 }
 
+interface DemoSession {
+  mode: "demo";
+  role: DemoRole;
+}
+
+function readDemoSession(): DemoSession | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(DEMO_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as DemoSession;
+    return parsed?.mode === "demo" && (parsed.role === "client" || parsed.role === "superadmin") ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+/** True while a front-end-only demo session is active (no token, no backend calls). */
+export function isDemoSession(): boolean {
+  return readDemoSession() !== null;
+}
+
 export function readDemoRole(): DemoRole | null {
   if (typeof window === "undefined") return null;
   const session = parseSession(readSessionRaw());
   if (session) return session.role;
-  const value = window.localStorage.getItem(STORAGE_KEY);
-  return value === "client" || value === "superadmin" ? value : null;
+  const demo = readDemoSession();
+  if (demo) return demo.role;
+  // Migrate the pre-demo-mode localStorage flag.
+  const legacy = window.localStorage.getItem(LEGACY_DEMO_KEY);
+  if (legacy === "client" || legacy === "superadmin") {
+    window.sessionStorage.setItem(DEMO_KEY, JSON.stringify({ mode: "demo", role: legacy }));
+    window.localStorage.removeItem(LEGACY_DEMO_KEY);
+    return legacy;
+  }
+  return null;
+}
+
+function demoRoleFromSessionStorage(): DemoRole | null {
+  const demo = readDemoSession();
+  return demo?.role ?? null;
 }
 
 export function selectDemoRole(role: DemoRole) {
-  window.localStorage.removeItem(SESSION_KEY);
   setToken(null);
-  window.localStorage.setItem(STORAGE_KEY, role);
+  window.localStorage.removeItem(SESSION_STORAGE_KEY);
+  window.localStorage.removeItem(LEGACY_DEMO_KEY);
+  window.sessionStorage.setItem(DEMO_KEY, JSON.stringify({ mode: "demo", role }));
+  resetDemoApi();
   window.dispatchEvent(new Event(EVENT));
 }
 
 /** Signed in through the real FastAPI login. */
 export function selectSession(session: AuthSession) {
-  window.localStorage.removeItem(STORAGE_KEY);
-  window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  window.sessionStorage.removeItem(DEMO_KEY);
+  window.localStorage.removeItem(LEGACY_DEMO_KEY);
+  window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+  resetDemoApi();
   window.dispatchEvent(new Event(EVENT));
 }
 
-export function clearDemoRole() {
-  window.localStorage.removeItem(STORAGE_KEY);
-  window.localStorage.removeItem(SESSION_KEY);
+export function signOut() {
   setToken(null);
+  window.localStorage.removeItem(SESSION_STORAGE_KEY);
+  window.sessionStorage.removeItem(DEMO_KEY);
+  window.localStorage.removeItem(LEGACY_DEMO_KEY);
+  resetDemoApi();
   window.dispatchEvent(new Event(EVENT));
 }
 
@@ -97,7 +142,7 @@ function subscribe(listener: () => void) {
 function snapshot(): string | null {
   const raw = readSessionRaw();
   if (raw) return `s:${raw}`;
-  const role = readDemoRole();
+  const role = demoRoleFromSessionStorage();
   return role ? `d:${role}` : null;
 }
 
@@ -133,4 +178,31 @@ export function canAccessPath(role: DemoRole, pathname: string) {
   if (pathname === "/settings") return true;
   if (role === "superadmin") return pathname === "/internal" || pathname.startsWith("/internal/");
   return !pathname.startsWith("/internal") && pathname !== "/" && pathname !== "/forgot-password";
+}
+
+/**
+ * Restore a real session on app load: if a token exists, ask the backend who
+ * we are. Returns null when there is nothing to restore (demo or signed out).
+ */
+export async function restoreSessionFromApi(): Promise<AuthSession | null> {
+  if (typeof window === "undefined") return null;
+  if (!getToken() || isDemoSession()) return null;
+  try {
+    const me = await apiFetch<UserOut>("/users/me");
+    const p = (me.position ?? "").trim().toLowerCase();
+    if (p !== "superadmin" && p !== "client") {
+      signOut();
+      return null;
+    }
+    const session: AuthSession = {
+      role: p,
+      email: me.email,
+      name: me.name,
+      position: me.position ?? "",
+    };
+    selectSession(session);
+    return session;
+  } catch {
+    return null;
+  }
 }
