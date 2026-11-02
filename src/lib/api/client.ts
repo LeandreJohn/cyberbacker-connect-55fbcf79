@@ -1,7 +1,7 @@
 // Shared FastAPI client. Base URL comes from VITE_API_BASE_URL (.env).
 // Demo sessions never reach the network: every request is answered in-memory
 // by src/lib/mocks/demo-api.ts, which mirrors the reference paths and shapes.
-import { isDemoSession } from "@/lib/demo-auth";
+import { isDemoSession, demoRole } from "@/lib/demo-auth";
 import { demoApi } from "@/lib/mocks/demo-api";
 
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") || "http://localhost:8000";
@@ -50,7 +50,7 @@ function handle401() {
 }
 
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
-  if (isDemoSession()) return demoApi<T>(path, init);
+  if (isDemoSession()) return demoApi<T>(path, init, demoRole() ?? "client");
 
   const headers = new Headers(init.headers);
   const token = getToken();
