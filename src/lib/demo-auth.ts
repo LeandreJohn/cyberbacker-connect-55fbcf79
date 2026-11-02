@@ -82,6 +82,11 @@ export function isDemoSession(): boolean {
   return readDemoSession() !== null;
 }
 
+/** The active demo role, or null outside demo mode. */
+export function demoRole(): DemoRole | null {
+  return readDemoSession()?.role ?? null;
+}
+
 export function readDemoRole(): DemoRole | null {
   if (typeof window === "undefined") return null;
   const session = parseSession(readSessionRaw());

@@ -47,7 +47,7 @@ import type { DemoRole } from "@/lib/demo-auth";
 
 export const DEMO_PEOPLE = {
   client: {
-    email: "jordan.avery@brightback.co",
+    email: "jordan.avery@brightpath.co",
     name: "Jordan Avery",
     company: "BrightPath Ventures",
     initials: "JA",
@@ -578,7 +578,6 @@ function toSummary(clientEmail: string): CyberbackerSummary[] {
   });
   const out: CyberbackerSummary[] = [];
   byId.forEach((scores, id) => {
-    const cb = ROSTER.find((c) => cbNumber(c.id) === id);
     out.push({
       id,
       name: "",
@@ -587,7 +586,6 @@ function toSummary(clientEmail: string): CyberbackerSummary[] {
       average_rating: avg(scores),
       review_count: scores.length,
     });
-    void cb;
   });
   return out.sort((a, b) => (b.average_rating ?? 0) - (a.average_rating ?? 0));
 }
@@ -1110,9 +1108,6 @@ export async function demoApi<T>(path: string, init: RequestInit = {}, role: Dem
         .slice(0, limit)
         .map((a) => toArticleListItem(a, false)) as T;
     }
-    if (p === `${KB}/articles` && method === "GET" && !/\/(popular|\d+|[a-z0-9-]+)$/.test(p.replace(`${KB}/`, "")) ) {
-      // handled below by slug match — no-op guard
-    }
     if (p === `${KB}/articles` && method === "GET") {
       let rows = state.articles.filter((a) => a.status === "published");
       const cat = q.get("category");
@@ -1230,7 +1225,7 @@ export async function demoApi<T>(path: string, init: RequestInit = {}, role: Dem
     if (p === `${AKB}/articles/import` && method === "POST") {
       const report: KbImportReport = {
         dry_run: bool(body.fields.dry_run),
-        committed: true,
+        committed: false,
         created: 2,
         updated: 1,
         skipped: 0,
@@ -1242,8 +1237,7 @@ export async function demoApi<T>(path: string, init: RequestInit = {}, role: Dem
           { row: 5, title: "Missing body column", action: "error", message: "Row 5: 'body' is required" },
         ],
       };
-      report.committed = !report.dry_run && report.errors === 0 ? true : !(report.errors > 0) || report.dry_run;
-      report.committed = report.dry_run ? false : report.errors === 0;
+      report.committed = !report.dry_run && report.errors === 0;
       return report as T;
     }
 
