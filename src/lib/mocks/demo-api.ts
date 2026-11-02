@@ -47,7 +47,7 @@ import type { DemoRole } from "@/lib/demo-auth";
 
 export const DEMO_PEOPLE = {
   client: {
-    email: "jordan.avery@brightback.co",
+    email: "jordan.avery@brightpath.co",
     name: "Jordan Avery",
     company: "BrightPath Ventures",
     initials: "JA",
@@ -578,7 +578,6 @@ function toSummary(clientEmail: string): CyberbackerSummary[] {
   });
   const out: CyberbackerSummary[] = [];
   byId.forEach((scores, id) => {
-    const cb = ROSTER.find((c) => cbNumber(c.id) === id);
     out.push({
       id,
       name: "",
@@ -587,7 +586,6 @@ function toSummary(clientEmail: string): CyberbackerSummary[] {
       average_rating: avg(scores),
       review_count: scores.length,
     });
-    void cb;
   });
   return out.sort((a, b) => (b.average_rating ?? 0) - (a.average_rating ?? 0));
 }
