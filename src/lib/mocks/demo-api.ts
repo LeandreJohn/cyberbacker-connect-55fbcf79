@@ -847,7 +847,7 @@ export async function demoApi<T>(path: string, init: RequestInit = {}, role: Dem
         created_at: new Date().toISOString(),
       };
       state.reviews = [review, ...state.reviews];
-      const out: CyberbackerReviewOut = { ...toReviewItem(review) as unknown as CyberbackerReviewCreate, ...review };
+      const out = { ...toReviewItem(review), ...review } as unknown as CyberbackerReviewOut;
       return out as T;
     }
 
