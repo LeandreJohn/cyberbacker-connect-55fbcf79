@@ -179,6 +179,12 @@ export function useDemoAccount() {
   return key ? toAccount(key) : null;
 }
 
+/** Reactive flag for the slim demo banner. */
+export function useIsDemo() {
+  const key = useSyncExternalStore(subscribe, snapshot, () => null);
+  return key?.startsWith("d:") ?? false;
+}
+
 export function canAccessPath(role: DemoRole, pathname: string) {
   if (pathname === "/settings") return true;
   if (role === "superadmin") return pathname === "/internal" || pathname.startsWith("/internal/");
