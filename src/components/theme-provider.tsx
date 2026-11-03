@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-type Theme = "light" | "dark";
+export type Theme = "light" | "dark" | "system";
 
 interface ThemeContextValue {
   theme: Theme;
+  /** The theme actually applied (system resolves to light or dark). */
+  resolved: "light" | "dark";
   toggleTheme: () => void;
   setTheme: (theme: Theme) => void;
 }
@@ -12,27 +14,41 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "cb-theme";
 
+function systemPrefersDark(): boolean {
+  if (typeof window === "undefined" || !window.matchMedia) return false;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+function readStored(): Theme {
+  if (typeof window === "undefined") return "light";
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  return stored === "dark" || stored === "system" ? stored : "light";
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
+  const [theme, setThemeState] = useState<Theme>(() => readStored());
+  const [systemDark, setSystemDark] = useState(() => systemPrefersDark());
 
   useEffect(() => {
-    const stored = (typeof window !== "undefined" &&
-      window.localStorage.getItem(STORAGE_KEY)) as Theme | null;
-    const initial: Theme = stored ?? "light";
-    setThemeState(initial);
+    if (!window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
   }, []);
 
+  const resolved: "light" | "dark" = theme === "system" ? (systemDark ? "dark" : "light") : theme;
+
   useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle("dark", theme === "dark");
+    document.documentElement.classList.toggle("dark", resolved === "dark");
     window.localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme]);
+  }, [theme, resolved]);
 
   const setTheme = (next: Theme) => setThemeState(next);
-  const toggleTheme = () => setThemeState((t) => (t === "dark" ? "light" : "dark"));
+  const toggleTheme = () => setThemeState(resolved === "dark" ? "light" : "dark");
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, resolved, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

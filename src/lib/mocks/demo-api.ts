@@ -122,8 +122,8 @@ async function parseBody(init: RequestInit): Promise<Body> {
   return { fields: {}, files: [] };
 }
 
-const bool = (v: string | undefined) => v === "true" || v === "1";
-const int = (v: string | undefined, fallback: number) => {
+const bool = (v: string | null | undefined) => v === "true" || v === "1";
+const int = (v: string | null | undefined, fallback: number) => {
   const n = Number(v);
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
 };
@@ -556,7 +556,7 @@ function seed(): State {
     tutorials: {},
     nextReviewId: 1000,
     nextCompanyId: 100,
-    nextTicketId,
+    nextTicketId: nextId,
     nextMessageId: 5000,
     nextCategoryId: 10,
     nextArticleId: kb.articles.length + 1,
@@ -591,26 +591,24 @@ function toSummary(clientEmail: string): CyberbackerSummary[] {
 }
 
 function toReviewItem(r: DemoReview): CyberbackerReviewItem {
-  const labels = ["Doesn't meet expectations", "Partially meets expectations", "Meets expectations", "Above expectations", "Exceeds expectations"];
   return {
     id: r.id,
     cyberbacker_id: r.cyberbacker_id,
     cyberbacker_name: "",
     overall_rating: r.overall_rating,
     meets_expectations: r.meets_expectations,
-    expectation_label: labels[Math.min(5, Math.max(1, r.meets_expectations)) - 1],
+    expectation_label: labelFor(r.meets_expectations),
     comments: r.comments,
     would_recommend: r.would_recommend,
     created_at: r.created_at,
-  };
+  } as CyberbackerReviewItem;
 }
 
 function toCompanyItem(r: DemoCompanyReview): CompanyReviewItem {
-  const labels = ["Doesn't meet expectations", "Partially meets expectations", "Meets expectations", "Above expectations", "Exceeds expectations"];
   return {
     ...r,
-    expectation_label: labels[Math.min(5, Math.max(1, r.meets_expectations)) - 1],
-  };
+    expectation_label: labelFor(r.meets_expectations),
+  } as CompanyReviewItem;
 }
 
 function toListItem(t: DemoTicket): TicketListItem {
@@ -849,7 +847,7 @@ export async function demoApi<T>(path: string, init: RequestInit = {}, role: Dem
         created_at: new Date().toISOString(),
       };
       state.reviews = [review, ...state.reviews];
-      const out: CyberbackerReviewOut = { ...toReviewItem(review) as unknown as CyberbackerReviewCreate, ...review };
+      const out = { ...toReviewItem(review), ...review } as unknown as CyberbackerReviewOut;
       return out as T;
     }
 

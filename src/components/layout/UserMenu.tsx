@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { InitialsAvatar } from "@/components/shared/InitialsAvatar";
-import { clearDemoRole, useDemoAccount } from "@/lib/demo-auth";
+import { signOut, useDemoAccount } from "@/lib/demo-auth";
 
 export function UserMenu() {
   const user = useDemoAccount();
@@ -57,7 +57,7 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={() => { clearDemoRole(); void navigate({ to: "/", replace: true }); }}>
+        <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={() => { signOut(); void navigate({ to: "/", replace: true }); }}>
           <LogOut className="mr-2 h-4 w-4" /> Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>

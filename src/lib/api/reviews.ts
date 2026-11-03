@@ -69,7 +69,7 @@ export function toCyberbackerPayload(input: CyberbackerReviewInput): Cyberbacker
     timeliness_rating: asRating(input.timeliness),
   } as const;
   for (const [key, value] of Object.entries(optional)) {
-    if (value) (payload as Record<string, unknown>)[key] = value;
+    if (value) (payload as unknown as Record<string, unknown>)[key] = value;
   }
   const comments = input.comments?.trim();
   if (comments) payload.comments = comments;
@@ -106,7 +106,7 @@ export function toCompanyPayload(input: CompanyReviewInput): CompanyReviewCreate
     value_for_money_rating: asRating(input.value),
   } as const;
   for (const [key, value] of Object.entries(optional)) {
-    if (value) (payload as Record<string, unknown>)[key] = value;
+    if (value) (payload as unknown as Record<string, unknown>)[key] = value;
   }
   const comments = input.comments?.trim();
   if (comments) payload.comments = comments;
