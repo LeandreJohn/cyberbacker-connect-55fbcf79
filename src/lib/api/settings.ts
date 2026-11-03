@@ -32,11 +32,3 @@ export function completeTutorial(pageKey: string): Promise<TutorialState> {
 export function replayTutorials(): Promise<TutorialState> {
   return apiFetch<TutorialState>(`${CP}/settings/tutorials/replay`, { method: "POST" });
 }
-
-export async function completeTutorial(path: string): Promise<TutorialOut> {
-  return apiFetch<TutorialOut>(`${TP}/complete`, { method: "POST", body: JSON.stringify({ page_path: path }) });
-}
-
-export async function replayTutorials(): Promise<TutorialOut> {
-  return apiFetch<TutorialOut>(`${TP}/replay`, { method: "POST" });
-}
