@@ -38,6 +38,7 @@ function GoogleIcon() {
 
 function LoginPage() {
   const navigate = useNavigate();
+  const demoEnabled = import.meta.env.VITE_ENABLE_DEMO !== "false";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
@@ -109,19 +110,29 @@ function LoginPage() {
             <GoogleIcon /> Sign in with Google
           </Button>
 
-          <div className="mt-6 border-t border-border pt-4">
-            <p className="mb-2 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Demo access</p>
-            <div className="grid grid-cols-2 gap-2">
-              <Button size="sm" variant="secondary" className="h-auto flex-col py-2" onClick={() => login("client")}>
-                <span className="text-xs font-semibold">Continue as Client</span>
-                <span className="text-[10px] font-normal text-muted-foreground">{DEMO_ACCOUNTS.client.name}</span>
-              </Button>
-              <Button size="sm" variant="secondary" className="h-auto flex-col py-2" onClick={() => login("superadmin")}>
-                <span className="text-xs font-semibold">Continue as Superadmin</span>
-                <span className="text-[10px] font-normal text-muted-foreground">{DEMO_ACCOUNTS.superadmin.name}</span>
-              </Button>
-            </div>
-          </div>
+          {demoEnabled && (
+            <>
+              <div className="my-5 flex items-center gap-4 text-xs text-muted-foreground">
+                <span className="h-px flex-1 bg-border" />or explore the demo<span className="h-px flex-1 bg-border" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button size="sm" variant="secondary" className="h-auto gap-2 py-2" onClick={() => login("client")}>
+                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">JA</span>
+                  <span className="min-w-0 text-left">
+                    <span className="block truncate text-xs font-semibold">Jordan Avery · Client demo</span>
+                    <span className="block text-[10px] font-normal text-muted-foreground">BrightPath Ventures</span>
+                  </span>
+                </Button>
+                <Button size="sm" variant="secondary" className="h-auto gap-2 py-2" onClick={() => login("superadmin")}>
+                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">LS</span>
+                  <span className="min-w-0 text-left">
+                    <span className="block truncate text-xs font-semibold">Leandre John Sabado · SuperAdmin demo</span>
+                    <span className="block text-[10px] font-normal text-muted-foreground">Cyberbacker</span>
+                  </span>
+                </Button>
+              </div>
+            </>
+          )}
         </div>
         </div>
         <p className="text-center text-xs text-foreground/85 lg:hidden">© 2026 Cyberbacker. All rights reserved.</p>
