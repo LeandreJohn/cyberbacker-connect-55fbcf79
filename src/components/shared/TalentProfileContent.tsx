@@ -7,9 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TalentProfile } from "@/lib/data/types";
 import { firstName } from "@/lib/utils";
 import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { addEndorsedSkill, toggleEndorsement, useMemberSkills } from "@/lib/data/member-skills";
+import { Skeleton } from "@/components/ui/skeleton";
+import { portalQ } from "@/lib/api/queries";
+import { toBackendId } from "@/lib/api/reviews";
+import { endorseSkill, unendorseSkill } from "@/lib/api/endorsements";
 
 interface TalentProfileContentProps {
   name: string;
@@ -107,19 +112,29 @@ function Info({ label, value }: { label: string; value: string }) { return <div 
 function Score({ label, value, caption, extra }: { label: string; value: number; caption?: string; extra?: React.ReactNode }) { return <div><div className="mb-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm"><span className="font-medium">{label}</span><span className="flex items-center gap-3">{extra}<span className="text-xs text-muted-foreground">{caption ?? `${value}%`}</span></span></div><Progress value={value} className="h-1.5"/></div>; }
 
 function EndorsementsSection({ memberId, profileSkills }: { memberId: string; profileSkills: string[] }) {
-  const state = useMemberSkills(memberId);
+  let cbId: number;
+  try {
+    cbId = toBackendId(memberId);
+  } catch {
+    return null;
+  }
+  const queryClient = useQueryClient();
+  const { data: endorsements = [], isPending } = useQuery(portalQ.endorsements(cbId));
   const [name, setName] = useState(""); const [error, setError] = useState("");
-  const available = profileSkills.filter((s) => !state.endorsed.includes(s));
-  const submit = (e: React.FormEvent) => { e.preventDefault(); if (!name.trim()) return setError("Enter a skill name."); if (!addEndorsedSkill(memberId, name, profileSkills)) return setError("You've already endorsed that skill."); setName(""); setError(""); };
+  const apply = (rows: { skill: string; endorsements: number; endorsed_by_me: boolean }[]) => queryClient.setQueryData(["endorsements", cbId], rows);
+  const endorse = useMutation({ mutationFn: (skill: string) => endorseSkill(cbId, skill), onSuccess: apply, onError: (e) => toast.error(e instanceof Error ? e.message : "Couldn't endorse the skill") });
+  const unendorse = useMutation({ mutationFn: (skill: string) => unendorseSkill(cbId, skill), onSuccess: apply, onError: (e) => toast.error(e instanceof Error ? e.message : "Couldn't remove the endorsement") });
+  const available = profileSkills.filter((s) => !endorsements.some((e) => e.skill.toLowerCase() === s.toLowerCase()));
+  const submit = (e: React.FormEvent) => { e.preventDefault(); const skill = name.trim(); if (!skill) return setError("Enter a skill name."); if (endorsements.some((x) => x.skill.toLowerCase() === skill.toLowerCase())) return setError("You've already endorsed that skill."); endorse.mutate(skill); setName(""); setError(""); };
   return <section className="space-y-4 rounded-lg border bg-card p-4">
     <div className="flex items-center gap-2"><ThumbsUp className="h-4 w-4 text-primary"/><h3 className="font-semibold">Client endorsements</h3></div>
     <p className="text-xs text-muted-foreground">Endorse the skills you've seen this team member use. Endorsements are separate from their profile skills.</p>
-    {state.endorsed.length ? <ul className="divide-y rounded-md border">{state.endorsed.map((skill) => <li key={skill} className="flex items-center justify-between gap-3 p-3">
-      <div className="min-w-0"><p className="flex flex-wrap items-center gap-2 text-sm font-semibold">{skill}{state.added.includes(skill) && <Badge variant="outline" className="text-[10px]">Client-added</Badge>}</p><p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><span className="grid h-5 w-5 place-items-center rounded-full bg-primary/10 text-primary"><ThumbsUp className="h-3 w-3"/></span>1 endorsement · Endorsed by you</p></div>
-      <Button type="button" variant="secondary" size="sm" className="rounded-full" aria-label={`Remove endorsement for ${skill}`} onClick={() => toggleEndorsement(memberId, skill)}><Check className="mr-1 h-3.5 w-3.5"/>Endorsed</Button>
+    {isPending ? <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div> : endorsements.length ? <ul className="divide-y rounded-md border">{endorsements.map((skill) => <li key={skill.skill} className="flex items-center justify-between gap-3 p-3">
+      <div className="min-w-0"><p className="flex flex-wrap items-center gap-2 text-sm font-semibold">{skill.skill}<Badge variant="outline" className="text-[10px]">{skill.endorsements} endorsement{skill.endorsements === 1 ? "" : "s"}</Badge></p>{skill.endorsed_by_me && <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><span className="grid h-5 w-5 place-items-center rounded-full bg-primary/10 text-primary"><ThumbsUp className="h-3 w-3"/></span>Endorsed by you</p></div>
+      <Button type="button" variant="secondary" size="sm" className="rounded-full" aria-label={`Remove endorsement for ${skill.skill}`} disabled={unendorse.isPending} onClick={() => skill.endorsed_by_me && unendorse.mutate(skill.skill)}><Check className="mr-1 h-3.5 w-3.5"/>{skill.endorsed_by_me ? "Endorsed" : "Endorse"}</Button>
     </li>)}</ul> : <p className="rounded-md border border-dashed p-3 text-center text-sm text-muted-foreground">No endorsements yet.</p>}
-    {available.length > 0 && <div className="space-y-2"><p className="text-xs font-semibold uppercase text-muted-foreground">Endorse a skill</p><div className="flex flex-wrap gap-2">{available.map((skill) => <Button key={skill} type="button" variant="outline" size="sm" className="rounded-full" aria-label={`Endorse ${skill}`} onClick={() => toggleEndorsement(memberId, skill)}><Plus className="mr-1 h-3.5 w-3.5"/>{skill}</Button>)}</div></div>}
-    <form onSubmit={submit} className="space-y-2"><p className="text-xs font-semibold uppercase text-muted-foreground">Add a skill</p><div className="flex gap-2"><Input aria-label="Skill name" placeholder="Skill not on their profile" value={name} onChange={(e) => setName(e.target.value)} /><Button type="submit" size="sm">Endorse</Button></div>{error && <p className="text-xs text-destructive">{error}</p>}</form>
+    {available.length > 0 && <div className="space-y-2"><p className="text-xs font-semibold uppercase text-muted-foreground">Endorse a skill</p><div className="flex flex-wrap gap-2">{available.map((skill) => <Button key={skill} type="button" variant="outline" size="sm" className="rounded-full" disabled={endorse.isPending} aria-label={`Endorse ${skill}`} onClick={() => endorse.mutate(skill)}><Plus className="mr-1 h-3.5 w-3.5"/>{skill}</Button>)}</div></div>}
+    <form onSubmit={submit} className="space-y-2"><p className="text-xs font-semibold uppercase text-muted-foreground">Add a skill</p><div className="flex gap-2"><Input aria-label="Skill name" placeholder="Skill not on their profile" value={name} onChange={(e) => setName(e.target.value)} /><Button type="submit" size="sm" disabled={endorse.isPending}>Endorse</Button></div>{error && <p className="text-xs text-destructive">{error}</p>}</form>
   </section>;
 }
 

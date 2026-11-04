@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ArrowRight,
@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
-import { useDashboardWidgets } from "@/lib/data/dashboard-widgets";
+import { portalQ } from "@/lib/api/queries";
 import { StatCard } from "@/components/shared/StatCard";
 import { InitialsAvatar } from "@/components/shared/InitialsAvatar";
 import { StatusBadge, toneFor, prettify } from "@/components/shared/StatusBadge";
@@ -79,8 +79,14 @@ function Dashboard() {
   const { data: announcements } = useSuspenseQuery(q.announcements());
   const { data: activity } = useSuspenseQuery(q.activityFeed());
   const { data: trend } = useSuspenseQuery(q.performanceTrend());
-
-  const widgets = useDashboardWidgets();
+  const { data: prefs } = useQuery(portalQ.preferences());
+  // KPI visibility comes from the account's saved preferences.
+  const widgets = {
+    activeCyberbackers: prefs?.kpi_active_cyberbackers ?? true,
+    attendanceRate: prefs?.kpi_attendance_rate ?? true,
+    openTickets: prefs?.kpi_open_support_tickets ?? true,
+    upcomingRenewals: prefs?.kpi_upcoming_renewals ?? true,
+  };
   const activeCount = team.filter((c) => c.status === "active").length;
   const openTickets = tickets.filter(
     (t) => t.status === "open" || t.status === "in_progress" || t.status === "pending_client",

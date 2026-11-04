@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useDemoAccount } from "@/lib/demo-auth";
-import { getToken } from "@/lib/api/client";
-import { fetchCompanyReviews, fetchCyberbackerReviews, fetchCyberbackerSummary, fetchRatingTrend, fromBackendId, postCompanyReview, postCyberbackerReview } from "@/lib/data/reviews-api";
 import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
 
@@ -15,14 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { COMPANY_CATEGORIES, addCompanyReview, getCompanyReviews, type CompanyCategory, type CompanyReview } from "@/lib/data/company-reviews";
-import { useEffect } from "react";
+import { portalQ } from "@/lib/api/queries";
+import { fromBackendId, postCompanyReview, postCyberbackerReview, toBackendId } from "@/lib/api/reviews";
+import type { CompanyReviewItem } from "@/lib/types";
 import { expectationLabel } from "@/lib/expectations";
 import { q } from "@/lib/data/queries";
-import { submitReview } from "@/lib/data/api";
-import type { Review } from "@/lib/data/types";
 import { cn, firstName } from "@/lib/utils";
 
 interface ReviewsSearch { cyberbacker?: string }
@@ -41,8 +38,11 @@ export const Route = createFileRoute("/_app/reviews")({
   }),
   loader: async ({ context }) => {
     await Promise.all([
-      context.queryClient.ensureQueryData(q.reviews()),
       context.queryClient.ensureQueryData(q.cyberbackers()),
+      context.queryClient.ensureQueryData(portalQ.cbSummaries()),
+      context.queryClient.ensureQueryData(portalQ.cbReviews()),
+      context.queryClient.ensureQueryData(portalQ.cbTrend()),
+      context.queryClient.ensureQueryData(portalQ.companyReviews()),
     ]);
   },
   component: ReviewsPage,
@@ -84,28 +84,23 @@ function ExpectationStars({ value, onChange, id }: { value: number; onChange: (v
   );
 }
 
-/** True when signed in through the real FastAPI login (token present). */
-function useLiveApi() {
-  const account = useDemoAccount();
-  const [live, setLive] = useState(false);
-  useEffect(() => setLive(Boolean(getToken())), [account]);
-  return live;
+function usePortalError(...results: { error: unknown }[]): string | null {
+  const first = results.find((r) => r.error);
+  if (!first) return null;
+  return first.error instanceof Error ? first.error.message : "Something went wrong";
 }
 
 function ReviewsPage() {
-  const { data: mockReviews } = useSuspenseQuery(q.reviews());
-  const { data: team } = useSuspenseQuery(q.cyberbackers());
-  const qc = useQueryClient();
-  const search = Route.useSearch();
-  const live = useLiveApi();
-  const nameFor = (id: string) => team.find((t) => t.id === id)?.name ?? "Cyberbacker";
-  const liveReviews = useQuery({ queryKey: ["api", "cb_reviews"], queryFn: () => fetchCyberbackerReviews(nameFor), enabled: live });
-  const liveSummary = useQuery({ queryKey: ["api", "cb_ratings"], queryFn: fetchCyberbackerSummary, enabled: live });
-  const liveTrend = useQuery({ queryKey: ["api", "cb_rating_trend"], queryFn: fetchRatingTrend, enabled: live });
-  const liveError = liveReviews.error ?? liveSummary.error ?? liveTrend.error;
-  const reviews = live ? liveReviews.data ?? [] : mockReviews;
+  const { data: team } = useQuery({ ...q.cyberbackers(), throwOnError: false });
+  const summaries = useQuery(portalQ.cbSummaries());
+  const reviews = useQuery(portalQ.cbReviews());
+  const trend = useQuery(portalQ.cbTrend());
+  const company = useQuery(portalQ.companyReviews());
+  const loadError = usePortalError(summaries, reviews, trend, company);
+  const roster = team ?? [];
+  const nameByBackend = (id: number) => roster.find((t) => t.id === fromBackendId(id))?.name ?? "Cyberbacker";
 
-  const [cbId, setCbId] = useState(team.some((cb) => cb.id === search.cyberbacker) ? search.cyberbacker ?? "" : team[0]?.id ?? "");
+  const [cbId, setCbId] = useState("cb1");
   const [overall, setOverall] = useState(0);
   const [scores, setScores] = useState<Record<(typeof CATS)[number], number>>({
     communication: 0, quality: 0, reliability: 0, timeliness: 0,
@@ -113,6 +108,7 @@ function ReviewsPage() {
   const [comment, setComment] = useState("");
   const [recommend, setRecommend] = useState(true);
   const [expectations, setExpectations] = useState(0);
+  const qc = useQueryClient();
 
   const reset = () => {
     setOverall(0);
@@ -121,193 +117,177 @@ function ReviewsPage() {
     setExpectations(0);
   };
   const mutation = useMutation({
-    mutationFn: async (input: Parameters<typeof submitReview>[0]) => {
-      if (live) { await postCyberbackerReview(input); return null; }
-      return submitReview(input);
-    },
-    onSuccess: (r, input) => {
-      if (r) qc.setQueryData<Review[]>(q.reviews().queryKey, (old) => [r, ...(old ?? [])]);
-      else void qc.invalidateQueries({ queryKey: ["api"] });
-      toast.success("Review submitted", { description: `Thanks for rating ${firstName(input.cyberbackerName)}.` });
+    mutationFn: () => postCyberbackerReview({
+      cyberbackerId: toBackendId(cbId),
+      overall, ...scores, expectations, comments: comment, recommend,
+    }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["cb_reviews"] });
+      void qc.invalidateQueries({ queryKey: ["cb_ratings"] });
+      void qc.invalidateQueries({ queryKey: ["cb_rating_trend"] });
+      toast.success("Review submitted", { description: `Thanks for rating ${firstName(roster.find((t) => t.id === cbId)?.name ?? "your Cyberbacker")}.` });
       reset();
     },
     onError: (e) => toast.error("Couldn't submit review", { description: e instanceof Error ? e.message : undefined }),
   });
 
-  const summary = useMemo(() => {
-    if (live) {
-      return team.map((cb) => {
-        const s = liveSummary.data?.find((x) => fromBackendId(x.id) === cb.id);
-        return { cb, count: s?.review_count ?? 0, avg: s?.average_rating ?? 0 };
-      });
-    }
-    return team.map((cb) => {
-      const rs = reviews.filter((r) => r.cyberbackerId === cb.id);
-      const avg = rs.length ? rs.reduce((s, r) => s + r.overall, 0) / rs.length : 0;
-      return { cb, count: rs.length, avg };
-    });
-  }, [team, reviews, live, liveSummary.data]);
+  const summary = useMemo(() => roster.map((cb) => {
+    let id: number | null = null;
+    try { id = toBackendId(cb.id); } catch { id = null; }
+    const s = summaries.data?.find((x) => x.id === id);
+    return { cb, count: s?.review_count ?? 0, avg: s?.average_rating ?? 0 };
+  }), [roster, summaries.data]);
 
-  const trend = useMemo(() => {
-    if (live) {
-      return (liveTrend.data ?? []).map((p) => ({
-        month: new Date(`${p.month}-01T00:00:00`).toLocaleDateString("en-US", { month: "short" }),
-        rating: p.average_rating,
-      }));
-    }
-    const byMonth = new Map<string, number[]>();
-    [...reviews].reverse().forEach((r) => {
-      const m = new Date(r.date).toLocaleDateString("en-US", { month: "short" });
-      byMonth.set(m, [...(byMonth.get(m) ?? []), r.overall]);
-    });
-    return [...byMonth].map(([month, v]) => ({ month, rating: +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(2) }));
-  }, [reviews, live, liveTrend.data]);
+  const trendData = useMemo(() => (trend.data ?? []).map((p) => ({
+    month: new Date(`${p.month}-01T00:00:00`).toLocaleDateString("en-US", { month: "short" }),
+    rating: p.average_rating,
+  })), [trend.data]);
 
   const submit = () => {
-    const cb = team.find((t) => t.id === cbId);
-    if (!cb || !overall) return toast.error("Choose a Cyberbacker and an overall rating.");
+    if (!cbId || !overall) return toast.error("Choose a Cyberbacker and an overall rating.");
     if (CATS.some((c) => !scores[c])) return toast.error("Please rate every category.");
     if (!expectations) return toast.error("Rate how well they meet expectations.");
-    mutation.mutate({ cyberbackerId: cb.id, cyberbackerName: cb.name, overall, ...scores, expectations, comment, recommend });
+    mutation.mutate();
   };
 
   return (
     <div className="space-y-6">
       <PageHeader title="Reviews & Ratings" description="Rate your Cyberbackers and help us keep quality high." />
-      {live && liveError && (
-        <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">Couldn't load your reviews: {liveError instanceof Error ? liveError.message : "unknown error"}</p>
+      {loadError && (
+        <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">Couldn't load your reviews: {loadError}</p>
       )}
       <Tabs defaultValue="team" className="space-y-6">
         <TabsList><TabsTrigger value="team">Rate my Cyberbackers</TabsTrigger><TabsTrigger value="company">Rate Cyberbacker</TabsTrigger></TabsList>
-      <TabsContent value="team" className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        {summary.map(({ cb, count, avg }) => (
-          <Card key={cb.id}>
-            <CardContent className="flex items-center gap-3 p-4">
-              <InitialsAvatar initials={cb.initials} />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{firstName(cb.name)}</p>
-                <div className="flex items-center gap-1.5">
-                  <Stars value={Math.round(avg)} size="sm" />
-                  <span className="text-xs text-muted-foreground">{avg ? avg.toFixed(1) : "—"} · {count}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-2">
-          <CardHeader><CardTitle>Write a review</CardTitle></CardHeader>
-          <CardContent className="space-y-5">
-            <div className="space-y-2">
-              <Label>Cyberbacker</Label>
-              <Select value={cbId} onValueChange={setCbId}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {team.map((t) => <SelectItem key={t.id} value={t.id}>{firstName(t.name)} — {t.role}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Overall rating</Label>
-              <Stars value={overall} onChange={setOverall} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {CATS.map((c) => (
-                <div key={c} className="space-y-1">
-                  <Label className="capitalize">{c}</Label>
-                  <Stars size="sm" value={scores[c]} onChange={(v) => setScores((s) => ({ ...s, [c]: v }))} />
-                </div>
-              ))}
-            </div>
-            <ExpectationStars id="cb-expectations" value={expectations} onChange={setExpectations} />
-            <div className="space-y-2">
-              <Label htmlFor="comment">Comments</Label>
-              <Textarea id="comment" rows={4} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="What went well? What could improve?" />
-            </div>
-            <div className="flex items-center justify-between rounded-lg border border-border p-3">
-              <Label htmlFor="rec">Would you recommend them?</Label>
-              <Switch id="rec" checked={recommend} onCheckedChange={setRecommend} />
-            </div>
-            <Button className="w-full" onClick={submit} disabled={mutation.isPending}>
-              {mutation.isPending ? "Submitting…" : "Submit review"}
-            </Button>
-          </CardContent>
-        </Card>
-
-        <div className="space-y-6 lg:col-span-3">
-          <Card>
-            <CardHeader><CardTitle>Average rating trend</CardTitle></CardHeader>
-            <CardContent>
-              <SimpleLineChart data={trend} xKey="month" height={220} series={[{ key: "rating", label: "Avg rating", color: "var(--color-primary)" }]} />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle>Recent reviews</CardTitle></CardHeader>
-            <CardContent className="divide-y divide-border">
-              {reviews.slice(0, 8).map((r) => (
-                <div key={r.id} className="space-y-1.5 py-3 first:pt-0">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-sm font-medium">{firstName(r.cyberbackerName)}</p>
-                    <div className="flex items-center gap-2">
-                      <Stars value={r.overall} size="sm" />
-                      <span className="text-xs text-muted-foreground">{r.date}</span>
+        <TabsContent value="team" className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            {summaries.isPending ? [...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />) : summary.map(({ cb, count, avg }) => (
+              <Card key={cb.id}>
+                <CardContent className="flex items-center gap-3 p-4">
+                  <InitialsAvatar initials={cb.initials} />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{firstName(cb.name)}</p>
+                    <div className="flex items-center gap-1.5">
+                      <Stars value={Math.round(avg)} size="sm" />
+                      <span className="text-xs text-muted-foreground">{avg ? avg.toFixed(1) : "—"} · {count}</span>
                     </div>
                   </div>
-                  <p className="text-xs font-medium text-primary">{expectationLabel(r.expectations ?? r.overall)}</p>
-                  {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
-                  {r.recommend && (
-                    <p className="flex items-center gap-1 text-xs text-success"><ThumbsUp className="h-3 w-3" /> Recommended</p>
-                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+            <Card className="lg:col-span-2">
+              <CardHeader><CardTitle>Write a review</CardTitle></CardHeader>
+              <CardContent className="space-y-5">
+                <div className="space-y-2">
+                  <Label>Cyberbacker</Label>
+                  <Select value={cbId} onValueChange={setCbId}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {roster.map((t) => <SelectItem key={t.id} value={t.id}>{firstName(t.name)} — {t.role}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-      </TabsContent>
-      <TabsContent value="company"><CompanyReviewTab /></TabsContent>
+                <div className="space-y-2">
+                  <Label>Overall rating</Label>
+                  <Stars value={overall} onChange={setOverall} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {CATS.map((c) => (
+                    <div key={c} className="space-y-1">
+                      <Label className="capitalize">{c}</Label>
+                      <Stars size="sm" value={scores[c]} onChange={(v) => setScores((s) => ({ ...s, [c]: v }))} />
+                    </div>
+                  ))}
+                </div>
+                <ExpectationStars id="cb-expectations" value={expectations} onChange={setExpectations} />
+                <div className="space-y-2">
+                  <Label htmlFor="comment">Comments</Label>
+                  <Textarea id="comment" rows={4} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="What went well? What could improve?" />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                  <Label htmlFor="rec">Would you recommend them?</Label>
+                  <Switch id="rec" checked={recommend} onCheckedChange={setRecommend} />
+                </div>
+                <Button className="w-full" onClick={submit} disabled={mutation.isPending}>
+                  {mutation.isPending ? "Submitting…" : "Submit review"}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-6 lg:col-span-3">
+              <Card>
+                <CardHeader><CardTitle>Average rating trend</CardTitle></CardHeader>
+                <CardContent>
+                  {trend.isPending ? <Skeleton className="h-52 w-full" /> : (
+                    <SimpleLineChart data={trendData} xKey="month" height={220} series={[{ key: "rating", label: "Avg rating", color: "var(--color-primary)" }]} />
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader><CardTitle>Recent reviews</CardTitle></CardHeader>
+                <CardContent className="divide-y divide-border">
+                  {reviews.isPending ? [...Array(4)].map((_, i) => <Skeleton key={i} className="my-2 h-14 w-full" />) : (reviews.data ?? []).slice(0, 8).map((r) => (
+                    <div key={r.id} className="space-y-1.5 py-3 first:pt-0">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-sm font-medium">{firstName(nameByBackend(r.cyberbacker_id))}</p>
+                        <div className="flex items-center gap-2">
+                          <Stars value={r.overall_rating} size="sm" />
+                          <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <p className="text-xs font-medium text-primary">{r.expectation_label}</p>
+                      {r.comments && <p className="text-sm text-muted-foreground">{r.comments}</p>}
+                      {r.would_recommend && (
+                        <p className="flex items-center gap-1 text-xs text-success"><ThumbsUp className="h-3 w-3" /> Recommended</p>
+                      )}
+                    </div>
+                  ))}
+                  {!reviews.isPending && !(reviews.data ?? []).length && (
+                    <p className="py-6 text-center text-sm text-muted-foreground">No reviews yet. Rate one of your Cyberbackers to get started.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+        <TabsContent value="company"><CompanyReviewTab data={company.data} isPending={company.isPending} onSubmitted={() => void qc.invalidateQueries({ queryKey: ["company_reviews"] })} /></TabsContent>
       </Tabs>
     </div>
   );
 }
 
-const emptyCompanyScores = (): Record<CompanyCategory, number> => ({ service: 0, communication: 0, matching: 0, support: 0, value: 0 });
-function CompanyReviewTab() {
-  const live = useLiveApi();
-  const user = useDemoAccount();
-  const qc = useQueryClient();
-  const [localReviews, setLocalReviews] = useState<CompanyReview[]>([]);
-  useEffect(() => setLocalReviews(getCompanyReviews()), []);
-  const liveData = useQuery({ queryKey: ["api", "company_reviews"], queryFn: fetchCompanyReviews, enabled: live });
-  const reviews = live ? liveData.data?.reviews ?? [] : localReviews;
+const emptyCompanyScores = () => ({ service: 0, communication: 0, matching: 0, support: 0, value: 0 });
+function CompanyReviewTab({ data, isPending, onSubmitted }: { data?: { average_rating: number | null; total_reviews: number; reviews: CompanyReviewItem[] }; isPending: boolean; onSubmitted: () => void }) {
   const [overall, setOverall] = useState(0);
   const [scores, setScores] = useState(emptyCompanyScores);
   const [comment, setComment] = useState("");
   const [recommend, setRecommend] = useState(true);
   const [expectations, setExpectations] = useState(0);
   const [pending, setPending] = useState(false);
-  const avg = live ? liveData.data?.average ?? 0 : reviews.length ? reviews.reduce((s, r) => s + r.overall, 0) / reviews.length : 0;
-  const total = live ? liveData.data?.total ?? 0 : reviews.length;
+  const avg = data?.average_rating ?? 0;
+  const total = data?.total_reviews ?? 0;
+  const categories = [
+    { key: "service" as const, label: "Service quality", field: "service_quality_rating" as const },
+    { key: "communication" as const, label: "Communication", field: "communication_rating" as const },
+    { key: "matching" as const, label: "Recruiting & matching", field: "recruiting_matching_rating" as const },
+    { key: "support" as const, label: "Support responsiveness", field: "support_responsiveness_rating" as const },
+    { key: "value" as const, label: "Value for money", field: "value_for_money_rating" as const },
+  ];
   const submit = async () => {
     if (!overall) return toast.error("Choose an overall rating.");
-    if (COMPANY_CATEGORIES.some((c) => !scores[c.key])) return toast.error("Please rate every category.");
+    if (categories.some((c) => !scores[c.key])) return toast.error("Please rate every category.");
     if (!expectations) return toast.error("Rate how well Cyberbacker meets expectations.");
-    if (live) {
-      setPending(true);
-      try {
-        await postCompanyReview({ overall, scores, expectations, comment, recommend });
-        await qc.invalidateQueries({ queryKey: ["api", "company_reviews"] });
-      } catch (e) {
-        setPending(false);
-        return toast.error("Couldn't submit review", { description: e instanceof Error ? e.message : undefined });
-      }
+    setPending(true);
+    try {
+      await postCompanyReview({ overall, ...scores, expectations, comments: comment, recommend });
+      onSubmitted();
+    } catch (e) {
       setPending(false);
-    } else {
-      setLocalReviews(addCompanyReview({ overall, scores, expectations, comment, recommend, author: user?.name ?? "Client" }));
+      return toast.error("Couldn't submit review", { description: e instanceof Error ? e.message : undefined });
     }
+    setPending(false);
     toast.success("Thanks for rating Cyberbacker!");
     setOverall(0); setScores(emptyCompanyScores()); setComment(""); setExpectations(0);
   };
@@ -318,7 +298,7 @@ function CompanyReviewTab() {
         <CardContent className="space-y-5">
           <div className="space-y-2"><Label>Overall rating</Label><Stars value={overall} onChange={setOverall} /></div>
           <div className="space-y-3">
-            {COMPANY_CATEGORIES.map((c) => (
+            {categories.map((c) => (
               <div key={c.key} className="flex items-center justify-between gap-3">
                 <Label>{c.label}</Label>
                 <Stars size="sm" value={scores[c.key]} onChange={(v) => setScores((s) => ({ ...s, [c.key]: v }))} />
@@ -334,15 +314,20 @@ function CompanyReviewTab() {
       <Card className="lg:col-span-3">
         <CardHeader className="flex-row items-center justify-between"><CardTitle>Your company reviews</CardTitle><div className="flex items-center gap-2"><Stars size="sm" value={Math.round(avg)} /><span className="text-sm text-muted-foreground">{avg ? avg.toFixed(1) : "—"} · {total}</span></div></CardHeader>
         <CardContent className="space-y-4">
-          {reviews.map((r) => (
+          {isPending ? [...Array(3)].map((_, i) => <Skeleton key={i} className="h-24 w-full" />) : (data?.reviews ?? []).map((r) => (
             <div key={r.id} className="space-y-2 rounded-lg border border-border p-4">
-              <div className="flex items-center justify-between"><Stars size="sm" value={r.overall} /><span className="text-xs text-muted-foreground">{new Date(r.date).toLocaleDateString()}</span></div>
-              <p className="text-xs font-medium text-primary">{expectationLabel(r.expectations ?? r.overall)}</p>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">{COMPANY_CATEGORIES.map((c) => <span key={c.key}>{c.label}: {r.scores[c.key]}/5</span>)}</div>
-              {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
-              {r.recommend && <p className="flex items-center gap-1 text-xs text-success"><ThumbsUp className="h-3 w-3" /> Recommends Cyberbacker</p>}
+              <div className="flex items-center justify-between"><Stars size="sm" value={r.overall_rating} /><span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</span></div>
+              <p className="text-xs font-medium text-primary">{r.expectation_label}</p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                {categories.map((c) => <span key={c.key}>{c.label}: {r[c.field] ?? "—"}/5</span>)}
+              </div>
+              {r.comments && <p className="text-sm text-muted-foreground">{r.comments}</p>}
+              {r.would_recommend && <p className="flex items-center gap-1 text-xs text-success"><ThumbsUp className="h-3 w-3" /> Recommends Cyberbacker</p>}
             </div>
           ))}
+          {!isPending && !(data?.reviews ?? []).length && (
+            <p className="py-6 text-center text-sm text-muted-foreground">You haven't rated Cyberbacker as a company yet.</p>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -1,23 +1,29 @@
 import {
   CircleDot,
   RefreshCw,
-  UserPlus,
+  UserCog,
   Flag,
   MessageSquare,
-  Paperclip,
   type LucideIcon,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import type { TicketEvent, TicketEventType } from "@/lib/data/types";
+import type { TicketEvent } from "@/lib/types";
 
-const iconFor: Record<TicketEventType, LucideIcon> = {
+const iconFor: Record<TicketEvent["event_type"], LucideIcon> = {
   created: CircleDot,
-  status: RefreshCw,
-  assignment: UserPlus,
-  priority: Flag,
-  comment: MessageSquare,
-  attachment: Paperclip,
+  replied: MessageSquare,
+  status_changed: RefreshCw,
+  priority_changed: Flag,
+  reassigned: UserCog,
+};
+
+const prefixFor: Record<TicketEvent["event_type"], string> = {
+  created: "Ticket created",
+  replied: "New reply",
+  status_changed: "Status",
+  priority_changed: "Priority",
+  reassigned: "Assigned to",
 };
 
 export function TicketTimeline({
@@ -27,13 +33,17 @@ export function TicketTimeline({
   events: TicketEvent[];
   className?: string;
 }) {
+  if (!events.length) {
+    return <p className={cn("text-sm text-muted-foreground", className)}>No activity yet.</p>;
+  }
   return (
     <ol className={cn("relative space-y-5", className)}>
       {events.map((event, i) => {
-        const Icon = iconFor[event.type];
+        const Icon = iconFor[event.event_type];
         const isLast = i === events.length - 1;
+        const change = event.old_value && event.new_value ? `${event.old_value} → ${event.new_value}` : event.new_value ?? "";
         return (
-          <li key={event.id} className="relative flex gap-3.5 pl-1">
+          <li key={`${event.event_type}-${event.created_at}-${i}`} className="relative flex gap-3.5 pl-1">
             {!isLast && (
               <span
                 aria-hidden
@@ -44,9 +54,12 @@ export function TicketTimeline({
               <Icon className="h-4 w-4" />
             </span>
             <div className="min-w-0 pt-0.5">
-              <p className="text-sm font-medium text-foreground">{event.label}</p>
+              <p className="text-sm font-medium text-foreground">
+                {prefixFor[event.event_type]}
+                {change ? `: ${change}` : ""}
+              </p>
               <p className="text-xs text-muted-foreground">
-                {event.actor} · {event.time}
+                {event.actor_name} · {new Date(event.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
               </p>
             </div>
           </li>
