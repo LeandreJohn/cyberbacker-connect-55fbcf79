@@ -39,7 +39,8 @@ function TicketManagement() {
 
   const select = (id: number) => {
     setSelectedId(id);
-    setMobileOpen(true);
+    // The mobile sheet only exists below lg; on desktop the detail panel is shown inline.
+    if (!window.matchMedia("(min-width: 1024px)").matches) setMobileOpen(true);
   };
 
   const onUpdated = (d: TicketDetail) => {
