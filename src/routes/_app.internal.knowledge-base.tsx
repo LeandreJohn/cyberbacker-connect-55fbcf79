@@ -200,7 +200,7 @@ function ArticleDialog({ article, categories, onClose, onSaved }: {
   const [body, setBody] = useState("");
   // Editing starts from the stored body: fetch the admin detail so a save
   // never overwrites existing content with an empty field.
-  const detail = useQuery({ ...portalQ.kbArticleAdmin(article!.id), enabled: Boolean(article) });
+  const detail = useQuery({ ...portalQ.kbArticleAdmin(article?.id ?? 0), enabled: Boolean(article) });
   useEffect(() => {
     if (article && detail.data) setBody((current) => (current ? current : detail.data.body));
   }, [article, detail.data]);
