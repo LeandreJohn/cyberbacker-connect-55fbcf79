@@ -135,7 +135,7 @@ function reviewsSeed(): Review[] {
 }
 export const getReviews = (): Promise<Review[]> => {
   reviewStore ??= reviewsSeed();
-  return mockResponse([...reviewStore]);
+  return gated([...reviewStore], []);
 };
 export const submitReview = (r: Omit<Review, "id" | "date" | "author">): Promise<Review> => {
   reviewStore ??= reviewsSeed();
