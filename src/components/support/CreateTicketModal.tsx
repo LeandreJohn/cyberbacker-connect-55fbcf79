@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Plus, Paperclip, X, UploadCloud } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { Plus, Paperclip, X, UploadCloud, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -22,9 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createTicket } from "@/lib/api/support";
+import type { TicketDetail, TicketPriority } from "@/lib/types";
 
-const categories = ["Account", "Billing", "Onboarding", "Reports", "Technical"];
-const priorities = [
+const categories = ["account", "billing", "onboarding", "reports", "technical"];
+const priorities: { value: TicketPriority; label: string }[] = [
   { value: "low", label: "Low" },
   { value: "medium", label: "Medium" },
   { value: "high", label: "High" },
@@ -33,38 +36,41 @@ const priorities = [
 
 export function CreateTicketModal({
   trigger,
+  onCreated,
 }: {
   trigger?: React.ReactNode;
+  onCreated?: (ticket: TicketDetail) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [subject, setSubject] = useState("");
-  const [category, setCategory] = useState("Account");
-  const [priority, setPriority] = useState("medium");
+  const [category, setCategory] = useState("account");
+  const [priority, setPriority] = useState<TicketPriority>("medium");
   const [description, setDescription] = useState("");
-  const [files, setFiles] = useState<string[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
 
   const reset = () => {
     setSubject("");
-    setCategory("Account");
+    setCategory("account");
     setPriority("medium");
     setDescription("");
     setFiles([]);
   };
 
-  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const picked = Array.from(e.target.files ?? []).map((f) => f.name);
-    if (picked.length) setFiles((prev) => [...prev, ...picked]);
-    e.target.value = "";
-  };
+  const create = useMutation({
+    mutationFn: () => createTicket({ subject: subject.trim(), category, priority, description: description.trim(), files }),
+    onSuccess: (ticket) => {
+      onCreated?.(ticket);
+      toast.success("Ticket created", { description: `${ticket.code} · ${ticket.subject}` });
+      reset();
+      setOpen(false);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Couldn't create the ticket"),
+  });
 
   const submit = () => {
-    if (!subject.trim()) {
-      toast.error("Please add a subject.");
-      return;
-    }
-    toast.success("Ticket created", { description: subject });
-    reset();
-    setOpen(false);
+    if (!subject.trim()) return toast.error("Please add a subject.");
+    if (!description.trim()) return toast.error("Please describe the issue.");
+    create.mutate();
   };
 
   return (
@@ -110,7 +116,7 @@ export function CreateTicketModal({
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((c) => (
-                    <SelectItem key={c} value={c}>
+                    <SelectItem key={c} value={c} className="capitalize">
                       {c}
                     </SelectItem>
                   ))}
@@ -119,7 +125,7 @@ export function CreateTicketModal({
             </div>
             <div className="space-y-1.5">
               <Label>Priority</Label>
-              <Select value={priority} onValueChange={setPriority}>
+              <Select value={priority} onValueChange={(v) => setPriority(v as TicketPriority)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -154,23 +160,32 @@ export function CreateTicketModal({
               <UploadCloud className="h-5 w-5 text-muted-foreground" />
               <span className="text-sm font-medium">Click to add files</span>
               <span className="text-xs text-muted-foreground">
-                Screenshots, PDFs, or documents
+                Up to 5 files · 10 MB each
               </span>
-              <input id="ct-files" type="file" multiple className="hidden" onChange={onPick} />
+              <input
+                id="ct-files"
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  setFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])]);
+                  e.target.value = "";
+                }}
+              />
             </label>
             {files.length > 0 && (
               <div className="flex flex-wrap gap-2 pt-1">
-                {files.map((name, i) => (
+                {files.map((f, i) => (
                   <span
-                    key={`${name}-${i}`}
+                    key={`${f.name}-${i}`}
                     className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1 text-xs"
                   >
                     <Paperclip className="h-3.5 w-3.5 text-primary" />
-                    <span className="max-w-[140px] truncate">{name}</span>
+                    <span className="max-w-[140px] truncate">{f.name}</span>
                     <button
                       type="button"
                       onClick={() => setFiles((prev) => prev.filter((_, idx) => idx !== i))}
-                      aria-label={`Remove ${name}`}
+                      aria-label={`Remove ${f.name}`}
                     >
                       <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
                     </button>
@@ -185,7 +200,9 @@ export function CreateTicketModal({
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={submit}>Submit ticket</Button>
+          <Button onClick={submit} disabled={create.isPending}>
+            {create.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />} Submit ticket
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

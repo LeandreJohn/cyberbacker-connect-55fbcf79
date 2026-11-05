@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   Clock,
   Tag,
@@ -8,13 +11,13 @@ import {
   UserCog,
   Flag,
 } from "lucide-react";
-import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
-import { StatusBadge, toneFor, prettify } from "@/components/shared/StatusBadge";
+import { StatusBadge, toneFor } from "@/components/shared/StatusBadge";
 import { InitialsAvatar } from "@/components/shared/InitialsAvatar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -25,7 +28,8 @@ import {
 import { ConversationThread } from "./ConversationThread";
 import { TicketTimeline } from "./TicketTimeline";
 import { AttachmentList } from "./AttachmentList";
-import type { Ticket, TicketStatus } from "@/lib/data/types";
+import { patchTicket, replyToTicket, resolveTicket } from "@/lib/api/support";
+import type { TicketDetail, TicketStatus } from "@/lib/types";
 
 const statusOptions: TicketStatus[] = [
   "open",
@@ -35,16 +39,48 @@ const statusOptions: TicketStatus[] = [
   "closed",
 ];
 
+const AGENTS = ["Support Team", "Aisha Torres", "Marcus Lee", "Priya Nair"];
+
 export function TicketDetailPanel({
-  ticket,
-  variant = "client",
+  detail,
+  admin = false,
+  onUpdated,
   className,
 }: {
-  ticket: Ticket;
-  variant?: "client" | "agent";
+  detail: TicketDetail;
+  admin?: boolean;
+  onUpdated: (detail: TicketDetail) => void;
   className?: string;
 }) {
-  const isAgent = variant === "agent";
+  const ticket = detail;
+  const isAgent = admin;
+
+  const reply = useMutation({
+    mutationFn: (input: { body: string; files: File[]; isInternal: boolean }) =>
+      replyToTicket(ticket.id, { body: input.body, files: input.files, isInternal: input.isInternal }, admin),
+    onSuccess: (d) => onUpdated(d),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Couldn't send the reply"),
+  });
+
+  const resolve = useMutation({
+    mutationFn: () => resolveTicket(ticket.id),
+    onSuccess: (d) => { onUpdated(d); toast.success("Ticket marked as resolved"); },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Couldn't resolve the ticket"),
+  });
+
+  const patch = useMutation({
+    mutationFn: (update: Parameters<typeof patchTicket>[1]) => patchTicket(ticket.id, update),
+    onSuccess: (d) => { onUpdated(d); toast.success("Ticket updated"); },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Couldn't update the ticket"),
+  });
+
+  const createdLabel = new Date(ticket.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const updatedLabel = new Date(ticket.updated_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  const slaLabel = ticket.sla_breached
+    ? "SLA breached"
+    : ticket.sla_hours_left !== null
+      ? `${Math.round(ticket.sla_hours_left)}h SLA left`
+      : "SLA met";
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
@@ -55,11 +91,11 @@ export function TicketDetailPanel({
             <h2 className="text-lg font-semibold leading-tight">{ticket.subject}</h2>
             <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
               <Hash className="h-3.5 w-3.5" />
-              {ticket.id.toUpperCase()} · opened {ticket.createdAt}
+              {ticket.code} · opened {createdLabel}
             </p>
           </div>
           <div className="flex flex-col items-end gap-1.5">
-            <StatusBadge label={prettify(ticket.status)} tone={toneFor(ticket.status)} />
+            <StatusBadge label={ticket.status_label} tone={toneFor(ticket.status)} />
             <StatusBadge label={ticket.priority} tone={toneFor(ticket.priority)} />
           </div>
         </div>
@@ -69,19 +105,18 @@ export function TicketDetailPanel({
             <Tag className="h-3.5 w-3.5" /> {ticket.category}
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <User className="h-3.5 w-3.5" /> {ticket.requester}
+            <User className="h-3.5 w-3.5" /> {ticket.requester_name}
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <UserCog className="h-3.5 w-3.5" /> {ticket.assignedTo}
+            <UserCog className="h-3.5 w-3.5" /> {ticket.assignee}
           </span>
           <span
             className={cn(
               "inline-flex items-center gap-1.5",
-              ticket.slaHoursLeft > 0 && ticket.slaHoursLeft <= 4 && "text-destructive",
+              (ticket.sla_breached || (ticket.sla_hours_left !== null && ticket.sla_hours_left > 0 && ticket.sla_hours_left <= 4)) && "text-destructive",
             )}
           >
-            <Clock className="h-3.5 w-3.5" />
-            {ticket.slaHoursLeft > 0 ? `${ticket.slaHoursLeft}h SLA left` : "SLA met"}
+            <Clock className="h-3.5 w-3.5" /> {slaLabel}
           </span>
         </div>
 
@@ -89,8 +124,9 @@ export function TicketDetailPanel({
         {isAgent ? (
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <Select
-              defaultValue={ticket.status}
-              onValueChange={(v) => toast.success(`Status changed to ${prettify(v)}`)}
+              value={ticket.status}
+              onValueChange={(v) => patch.mutate({ status: v as TicketStatus })}
+              disabled={patch.isPending}
             >
               <SelectTrigger className="h-8 w-[150px] text-xs">
                 <RefreshCw className="h-3.5 w-3.5" />
@@ -99,14 +135,15 @@ export function TicketDetailPanel({
               <SelectContent>
                 {statusOptions.map((s) => (
                   <SelectItem key={s} value={s} className="capitalize">
-                    {prettify(s)}
+                    {ticket.status_label && s === ticket.status ? ticket.status_label : s}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select
-              defaultValue={ticket.priority}
-              onValueChange={(v) => toast.success(`Priority set to ${v}`)}
+              value={ticket.priority}
+              onValueChange={(v) => patch.mutate({ priority: v as typeof ticket.priority })}
+              disabled={patch.isPending}
             >
               <SelectTrigger className="h-8 w-[130px] text-xs capitalize">
                 <Flag className="h-3.5 w-3.5" />
@@ -120,13 +157,21 @@ export function TicketDetailPanel({
                 ))}
               </SelectContent>
             </Select>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => toast.success("Ticket reassigned")}
+            <Select
+              value={ticket.assignee}
+              onValueChange={(v) => patch.mutate({ assignee: v })}
+              disabled={patch.isPending}
             >
-              <UserCog className="h-4 w-4" /> Reassign
-            </Button>
+              <SelectTrigger className="h-8 w-[150px] text-xs">
+                <UserCog className="h-3.5 w-3.5" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {AGENTS.map((a) => (
+                  <SelectItem key={a} value={a}>{a}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -134,19 +179,14 @@ export function TicketDetailPanel({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => toast.success("Marked as resolved")}
+                disabled={resolve.isPending}
+                onClick={() => resolve.mutate()}
               >
                 <CheckCircle2 className="h-4 w-4" /> Mark resolved
               </Button>
             )}
-            {(ticket.status === "resolved" || ticket.status === "closed") && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toast.success("Ticket reopened")}
-              >
-                <RefreshCw className="h-4 w-4" /> Reopen ticket
-              </Button>
+            {ticket.status === "resolved" && (
+              <p className="text-xs text-muted-foreground">Resolved — reply reopens the conversation.</p>
             )}
           </div>
         )}
@@ -164,6 +204,8 @@ export function TicketDetailPanel({
           <ConversationThread
             messages={ticket.messages}
             allowInternalNote={isAgent}
+            sending={reply.isPending}
+            onSend={(body, files, isInternal) => reply.mutate({ body, files, isInternal })}
             className="h-full"
           />
         </TabsContent>
@@ -174,43 +216,45 @@ export function TicketDetailPanel({
 
         <TabsContent value="details" className="mt-4 min-h-0 flex-1 space-y-5 overflow-y-auto">
           <div className="flex items-start gap-3">
-            <InitialsAvatar initials={ticket.requesterInitials} size="sm" />
+            <InitialsAvatar initials={ticket.requester_initials} size="sm" />
             <div>
-              <p className="text-sm font-medium">{ticket.requester}</p>
-              <p className="text-xs text-muted-foreground">Requester</p>
+              <p className="text-sm font-medium">{ticket.requester_name}</p>
+              <p className="text-xs text-muted-foreground">
+                Requester{ticket.requester_email ? ` · ${ticket.requester_email}` : ""}
+              </p>
             </div>
           </div>
           <div>
             <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Description
             </h3>
-            <p className="text-sm leading-relaxed text-foreground">{ticket.description}</p>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+              {ticket.messages[0]?.body ?? "—"}
+            </p>
           </div>
           <div>
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Attachments
             </h3>
-            <AttachmentList attachments={ticket.attachments} />
+            <AttachmentList attachments={detail.messages.flatMap((m) => m.attachments)} />
           </div>
-          {ticket.tags && ticket.tags.length > 0 && (
-            <div>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Tags
-              </h3>
-              <div className="flex flex-wrap gap-1.5">
-                {ticket.tags.map((t) => (
-                  <span
-                    key={t}
-                    className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-                  >
-                    <Tag className="h-3 w-3" /> {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+          <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
+            Last updated {updatedLabel}
+          </div>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+export function TicketDetailSkeleton({ className }: { className?: string }) {
+  return (
+    <div className={cn("space-y-4 p-5", className)}>
+      <Skeleton className="h-6 w-2/3" />
+      <Skeleton className="h-4 w-1/3" />
+      <div className="space-y-2 pt-4">
+        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
+      </div>
     </div>
   );
 }
