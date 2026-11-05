@@ -1,13 +1,11 @@
 # AGENTS.md
 - Build is SPA mode (static shell, no runtime SSR) — the app must be deployable as static files to Azure Static Web Apps; avoid server functions and server-only loaders.
-- Data comes from the typed mock layer in src/lib/data (api.ts/queries.ts) — swap point for the future FastAPI backend.
-- Demo account selection is presentation-only browser state; never treat it as secure authorization until FastAPI authentication replaces it.
+- Backend integration follows the "Cyberbacker Client Portal API and Database Reference": all calls go through src/lib/api/client.ts (Bearer token, `detail` error toasts, authenticated blob downloads); base URL comes from VITE_API_BASE_URL (.env, localhost:8000 for now).
+- Demo sessions are sessionStorage `{mode:"demo", role}` (src/lib/demo-auth.ts); every demo request is answered in-memory by src/lib/mocks/demo-api.ts and never touches the network. Demo writes reset on refresh/sign-out, and demo buttons are gated by VITE_ENABLE_DEMO.
+- Real accounts must never see mock data: src/lib/data (legacy mock layer) is gated so non-demo sessions get empty fixtures, except the Cyberbacker roster which stays as the approved name source for review/endorsement ids.
+- API-backed features (reviews, endorsements, settings, tutorials, support, knowledge base) live in src/lib/api/* with shared TanStack Query options in src/lib/api/queries.ts; the article detail is fetched exactly once per open (each fetch counts a view).
 - Builder preference models and normalization live in the jobs data/helpers layer; save-only preferences must stay independent of candidate matching so collecting intake details cannot accidentally change ranking.
 - Cyberbacker University is a client-only route; superadmins manage staff via /internal/users instead.
-- Client skill endorsements (separate from profile skills) for team members live in src/lib/data/member-skills.ts (browser storage) until the FastAPI backend replaces it.
 - Requirements control layouts use the builder card's container width rather than viewport breakpoints, so they fit both split-preview and single-column forms.
 - Pasted/uploaded job descriptions are parsed fully in the browser (pdfjs-dist, mammoth) by a pure helper in src/lib/jobs/import.ts and handed to the builder via sessionStorage, keeping the app static-hostable.
-- Client dashboard KPI widget choices and company reviews are browser-stored (src/lib/data/dashboard-widgets.ts, company-reviews.ts) until the FastAPI backend replaces them.
-- FastAPI base URL comes from VITE_API_BASE_URL (.env); all calls go through src/lib/api/client.ts so the static SPA talks to the backend directly from the browser.
-- A real login session (token + name/position in browser storage) supersedes demo account selection; pages use live endpoints only when a token exists so demo access keeps working offline.
 - Invoice auto-pay comes per invoice from the payload (Invoice.autopay); manual Pay is a demo Authorize.Net modal until the backend integration exists.

@@ -1,48 +1,115 @@
-import { useEffect, useState } from "react";
+// Per-page tutorial copy. Visibility and progress are stored by the backend
+// (GET/POST /settings/tutorials); this module is pure display data.
+export interface TutorialInfo {
+  title: string;
+  body: string;
+  tips: string[];
+}
 
-export interface Tutorial { title: string; body: string; tips: string[] }
-export const TUTORIALS: Record<string, Tutorial> = {
-  "/dashboard": { title: "Your dashboard", body: "A quick view of your team, tickets and renewals.", tips: ["Announcements appear at the top.", "Choose which KPI cards show in Settings → Dashboard.", "Use Quick actions to hire, get support or download reports."] },
-  "/my-cyberbackers": { title: "My Cyberbackers", body: "Everyone currently working with you.", tips: ["Open View profile to rate or add skills.", "Use Rate my Cyberbacker to leave a review."] },
-  "/marketplace": { title: "Hiring Marketplace", body: "Browse and compare available Cyberbackers.", tips: ["Use search and filters to narrow results.", "Shortlist candidates or schedule an interview."] },
-  "/job-builder": { title: "Job Description Builder", body: "Create roles and match them to candidates.", tips: ["Click New Job to start blank or paste an existing description.", "Saved jobs appear in the table to edit later."] },
-  "/reviews": { title: "Reviews & Ratings", body: "Rate your Cyberbackers and Cyberbacker as a company.", tips: ["Switch tabs to rate the company.", "Star ratings go from Doesn't meet to Exceeds expectations."] },
-  "/attendance": { title: "Attendance", body: "Daily time logs and attendance for your team.", tips: ["Check late or absent days at a glance."] },
-  "/performance": { title: "Performance Reports", body: "Productivity and quality trends for your team.", tips: ["Export reports from the dashboard's Quick actions."] },
-  "/support": { title: "Support Center", body: "Create and track support tickets.", tips: ["Filter by status or category.", "Attach files when creating a ticket."] },
-  "/knowledge-base": { title: "Knowledge Base", body: "Guides and answers to common questions.", tips: ["Search for a topic to find articles fast."] },
-  "/cyberbacker-university": { title: "Cyberbacker University", body: "Training resources for working with Cyberbackers.", tips: ["New courses will appear here."] },
-  "/contracts": { title: "Contracts", body: "Your agreements and their status.", tips: ["Download signed copies anytime."] },
-  "/billing": { title: "Billing", body: "Invoices, payments and plan details.", tips: ["Check due dates to avoid late payments."] },
-  "/rewards": { title: "Rewards & Coupons", body: "Referral rewards and available coupons.", tips: ["Refer a business to earn account credit."] },
-  "/settings": { title: "Settings", body: "Manage your profile, password and preferences.", tips: ["Turn tutorials on or off in the Tutorials tab."] },
-  "/internal": { title: "Operations Dashboard", body: "Company-wide metrics across departments.", tips: ["See upcoming client renewals in the table.", "Use department tabs to drill down."] },
-  "/internal/clients": { title: "Client Management", body: "All client accounts and their health.", tips: ["Watch at-risk accounts closely."] },
-  "/internal/cyberbackers": { title: "Cyberbacker Management", body: "Roster, attendance and performance of Cyberbackers.", tips: ["Open a profile to request coaching or schedule a review."] },
-  "/internal/recruitment": { title: "Recruitment Pipeline", body: "Candidates moving through hiring stages.", tips: ["Track offers and placements."] },
-  "/internal/tickets": { title: "Support Tickets", body: "All client tickets in one queue.", tips: ["Prioritize by SLA and urgency."] },
-  "/internal/finance": { title: "Finance Dashboard", body: "Revenue, invoices and payouts.", tips: ["Review overdue invoices regularly."] },
-  "/internal/analytics": { title: "Analytics Dashboard", body: "Trends across clients and talent.", tips: ["Compare periods to spot changes."] },
-  "/internal/executive": { title: "Executive Dashboard", body: "High-level KPIs and strategic insights.", tips: ["Use insights to guide quarterly priorities."] },
-  "/internal/admin": { title: "System Administration", body: "Platform configuration and audit info.", tips: ["Changes here affect all users."] },
-  "/internal/users": { title: "User Management", body: "Manage staff accounts and roles.", tips: ["Invite staff and assign their roles."] },
+export const TUTORIALS: Record<string, TutorialInfo> = {
+  "/dashboard": {
+    title: "Your client dashboard",
+    body: "Everything about your Cyberbacker team on one page — KPIs, attendance, tickets and renewals.",
+    tips: ["Choose which KPI cards you see under Settings → Dashboard.", "Use quick actions to hire, get support or export reports."],
+  },
+  "/my-cyberbackers": {
+    title: "My Cyberbackers",
+    body: "Your active team members, their roles and latest reviews.",
+    tips: ["Open a profile to see details and endorse skills.", "Use “Rate my Cyberbacker” to leave a review."],
+  },
+  "/marketplace": {
+    title: "Hiring Marketplace",
+    body: "Browse available Cyberbackers and shortlist candidates that fit your role.",
+    tips: ["Filters and search narrow the roster.", "Shortlist candidates to compare them side by side."],
+  },
+  "/job-builder": {
+    title: "Job Description Builder",
+    body: "Build a structured job description with requirements, tiers and assessment preferences.",
+    tips: ["Saved jobs can be edited any time from the job table.", "Your scoring weights must total 100%."],
+  },
+  "/reviews": {
+    title: "Reviews & Ratings",
+    body: "Rate your Cyberbackers individually and Cyberbacker as a company.",
+    tips: ["Star ratings cover quality, communication, reliability and timeliness.", "The trend chart follows your average ratings over time."],
+  },
+  "/attendance": {
+    title: "Attendance",
+    body: "Daily time logs for your team, including late and leave entries.",
+    tips: ["Filter by date range or team member.", "Exports keep your records for payroll."],
+  },
+  "/performance": {
+    title: "Performance Reports",
+    body: "Productivity and quality trends for every member of your team.",
+    tips: ["Compare months to spot improvements.", "Share findings in your next check-in."],
+  },
+  "/support": {
+    title: "Support Center",
+    body: "Open tickets, track progress and talk to our team in one place.",
+    tips: ["Attach up to 5 files (10 MB each) per message.", "Mark a ticket resolved once you're happy with the fix."],
+  },
+  "/knowledge-base": {
+    title: "Knowledge Base",
+    body: "Guides and best practices for working with Cyberbacker.",
+    tips: ["Search by keyword or browse by category.", "Popular articles are shown first."],
+  },
+  "/contracts": {
+    title: "Contracts",
+    body: "Your agreements and their renewal dates.",
+    tips: ["Renewals surface on your dashboard ahead of time."],
+  },
+  "/billing": {
+    title: "Billing",
+    body: "Invoices, payment methods and receipts.",
+    tips: ["Due and overdue invoices show a Pay button.", "Subscriptions are charged automatically — receipts appear once paid."],
+  },
+  "/rewards": {
+    title: "Rewards & Coupons",
+    body: "Loyalty rewards and discounts you've earned.",
+    tips: ["Apply coupons at checkout or share them with your team."],
+  },
+  "/settings": {
+    title: "Settings",
+    body: "Profile, password, KPI widgets, tutorials, notifications and appearance.",
+    tips: ["Switch between Light, Dark and System themes.", "Turn off all tutorials here or from any popup."],
+  },
+  "/internal": {
+    title: "Operations Dashboard",
+    body: "The internal control room — active clients, Cyberbackers, tickets and revenue.",
+    tips: ["Drill into department dashboards from the sidebar.", "KPIs follow the same last-one-on rule as the client dashboard."],
+  },
+  "/internal/tickets": {
+    title: "Support Ticket Management",
+    body: "Triage, assign and resolve client tickets.",
+    tips: ["Internal notes stay private to staff.", "Replying to an open ticket moves it to In Progress."],
+  },
+  "/internal/knowledge-base": {
+    title: "Knowledge Base Management",
+    body: "Publish articles, organize categories and import from Excel.",
+    tips: ["Use the template for bulk imports — validate with a dry run first.", "Deactivate a category to hide it from clients without deleting it."],
+  },
 };
 
-export interface TutorialState { enabled: boolean; seen: string[] }
-const KEY = "cb-tutorials";
-const EVENT = "cb-tutorials-change";
-export const DEFAULT_TUTORIALS: TutorialState = { enabled: true, seen: [] };
-export const shouldShow = (s: TutorialState, path: string) => s.enabled && path in TUTORIALS && !s.seen.includes(path);
-export const markSeen = (s: TutorialState, path: string): TutorialState => ({ ...s, seen: s.seen.includes(path) ? s.seen : [...s.seen, path] });
-export const turnOff = (s: TutorialState): TutorialState => ({ ...s, enabled: false });
-export const replayAll = (): TutorialState => ({ enabled: true, seen: [] });
-
-export function readTutorials(): TutorialState {
-  try { return { ...DEFAULT_TUTORIALS, ...JSON.parse(localStorage.getItem(KEY) ?? "{}") }; } catch { return { ...DEFAULT_TUTORIALS }; }
+export interface TutorialState {
+  enabled: boolean;
+  completed_pages: string[];
 }
-export function saveTutorials(s: TutorialState) { localStorage.setItem(KEY, JSON.stringify(s)); window.dispatchEvent(new Event(EVENT)); }
-export function useTutorials(): TutorialState | null {
-  const [state, setState] = useState<TutorialState | null>(null);
-  useEffect(() => { const sync = () => setState(readTutorials()); sync(); window.addEventListener(EVENT, sync); return () => window.removeEventListener(EVENT, sync); }, []);
-  return state;
+
+export const DEFAULT_TUTORIALS: TutorialState = { enabled: true, completed_pages: [] };
+
+export function shouldShow(state: TutorialState, path: string): boolean {
+  return state.enabled && Boolean(TUTORIALS[path]) && !state.completed_pages.includes(path);
+}
+
+export function markSeen(state: TutorialState, path: string): TutorialState {
+  return state.completed_pages.includes(path)
+    ? state
+    : { ...state, completed_pages: [...state.completed_pages, path] };
+}
+
+export function replayAll(): TutorialState {
+  return { enabled: true, completed_pages: [] };
+}
+
+export function turnOff(state: TutorialState): TutorialState {
+  return { ...state, enabled: false };
 }

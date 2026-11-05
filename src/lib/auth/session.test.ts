@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { homeForRole, positionToRole } from "./session";
-import { toBackendId, toCyberbackerPayload } from "@/lib/data/reviews-api";
+import { toBackendId, toCyberbackerPayload } from "@/lib/api/reviews";
 
 describe("login position routing", () => {
   it("SuperAdmin goes to the admin area", () => {
@@ -18,9 +18,9 @@ describe("login position routing", () => {
 describe("review payload", () => {
   it("sends integer id and meets_expectations", () => {
     expect(toBackendId("cb3")).toBe(3);
-    const p = toCyberbackerPayload({ cyberbackerId: "cb3", cyberbackerName: "Maya", overall: 4, communication: 5, quality: 4, reliability: 3, timeliness: 4, expectations: 5, comment: " ", recommend: true });
+    const p = toCyberbackerPayload({ cyberbackerId: 3, overall: 4, communication: 5, quality: 4, reliability: 3, timeliness: 4, expectations: 5, comments: " ", recommend: true });
     expect(p.cyberbacker_id).toBe(3);
     expect(p.meets_expectations).toBe(5);
-    expect(p.comments).toBeNull();
+    expect(p.comments).toBeUndefined();
   });
 });

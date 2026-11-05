@@ -1,5 +1,5 @@
 // Knowledge Base endpoints, client and admin sides.
-import { apiFetch } from "@/lib/api/client";
+import { apiFetch, downloadFile } from "@/lib/api/client";
 import type {
   ArticleStatus,
   KbArticleAdminDetail,
@@ -75,4 +75,8 @@ export function importKbArticles(file: File, options: { updateExisting?: boolean
   form.set("update_existing", String(Boolean(options.updateExisting)));
   form.set("dry_run", String(Boolean(options.dryRun)));
   return apiFetch<KbImportReport>(`${AP}/articles/import`, { method: "POST", body: form });
+}
+
+export function downloadKbTemplate(): Promise<void> {
+  return downloadFile(`${AP}/articles/import/template`, "kb-articles-template.xlsx");
 }

@@ -67,6 +67,7 @@ export const navGroups: NavGroup[] = [
       { title: "Cyberbacker Management", to: "/internal/cyberbackers", icon: UserSquare },
       { title: "Recruitment Pipeline", to: "/internal/recruitment", icon: Workflow },
       { title: "Support Tickets", to: "/internal/tickets", icon: TicketCheck },
+      { title: "Knowledge Base", to: "/internal/knowledge-base", icon: BookOpen },
       { title: "Finance Dashboard", to: "/internal/finance", icon: BadgeDollarSign },
       { title: "Analytics Dashboard", to: "/internal/analytics", icon: BarChart3 },
       { title: "Executive Dashboard", to: "/internal/executive", icon: Gauge },
