@@ -1,5 +1,5 @@
 // Knowledge Base endpoints, client and admin sides.
-import { apiFetch } from "@/lib/api/client";
+import { apiFetch, downloadFile } from "@/lib/api/client";
 import type {
   ArticleStatus,
   KbArticleAdminDetail,
