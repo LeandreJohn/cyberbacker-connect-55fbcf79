@@ -236,7 +236,7 @@ export function TicketDetailPanel({
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Attachments
             </h3>
-            <AttachmentList attachments={ticket.attachments} />
+            <AttachmentList attachments={detail.messages.flatMap((m) => m.attachments)} />
           </div>
           <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
             Last updated {updatedLabel}
