@@ -6,6 +6,7 @@
 // `fetchJson(...)` call already stubbed in comments below.
 
 import * as mock from "./mock";
+import { isDemoSession } from "@/lib/demo-auth";
 import type {
   ActivityItem,
   Announcement,
@@ -42,6 +43,15 @@ function mockResponse<T>(data: T, delay = 250): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(data), delay));
 }
 
+/**
+ * Backend-uncovered pages show empty data for real accounts; the two demo
+ * profiles get the full fixtures. The Cyberbacker roster stays ungated — it is
+ * the approved name source for reviews and endorsements.
+ */
+function gated<T>(data: T, empty: T): Promise<T> {
+  return mockResponse(isDemoSession() ? data : empty, isDemoSession() ? 250 : 0);
+}
+
 // Real implementation to use once FastAPI is connected:
 // async function fetchJson<T>(path: string): Promise<T> {
 //   const res = await fetch(`${API_BASE}${path}`, {
@@ -53,37 +63,37 @@ function mockResponse<T>(data: T, delay = 250): Promise<T> {
 // }
 
 export const getCurrentUser = (): Promise<CurrentUser> => mockResponse(mock.currentUser);
-export const getDashboardStats = (): Promise<KpiStat[]> => mockResponse(mock.dashboardStats);
-export const getActivityFeed = (): Promise<ActivityItem[]> => mockResponse(mock.activityFeed);
+export const getDashboardStats = (): Promise<KpiStat[]> => gated(mock.dashboardStats, []);
+export const getActivityFeed = (): Promise<ActivityItem[]> => gated(mock.activityFeed, []);
 export const getCyberbackers = (): Promise<Cyberbacker[]> => mockResponse(mock.cyberbackers);
-export const getCandidates = (): Promise<Candidate[]> => mockResponse(mock.candidates);
-export const getAttendance = (): Promise<AttendanceEntry[]> => mockResponse(mock.attendance);
+export const getCandidates = (): Promise<Candidate[]> => gated(mock.candidates, []);
+export const getAttendance = (): Promise<AttendanceEntry[]> => gated(mock.attendance, []);
 export const getPerformanceTrend = (): Promise<PerformancePoint[]> =>
-  mockResponse(mock.performanceTrend);
-export const getTickets = (): Promise<Ticket[]> => mockResponse(mock.tickets);
-export const getKbCategories = (): Promise<KbCategory[]> => mockResponse(mock.kbCategories);
-export const getArticles = (): Promise<Article[]> => mockResponse(mock.articles);
-export const getContracts = (): Promise<Contract[]> => mockResponse(mock.contracts);
-export const getInvoices = (): Promise<Invoice[]> => mockResponse(mock.invoices);
+  gated(mock.performanceTrend, []);
+export const getTickets = (): Promise<Ticket[]> => gated(mock.tickets, []);
+export const getKbCategories = (): Promise<KbCategory[]> => gated(mock.kbCategories, []);
+export const getArticles = (): Promise<Article[]> => gated(mock.articles, []);
+export const getContracts = (): Promise<Contract[]> => gated(mock.contracts, []);
+export const getInvoices = (): Promise<Invoice[]> => gated(mock.invoices, []);
 export const getPaymentMethods = (): Promise<PaymentMethod[]> =>
-  mockResponse(mock.paymentMethods);
-export const getRewards = (): Promise<Reward[]> => mockResponse(mock.rewards);
+  gated(mock.paymentMethods, []);
+export const getRewards = (): Promise<Reward[]> => gated(mock.rewards, []);
 export const getClientAccounts = (): Promise<ClientAccount[]> =>
-  mockResponse(mock.clientAccounts);
-export const getPipeline = (): Promise<PipelineCandidate[]> => mockResponse(mock.pipeline);
-export const getRevenueTrend = (): Promise<RevenuePoint[]> => mockResponse(mock.revenueTrend);
+  gated(mock.clientAccounts, []);
+export const getPipeline = (): Promise<PipelineCandidate[]> => gated(mock.pipeline, []);
+export const getRevenueTrend = (): Promise<RevenuePoint[]> => gated(mock.revenueTrend, []);
 export const getAcquisitionFunnel = (): Promise<FunnelStep[]> =>
-  mockResponse(mock.acquisitionFunnel);
-export const getGrowthTrend = (): Promise<GrowthPoint[]> => mockResponse(mock.growthTrend);
+  gated(mock.acquisitionFunnel, []);
+export const getGrowthTrend = (): Promise<GrowthPoint[]> => gated(mock.growthTrend, []);
 export const getTicketVolume = (): Promise<TicketVolumePoint[]> =>
-  mockResponse(mock.ticketVolume);
+  gated(mock.ticketVolume, []);
 export const getRetentionTrend = (): Promise<RetentionPoint[]> =>
-  mockResponse(mock.retentionTrend);
-export const getSystemUsers = (): Promise<SystemUser[]> => mockResponse(mock.systemUsers);
-export const getAuditLog = (): Promise<AuditEntry[]> => mockResponse(mock.auditLog);
-export const getNotifications = (): Promise<Notification[]> => mockResponse(mock.notifications);
-export const getRenewals = (): Promise<Renewal[]> => mockResponse(mock.renewals);
-export const getAnnouncements = (): Promise<Announcement[]> => mockResponse(mock.announcements);
+  gated(mock.retentionTrend, []);
+export const getSystemUsers = (): Promise<SystemUser[]> => gated(mock.systemUsers, []);
+export const getAuditLog = (): Promise<AuditEntry[]> => gated(mock.auditLog, []);
+export const getNotifications = (): Promise<Notification[]> => gated(mock.notifications, []);
+export const getRenewals = (): Promise<Renewal[]> => gated(mock.renewals, []);
+export const getAnnouncements = (): Promise<Announcement[]> => gated(mock.announcements, []);
 
 // ---- Reviews (mock, in-memory) ----
 import type { Review } from "./types";
