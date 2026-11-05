@@ -9,14 +9,15 @@ import { renderMarkdown } from "@/lib/markdown";
 import { portalQ } from "@/lib/api/queries";
 
 export const Route = createFileRoute("/_app/knowledge-base/$slug")({
-  head: ({ loaderData }) => ({
+  head: () => ({
     meta: [
-      { title: `${loaderData?.title ?? "Article"} — Cyberbacker Knowledge Base` },
-      { name: "description", content: loaderData?.summary ?? "Knowledge base article" },
+      { title: "Knowledge Base Article — Cyberbacker" },
+      { name: "description", content: "Knowledge base article from the Cyberbacker Knowledge Base." },
       { name: "robots", content: "noindex" },
     ],
   }),
-  loader: ({ context, params }) => context.queryClient.ensureQueryData(portalQ.kbArticle(params.slug)),
+  // No loader prefetch: opening an article counts one view, so the detail is
+  // fetched exactly once by the component query.
   component: KbArticlePage,
 });
 

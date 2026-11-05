@@ -355,7 +355,7 @@ function CategoryDialog({ category, onClose, onSaved }: {
 
 // ----------------------------------------------------------------- Import
 
-const actionTone: Record<string, "success" | "primary" | "warning" | "destructive"> = {
+const actionTone: Record<string, "success" | "primary" | "warning" | "danger"> = {
   created: "success",
   updated: "primary",
   skipped: "warning",
