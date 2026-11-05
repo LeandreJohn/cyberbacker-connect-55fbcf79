@@ -359,7 +359,7 @@ const actionTone: Record<string, "success" | "primary" | "warning" | "danger"> =
   created: "success",
   updated: "primary",
   skipped: "warning",
-  error: "destructive",
+  error: "danger",
 };
 
 function ImportTab() {
