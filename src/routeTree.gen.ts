@@ -39,7 +39,7 @@ import { Route as AppInternalRecruitmentRouteImport } from './routes/_app.intern
 import { Route as AppInternalTicketsRouteImport } from './routes/_app.internal.tickets'
 import { Route as AppInternalUsersRouteImport } from './routes/_app.internal.users'
 import { Route as AppJobBuilderImportRouteImport } from './routes/_app.job-builder_.import'
-import { Route as AppKnowledgeBaseSlugRouteImport } from './routes/_app.knowledge-base.$slug'
+import { Route as AppKnowledgeBaseSlugRouteImport } from './routes/_app.knowledge-base_.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -193,9 +193,9 @@ const AppJobBuilderImportRoute = AppJobBuilderImportRouteImport.update({
   getParentRoute: () => AppRoute,
 } as any)
 const AppKnowledgeBaseSlugRoute = AppKnowledgeBaseSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => AppKnowledgeBaseRoute,
+  id: '/knowledge-base_/$slug',
+  path: '/knowledge-base/$slug',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -208,7 +208,7 @@ export interface FileRoutesByFullPath {
   '/cyberbacker-university': typeof AppCyberbackerUniversityRoute
   '/dashboard': typeof AppDashboardRoute
   '/job-builder': typeof AppJobBuilderRoute
-  '/knowledge-base': typeof AppKnowledgeBaseRouteWithChildren
+  '/knowledge-base': typeof AppKnowledgeBaseRoute
   '/marketplace': typeof AppMarketplaceRoute
   '/my-cyberbackers': typeof AppMyCyberbackersRoute
   '/performance': typeof AppPerformanceRoute
@@ -240,7 +240,7 @@ export interface FileRoutesByTo {
   '/cyberbacker-university': typeof AppCyberbackerUniversityRoute
   '/dashboard': typeof AppDashboardRoute
   '/job-builder': typeof AppJobBuilderRoute
-  '/knowledge-base': typeof AppKnowledgeBaseRouteWithChildren
+  '/knowledge-base': typeof AppKnowledgeBaseRoute
   '/marketplace': typeof AppMarketplaceRoute
   '/my-cyberbackers': typeof AppMyCyberbackersRoute
   '/performance': typeof AppPerformanceRoute
@@ -274,7 +274,7 @@ export interface FileRoutesById {
   '/_app/cyberbacker-university': typeof AppCyberbackerUniversityRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/job-builder': typeof AppJobBuilderRoute
-  '/_app/knowledge-base': typeof AppKnowledgeBaseRouteWithChildren
+  '/_app/knowledge-base': typeof AppKnowledgeBaseRoute
   '/_app/marketplace': typeof AppMarketplaceRoute
   '/_app/my-cyberbackers': typeof AppMyCyberbackersRoute
   '/_app/performance': typeof AppPerformanceRoute
@@ -293,7 +293,7 @@ export interface FileRoutesById {
   '/_app/internal/tickets': typeof AppInternalTicketsRoute
   '/_app/internal/users': typeof AppInternalUsersRoute
   '/_app/job-builder_/import': typeof AppJobBuilderImportRoute
-  '/_app/knowledge-base/$slug': typeof AppKnowledgeBaseSlugRoute
+  '/_app/knowledge-base_/$slug': typeof AppKnowledgeBaseSlugRoute
   '/_app/internal/': typeof AppInternalIndexRoute
 }
 export interface FileRouteTypes {
@@ -392,7 +392,7 @@ export interface FileRouteTypes {
     | '/_app/internal/tickets'
     | '/_app/internal/users'
     | '/_app/job-builder_/import'
-    | '/_app/knowledge-base/$slug'
+    | '/_app/knowledge-base_/$slug'
     | '/_app/internal/'
   fileRoutesById: FileRoutesById
 }
@@ -615,26 +615,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppJobBuilderImportRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/knowledge-base/$slug': {
-      id: '/_app/knowledge-base/$slug'
-      path: '/$slug'
+    '/_app/knowledge-base_/$slug': {
+      id: '/_app/knowledge-base_/$slug'
+      path: '/knowledge-base/$slug'
       fullPath: '/knowledge-base/$slug'
       preLoaderRoute: typeof AppKnowledgeBaseSlugRouteImport
-      parentRoute: typeof AppKnowledgeBaseRoute
+      parentRoute: typeof AppRoute
     }
   }
 }
-
-interface AppKnowledgeBaseRouteChildren {
-  AppKnowledgeBaseSlugRoute: typeof AppKnowledgeBaseSlugRoute
-}
-
-const AppKnowledgeBaseRouteChildren: AppKnowledgeBaseRouteChildren = {
-  AppKnowledgeBaseSlugRoute: AppKnowledgeBaseSlugRoute,
-}
-
-const AppKnowledgeBaseRouteWithChildren =
-  AppKnowledgeBaseRoute._addFileChildren(AppKnowledgeBaseRouteChildren)
 
 interface AppRouteChildren {
   AppAttendanceRoute: typeof AppAttendanceRoute
@@ -643,7 +632,7 @@ interface AppRouteChildren {
   AppCyberbackerUniversityRoute: typeof AppCyberbackerUniversityRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppJobBuilderRoute: typeof AppJobBuilderRoute
-  AppKnowledgeBaseRoute: typeof AppKnowledgeBaseRouteWithChildren
+  AppKnowledgeBaseRoute: typeof AppKnowledgeBaseRoute
   AppMarketplaceRoute: typeof AppMarketplaceRoute
   AppMyCyberbackersRoute: typeof AppMyCyberbackersRoute
   AppPerformanceRoute: typeof AppPerformanceRoute
@@ -662,6 +651,7 @@ interface AppRouteChildren {
   AppInternalTicketsRoute: typeof AppInternalTicketsRoute
   AppInternalUsersRoute: typeof AppInternalUsersRoute
   AppJobBuilderImportRoute: typeof AppJobBuilderImportRoute
+  AppKnowledgeBaseSlugRoute: typeof AppKnowledgeBaseSlugRoute
   AppInternalIndexRoute: typeof AppInternalIndexRoute
 }
 
@@ -672,7 +662,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCyberbackerUniversityRoute: AppCyberbackerUniversityRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppJobBuilderRoute: AppJobBuilderRoute,
-  AppKnowledgeBaseRoute: AppKnowledgeBaseRouteWithChildren,
+  AppKnowledgeBaseRoute: AppKnowledgeBaseRoute,
   AppMarketplaceRoute: AppMarketplaceRoute,
   AppMyCyberbackersRoute: AppMyCyberbackersRoute,
   AppPerformanceRoute: AppPerformanceRoute,
@@ -691,6 +681,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppInternalTicketsRoute: AppInternalTicketsRoute,
   AppInternalUsersRoute: AppInternalUsersRoute,
   AppJobBuilderImportRoute: AppJobBuilderImportRoute,
+  AppKnowledgeBaseSlugRoute: AppKnowledgeBaseSlugRoute,
   AppInternalIndexRoute: AppInternalIndexRoute,
 }
 
