@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { renderMarkdown } from "@/lib/markdown";
 import { portalQ } from "@/lib/api/queries";
 
-export const Route = createFileRoute("/_app/knowledge-base/$slug")({
+export const Route = createFileRoute("/_app/knowledge-base_/$slug")({
   head: () => ({
     meta: [
       { title: "Knowledge Base Article — Cyberbacker" },
